@@ -46,4 +46,24 @@ class TravelerRepository {
   }
 
   // READ TRAVELER BY ID
+
+  Future<Traveler?> getTravelerById(int id) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return Traveler.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // CLOSE DB
+  Future<void> close() async {
+    final db = await database;
+    await db.close();
+    _database = null;
+  }
 }

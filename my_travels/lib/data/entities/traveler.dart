@@ -1,18 +1,17 @@
 class Traveler {
   final int? id;
   final String name;
-  final int age;
+  final int? age;
   final String? photoPath;
 
-  Traveler({
-    required this.id,
-    required this.name,
-    required this.age,
-    required this.photoPath,
-  });
+  Traveler({this.id, required this.name, this.age, this.photoPath});
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'name': name, 'age': age, 'photoPath': photoPath};
+    final map = {'name': name, 'age': age, 'photoPath': photoPath};
+    if (id != null) {
+      map['id'] = id;
+    }
+    return map;
   }
 
   factory Traveler.fromMap(Map<String, dynamic> map) {
@@ -22,5 +21,10 @@ class Traveler {
       age: map['age'],
       photoPath: map['photoPath'],
     );
+  }
+
+  @override
+  String toString() {
+    return 'Traveler(id: $id, name: $name, age: $age, photoPath: $photoPath)';
   }
 }
