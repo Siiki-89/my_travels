@@ -60,6 +60,29 @@ class TravelerRepository {
     return null;
   }
 
+  // DELETE TRAVELER
+
+  Future<int> deleteTraveler(int id) async {
+    final db = await database;
+    return await db.delete(
+      _tableName,
+      where: '${TravelerTable.id} = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // UPDATE TRAVELER
+
+  Future<int> updateTraveler(Traveler traveler) async {
+    final db = await database;
+    return await db.update(
+      _tableName,
+      traveler.toMap(),
+      where: '${TravelerTable.id} = ?',
+      whereArgs: [traveler.id],
+    );
+  }
+
   // CLOSE DB
   Future<void> close() async {
     final db = await database;

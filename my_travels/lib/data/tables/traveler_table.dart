@@ -1,4 +1,4 @@
-abstract final class TravelerTable {
+abstract class TravelerTable {
   static const String tableName = 'Traveler';
   static const String id = 'id';
   static const String name = 'name';

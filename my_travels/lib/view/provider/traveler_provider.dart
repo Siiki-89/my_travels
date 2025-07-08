@@ -12,7 +12,9 @@ class TravelerProvider with ChangeNotifier {
   String? _errorMessage;
   List<Traveler> _travelers = [];
   bool _isLoading = false;
+  int? _editingId;
 
+  int? get editingId => _editingId;
   String get name => _name;
   String? get errorMessage => _errorMessage;
   int? get age => _age;
@@ -33,12 +35,17 @@ class TravelerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setEditingId(int? id) {
+    _editingId = id;
+  }
+
   Future<void> loadTravelers() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
       _travelers = await _repository.getTravelers();
+      debugPrint('Viajantes carregados: ${_travelers.length}');
     } catch (e) {
       _errorMessage = 'Erro ao carregar viajantes: $e';
       debugPrint('Erro ao carregar viajantes $e 🛑');
@@ -73,9 +80,37 @@ class TravelerProvider with ChangeNotifier {
       await _repository.insertTraveler(newTraveler);
       debugPrint('Viajante foi salvo com sucesso: ${newTraveler.name} 🛑');
       resetFields();
+      await loadTravelers();
     } catch (e) {
       _errorMessage = 'Erro ao adicionar viajante: $e';
       debugPrint('Erro ao adicionar viajante $e');
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteTraveler(int? id) async {
+    try {
+      await _repository.deleteTraveler(id!);
+      await loadTravelers();
+    } catch (e) {
+      _errorMessage = 'Erro ao deletar viajante: $e';
+      debugPrint('Erro ao deletar viajante $e');
+      notifyListeners();
+    }
+  }
+
+  Future<void> editTraveler(Traveler traveler) async {
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.updateTraveler(traveler);
+      debugPrint('Viajante atualizado: ${traveler.name}');
+      resetFields();
+      await loadTravelers();
+    } catch (e) {
+      _errorMessage = 'Erro ao editar viajante: $e';
+      debugPrint(_errorMessage!);
       notifyListeners();
     }
   }
