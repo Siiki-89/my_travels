@@ -57,6 +57,7 @@ class TravelersPage extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            SizedBox(height: 15),
             if (travelerProvider.optionNow == 'add' ||
                 travelerProvider.editingId != null)
               const TravelerFormInput(),
@@ -99,9 +100,7 @@ class TravelersPage extends StatelessWidget {
                 final name = TravelerFormInput.nameController.text;
                 final age = TravelerFormInput.ageController.text;
 
-                travelerProvider.setName(
-                  name,
-                ); // Atualiza o provider com o valor final
+                travelerProvider.setName(name);
                 travelerProvider.setAge(age);
 
                 if (travelerProvider.editingId != null) {

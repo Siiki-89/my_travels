@@ -6,7 +6,11 @@ import 'package:my_travels/presentation/pages/settings_page.dart';
 import 'package:provider/provider.dart';
 
 class NavigatorPage extends StatelessWidget {
-  final _pages = [TravelersPage(), HomePage(), SettingsPage()];
+  final _pages = [
+    const TravelersPage(),
+    const HomePage(), //
+    const SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +20,7 @@ class NavigatorPage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navigatorProvider.current,
         onTap: (value) => navigatorProvider.current = value,
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Travelers'),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
