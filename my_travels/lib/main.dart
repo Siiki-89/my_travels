@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/presentation/provider/navigator_provider.dart';
-import 'package:my_travels/presentation/page/travelers_page.dart';
-import 'package:my_travels/presentation/page/home_page.dart';
-import 'package:my_travels/presentation/page/navigator_page.dart';
-import 'package:my_travels/presentation/page/settings_page.dart';
+import 'package:my_travels/presentation/pages/travelers_page.dart';
+import 'package:my_travels/presentation/pages/home_page.dart';
+import 'package:my_travels/presentation/pages/navigator_page.dart';
+import 'package:my_travels/presentation/pages/settings_page.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
