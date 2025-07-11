@@ -1,3 +1,4 @@
+// lib/src/view/provider/traveler_provider.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,14 +7,17 @@ import 'package:my_travels/data/repository/traveler_repository.dart';
 
 class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
+
   String _name = '';
-  int? _age;
+  int? _age; // Mantenha como null inicialmente
   File? _selectedImage;
   String? _errorMessage;
   List<Traveler> _travelers = [];
   bool _isLoading = false;
-  int? _editingId;
+  int? _editingId; // Guarda o ID do viajante que está sendo editado
+  String _optionNow = ''; // 'add', 'edit', 'delete' ou vazia (modo normal)
 
+  // Getters
   int? get editingId => _editingId;
   String get name => _name;
   String? get errorMessage => _errorMessage;
@@ -21,22 +25,45 @@ class TravelerProvider with ChangeNotifier {
   File? get selectedImage => _selectedImage;
   List<Traveler> get travelers => _travelers;
   bool get isLoading => _isLoading;
+  String get optionNow => _optionNow;
 
+  TravelerProvider() {
+    loadTravelers();
+  }
+
+  // Setters para os campos do formulário
   void setName(String newName) {
     _name = newName;
   }
 
   void setAge(String newAge) {
-    _age = int.tryParse(newAge) ?? 0;
+    _age = int.tryParse(newAge);
   }
 
-  void setImage(File newImage) {
+  void setImage(File? newImage) {
     _selectedImage = newImage;
     notifyListeners();
   }
 
   void setEditingId(int? id) {
     _editingId = id;
+    notifyListeners();
+  }
+
+  void setOptionNow(String option) {
+    _optionNow = option;
+    notifyListeners();
+  }
+
+  void changeOptionNow(String valor) {
+    if (_optionNow == valor) {
+      _optionNow = '';
+      resetFields();
+    } else {
+      _optionNow = valor;
+      resetFields();
+    }
+    notifyListeners();
   }
 
   Future<void> loadTravelers() async {
@@ -57,16 +84,15 @@ class TravelerProvider with ChangeNotifier {
 
   Future<void> addTraveler() async {
     _errorMessage = null;
-    notifyListeners();
 
-    if (_name.isEmpty) {
+    if (_name.trim().isEmpty) {
       _errorMessage = 'O nome do viajante é obrigatório.';
-      debugPrint('Nome do viajante não pode ser vazio.');
+      notifyListeners();
       return;
     }
-    if (_age == null) {
-      _errorMessage = 'Precisa inserir uma idade.';
-      debugPrint('Precisa inserir uma idade.');
+    if (_age == null || _age! <= 0) {
+      _errorMessage = 'Precisa inserir uma idade válida.';
+      notifyListeners();
       return;
     }
 
@@ -80,6 +106,7 @@ class TravelerProvider with ChangeNotifier {
       await _repository.insertTraveler(newTraveler);
       debugPrint('Viajante foi salvo com sucesso: ${newTraveler.name} 🛑');
       resetFields();
+      setOptionNow('');
       await loadTravelers();
     } catch (e) {
       _errorMessage = 'Erro ao adicionar viajante: $e';
@@ -89,36 +116,66 @@ class TravelerProvider with ChangeNotifier {
   }
 
   Future<void> deleteTraveler(int? id) async {
+    if (id == null) {
+      _errorMessage = 'ID do viajante para deletar é nulo.';
+      notifyListeners();
+      return;
+    }
     try {
-      await _repository.deleteTraveler(id!);
+      await _repository.deleteTraveler(id);
+      debugPrint('Viajante deletado: $id');
       await loadTravelers();
+      _errorMessage = null;
     } catch (e) {
       _errorMessage = 'Erro ao deletar viajante: $e';
       debugPrint('Erro ao deletar viajante $e');
+    } finally {
       notifyListeners();
     }
   }
 
   Future<void> editTraveler(Traveler traveler) async {
     _errorMessage = null;
-    notifyListeners();
+
+    if (traveler.id == null ||
+        traveler.name.trim().isEmpty ||
+        traveler.age == null ||
+        traveler.age! <= 0) {
+      _errorMessage = 'Dados inválidos para edição.';
+      notifyListeners();
+      return;
+    }
 
     try {
       await _repository.updateTraveler(traveler);
       debugPrint('Viajante atualizado: ${traveler.name}');
       resetFields();
+      setOptionNow('');
       await loadTravelers();
     } catch (e) {
       _errorMessage = 'Erro ao editar viajante: $e';
       debugPrint(_errorMessage!);
+    } finally {
       notifyListeners();
     }
   }
 
   void resetFields() {
     _name = '';
-    _age = 0;
+    _age = null;
     _selectedImage = null;
+    _errorMessage = null;
+    _editingId = null;
+    notifyListeners();
+  }
+
+  void prepareForEdit(Traveler traveler) {
+    _name = traveler.name;
+    _age = traveler.age;
+    _selectedImage = traveler.photoPath != null
+        ? File(traveler.photoPath!)
+        : null;
+    _editingId = traveler.id;
     _errorMessage = null;
     notifyListeners();
   }

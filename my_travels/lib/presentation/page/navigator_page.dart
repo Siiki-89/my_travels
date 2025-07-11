@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_travels/provider/navigator_provider.dart';
-import 'package:my_travels/view/page/travelers_page.dart';
-import 'package:my_travels/view/page/home_page.dart';
-import 'package:my_travels/view/page/settings_page.dart';
+import 'package:my_travels/presentation/provider/navigator_provider.dart';
+import 'package:my_travels/presentation/page/travelers_page.dart';
+import 'package:my_travels/presentation/page/home_page.dart';
+import 'package:my_travels/presentation/page/settings_page.dart';
 import 'package:provider/provider.dart';
 
 class NavigatorPage extends StatelessWidget {
