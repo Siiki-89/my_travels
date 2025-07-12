@@ -1,4 +1,3 @@
-// lib/src/view/provider/traveler_provider.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,15 +8,15 @@ class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
 
   String _name = '';
-  int? _age; // Mantenha como null inicialmente
+  int? _age; 
   File? _selectedImage;
   String? _errorMessage;
   List<Traveler> _travelers = [];
   bool _isLoading = false;
-  int? _editingId; // Guarda o ID do viajante que está sendo editado
-  String _optionNow = ''; // 'add', 'edit', 'delete' ou vazia (modo normal)
+  int? _editingId; 
+  String _optionNow = ''; 
 
-  // Getters
+
   int? get editingId => _editingId;
   String get name => _name;
   String? get errorMessage => _errorMessage;
@@ -31,7 +30,7 @@ class TravelerProvider with ChangeNotifier {
     loadTravelers();
   }
 
-  // Setters para os campos do formulário
+
   void setName(String newName) {
     _name = newName;
   }

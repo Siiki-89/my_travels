@@ -1,4 +1,3 @@
-// lib/src/presentation/widgets/traveler_list_item.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler.dart';

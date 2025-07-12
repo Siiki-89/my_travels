@@ -1,4 +1,3 @@
-// lib/src/presentation/pages/travelers_page.dart
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';

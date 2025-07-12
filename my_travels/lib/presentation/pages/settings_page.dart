@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_travels/presentation/provider/theme_provider.dart'; // Importe o ThemeProvider
+import 'package:my_travels/presentation/provider/theme_provider.dart'; 
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -7,7 +7,6 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos context.watch para observar as mudanças no ThemeProvider
     final themeProvider = context.watch<ThemeProvider>();
 
     return Scaffold(
@@ -18,9 +17,9 @@ class SettingsPage extends StatelessWidget {
             title: const Text('Modo Escuro'),
             subtitle: const Text('Ativar ou desativar o tema escuro'),
             value:
-                themeProvider.themeMode == ThemeMode.dark, // true se for dark
+                themeProvider.themeMode == ThemeMode.dark, 
             onChanged: (bool value) {
-              themeProvider.toggleTheme(); // Alterna o tema
+              themeProvider.toggleTheme(); 
             },
             secondary: Icon(
               themeProvider.themeMode == ThemeMode.dark
@@ -28,7 +27,6 @@ class SettingsPage extends StatelessWidget {
                   : Icons.light_mode,
             ),
           ),
-          // Adicione outras configurações aqui (ex: idioma)
         ],
       ),
     );
