@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +13,7 @@ class TravelerListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final travelerProvider = context.watch<TravelerProvider>();
+    final appLocalizations = AppLocalizations.of(context)!;
 
     return ListTile(
       leading: traveler.photoPath != null && traveler.photoPath!.isNotEmpty
@@ -25,7 +27,7 @@ class TravelerListItem extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.white, size: 32),
             ),
       title: Text(traveler.name),
-      subtitle: Text('Idade: ${traveler.age ?? '?'}'),
+      subtitle: Text('${appLocalizations.ageHint}: ${traveler.age ?? '?'}'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -40,7 +42,10 @@ class TravelerListItem extends StatelessWidget {
             ),
           if (travelerProvider.optionNow == 'delete')
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(
+                appLocalizations.deleteButton as IconData? ?? Icons.delete,
+                color: Colors.red,
+              ),
               onPressed: () async {
                 await context.read<TravelerProvider>().deleteTraveler(
                   traveler.id,
@@ -51,7 +56,9 @@ class TravelerListItem extends StatelessWidget {
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Viajante foi apagado!')),
+                    SnackBar(
+                      content: Text(appLocalizations.travelerDeletedSuccess),
+                    ),
                   );
                 }
               },

@@ -1,21 +1,20 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 
 class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
 
   String _name = '';
-  int? _age; 
+  int? _age;
   File? _selectedImage;
   String? _errorMessage;
   List<Traveler> _travelers = [];
   bool _isLoading = false;
-  int? _editingId; 
-  String _optionNow = ''; 
-
+  int? _editingId;
+  String _optionNow = '';
 
   int? get editingId => _editingId;
   String get name => _name;
@@ -30,14 +29,9 @@ class TravelerProvider with ChangeNotifier {
     loadTravelers();
   }
 
+  void setName(String newName) => _name = newName;
 
-  void setName(String newName) {
-    _name = newName;
-  }
-
-  void setAge(String newAge) {
-    _age = int.tryParse(newAge);
-  }
+  void setAge(String newAge) => _age = int.tryParse(newAge);
 
   void setImage(File? newImage) {
     _selectedImage = newImage;
@@ -65,7 +59,7 @@ class TravelerProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadTravelers() async {
+  Future<void> loadTravelers([BuildContext? context]) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -73,24 +67,25 @@ class TravelerProvider with ChangeNotifier {
       _travelers = await _repository.getTravelers();
       debugPrint('Viajantes carregados: ${_travelers.length}');
     } catch (e) {
-      _errorMessage = 'Erro ao carregar viajantes: $e';
-      debugPrint('Erro ao carregar viajantes $e 🛑');
+      final t = AppLocalizations.of(context!);
+      _errorMessage = '${t?.errorLoadingTravelers} $e';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> addTraveler() async {
+  Future<void> addTraveler([BuildContext? context]) async {
+    final t = AppLocalizations.of(context!);
     _errorMessage = null;
 
     if (_name.trim().isEmpty) {
-      _errorMessage = 'O nome do viajante é obrigatório.';
+      _errorMessage = t?.nameRequiredError;
       notifyListeners();
       return;
     }
     if (_age == null || _age! <= 0) {
-      _errorMessage = 'Precisa inserir uma idade válida.';
+      _errorMessage = t?.ageRequiredError;
       notifyListeners();
       return;
     }
@@ -103,44 +98,44 @@ class TravelerProvider with ChangeNotifier {
 
     try {
       await _repository.insertTraveler(newTraveler);
-      debugPrint('Viajante foi salvo com sucesso: ${newTraveler.name} 🛑');
+      debugPrint('Viajante salvo: ${newTraveler.name}');
       resetFields();
       setOptionNow('');
-      await loadTravelers();
+      await loadTravelers(context);
     } catch (e) {
-      _errorMessage = 'Erro ao adicionar viajante: $e';
-      debugPrint('Erro ao adicionar viajante $e');
+      _errorMessage = '${t?.errorAddingTraveler} $e';
       notifyListeners();
     }
   }
 
-  Future<void> deleteTraveler(int? id) async {
+  Future<void> deleteTraveler(int? id, [BuildContext? context]) async {
+    final t = AppLocalizations.of(context!);
     if (id == null) {
-      _errorMessage = 'ID do viajante para deletar é nulo.';
+      _errorMessage = 'ID inválido';
       notifyListeners();
       return;
     }
     try {
       await _repository.deleteTraveler(id);
       debugPrint('Viajante deletado: $id');
-      await loadTravelers();
+      await loadTravelers(context);
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = 'Erro ao deletar viajante: $e';
-      debugPrint('Erro ao deletar viajante $e');
+      _errorMessage = '${t?.errorDeletingTraveler} $e';
     } finally {
       notifyListeners();
     }
   }
 
-  Future<void> editTraveler(Traveler traveler) async {
+  Future<void> editTraveler(Traveler traveler, [BuildContext? context]) async {
+    final t = AppLocalizations.of(context!);
     _errorMessage = null;
 
     if (traveler.id == null ||
         traveler.name.trim().isEmpty ||
         traveler.age == null ||
         traveler.age! <= 0) {
-      _errorMessage = 'Dados inválidos para edição.';
+      _errorMessage = t?.errorUpdatingTraveler;
       notifyListeners();
       return;
     }
@@ -150,10 +145,9 @@ class TravelerProvider with ChangeNotifier {
       debugPrint('Viajante atualizado: ${traveler.name}');
       resetFields();
       setOptionNow('');
-      await loadTravelers();
+      await loadTravelers(context);
     } catch (e) {
-      _errorMessage = 'Erro ao editar viajante: $e';
-      debugPrint(_errorMessage!);
+      _errorMessage = '${t?.errorUpdatingTraveler} $e';
     } finally {
       notifyListeners();
     }

@@ -1,7 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +15,7 @@ class TravelerFormInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
     return Consumer<TravelerProvider>(
       builder: (context, travelerProvider, child) {
         if (_nameController.text != travelerProvider.name) {
@@ -46,16 +47,16 @@ class TravelerFormInput extends StatelessWidget {
           ),
           title: TextField(
             controller: _nameController,
-            decoration: const InputDecoration(
-              hintText: 'Viajante...',
+            decoration: InputDecoration(
+              hintText: appLocalizations.travelerNameHint,
               border: InputBorder.none,
             ),
             onChanged: travelerProvider.setName,
           ),
           subtitle: TextField(
             controller: _ageController,
-            decoration: const InputDecoration(
-              hintText: 'Idade',
+            decoration: InputDecoration(
+              hintText: appLocalizations.ageHint,
               border: InputBorder.none,
             ),
             onChanged: travelerProvider.setAge,

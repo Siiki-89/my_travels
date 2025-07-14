@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 class NavigatorPage extends StatelessWidget {
   final _pages = [
-    const TravelersPage(),
+    TravelersPage(),
     const HomePage(), //
     const SettingsPage(),
   ];

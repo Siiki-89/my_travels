@@ -1,0 +1,37 @@
+{
+  "@@locale": "pt",
+  "appName": "Minhas Viagens",
+  "users": "Participantes",
+  "addTraveler": "Adicionar Participante",
+  "travelerNameHint": "Nome do Participante",
+  "ageHint": "Idade",
+  "nameRequiredError": "O nome do participante é obrigatório.",
+  "ageRequiredError": "Por favor, insira uma idade válida.",
+  "travelerAddedSuccess": "Participante adicionado com sucesso!",
+  "travelerUpdatedSuccess": "Participante atualizado com sucesso!",
+  "travelerDeletedSuccess": "Participante excluído!",
+  "errorAddingTraveler": "Erro ao adicionar participante: ",
+  "errorUpdatingTraveler": "Erro ao atualizar participante: ",
+  "errorDeletingTraveler": "Erro ao excluir participante: ",
+  "errorLoadingTravelers": "Erro ao carregar participantes: ",
+  "noTravelersRegistered": "Nenhum participante cadastrado.",
+  "confirmDeletionTitle": "Confirmar Exclusão",
+  "confirmDeletionContent": "Tem certeza que deseja excluir {travelerName}?",
+  "@confirmDeletionContent": {
+    "placeholders": {
+      "travelerName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelButton": "Cancelar",
+  "deleteButton": "Excluir",
+  "saveButton": "Salvar",
+  "editButton": "Editar",
+  "clearButton": "Limpar",
+  "settings": "Configurações",
+  "darkModeTitle": "Modo Escuro",
+  "darkModeSubtitle": "Ativar ou desativar o tema escuro",
+  "home": "Início",
+  "language": "Idioma"
+}

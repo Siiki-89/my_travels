@@ -1,0 +1,37 @@
+{
+  "@@locale": "en",
+  "language": "Language",
+  "appName": "My Travels",
+  "users": "Travelers",
+  "addTraveler": "Add Traveler",
+  "travelerNameHint": "Traveler Name",
+  "ageHint": "Age",
+  "nameRequiredError": "Traveler name is required.",
+  "ageRequiredError": "Please enter a valid age.",
+  "travelerAddedSuccess": "Traveler added successfully!",
+  "travelerUpdatedSuccess": "Traveler updated successfully!",
+  "travelerDeletedSuccess": "Traveler deleted!",
+  "errorAddingTraveler": "Error adding traveler: ",
+  "errorUpdatingTraveler": "Error updating traveler: ",
+  "errorDeletingTraveler": "Error deleting traveler: ",
+  "errorLoadingTravelers": "Error loading travelers: ",
+  "noTravelersRegistered": "No travelers registered.",
+  "confirmDeletionTitle": "Confirm Deletion",
+  "confirmDeletionContent": "Are you sure you want to delete {travelerName}?",
+  "@confirmDeletionContent": {
+    "placeholders": {
+      "travelerName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelButton": "Cancel",
+  "deleteButton": "Delete",
+  "saveButton": "Save",
+  "editButton": "Edit",
+  "clearButton": "Clear",
+  "settings": "Settings",
+  "darkModeTitle": "Dark Mode",
+  "darkModeSubtitle": "Activate or deactivate dark theme",
+  "home": "Home"
+}
