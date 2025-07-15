@@ -258,6 +258,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @travelAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip title'**
+  String get travelAddTitle;
+
+  /// No description provided for @travelAddStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get travelAddStart;
+
+  /// No description provided for @travelAddFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get travelAddFinal;
+
+  /// No description provided for @travelAddTypeLocomotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of vehicle'**
+  String get travelAddTypeLocomotion;
+
+  /// No description provided for @travelAddTypeCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get travelAddTypeCar;
+
+  /// No description provided for @travelAddTypeMotorcycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get travelAddTypeMotorcycle;
+
+  /// No description provided for @travelAddTypeBuss.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus'**
+  String get travelAddTypeBuss;
+
+  /// No description provided for @travelAddTypePlane.
+  ///
+  /// In en, this message translates to:
+  /// **'Plane'**
+  String get travelAddTypePlane;
+
+  /// No description provided for @travelAddTypeCruise.
+  ///
+  /// In en, this message translates to:
+  /// **'Cruise'**
+  String get travelAddTypeCruise;
+
+  /// No description provided for @travelAddStartintPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose starting point...'**
+  String get travelAddStartintPoint;
+
+  /// No description provided for @travelAddTypeInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Group\'s points of interest'**
+  String get travelAddTypeInterest;
+
+  /// No description provided for @experiencePark.
+  ///
+  /// In en, this message translates to:
+  /// **'Park'**
+  String get experiencePark;
+
+  /// No description provided for @experienceBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar'**
+  String get experienceBar;
+
+  /// No description provided for @experienceCulinary.
+  ///
+  /// In en, this message translates to:
+  /// **'Culinary'**
+  String get experienceCulinary;
+
+  /// No description provided for @experienceHistoric.
+  ///
+  /// In en, this message translates to:
+  /// **'Historic Place'**
+  String get experienceHistoric;
+
+  /// No description provided for @experienceNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get experienceNature;
+
+  /// No description provided for @experienceCulture.
+  ///
+  /// In en, this message translates to:
+  /// **'Cultural'**
+  String get experienceCulture;
+
+  /// No description provided for @experienceShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get experienceShow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

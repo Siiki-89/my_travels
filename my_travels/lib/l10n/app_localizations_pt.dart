@@ -90,4 +90,61 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get home => 'Início';
+
+  @override
+  String get add => 'Adicionar';
+
+  @override
+  String get travelAddTitle => 'Título da viagem';
+
+  @override
+  String get travelAddStart => 'Início';
+
+  @override
+  String get travelAddFinal => 'Final';
+
+  @override
+  String get travelAddTypeLocomotion => 'Tipo de veiculo';
+
+  @override
+  String get travelAddTypeCar => 'Carro';
+
+  @override
+  String get travelAddTypeMotorcycle => 'Moto';
+
+  @override
+  String get travelAddTypeBuss => 'Ônibus';
+
+  @override
+  String get travelAddTypePlane => 'Avião';
+
+  @override
+  String get travelAddTypeCruise => 'Cruzeiro';
+
+  @override
+  String get travelAddStartintPoint => 'Escolher ponto de partida...';
+
+  @override
+  String get travelAddTypeInterest => 'Pontos de interesse do grupo';
+
+  @override
+  String get experiencePark => 'Park';
+
+  @override
+  String get experienceBar => 'Bar';
+
+  @override
+  String get experienceCulinary => 'Culinary';
+
+  @override
+  String get experienceHistoric => 'Historic Place';
+
+  @override
+  String get experienceNature => 'Nature';
+
+  @override
+  String get experienceCulture => 'Cultural';
+
+  @override
+  String get experienceShow => 'Show';
 }

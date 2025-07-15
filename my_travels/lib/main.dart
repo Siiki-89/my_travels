@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
 import 'package:my_travels/presentation/provider/navigator_provider.dart';
 import 'package:my_travels/presentation/pages/travelers_page.dart';
@@ -86,6 +87,7 @@ class MyApp extends StatelessWidget {
             '/home': (_) => const HomePage(),
             '/travelers': (_) => TravelersPage(),
             '/settings': (_) => const SettingsPage(),
+            '/addTravel': (_) => const CreateTravelPage(),
           },
         );
       },

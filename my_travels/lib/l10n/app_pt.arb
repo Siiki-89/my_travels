@@ -33,5 +33,24 @@
   "darkModeTitle": "Modo Escuro",
   "darkModeSubtitle": "Ativar ou desativar o tema escuro",
   "home": "Início",
-  "language": "Idioma"
+  "language": "Idioma",
+  "add" : "Adicionar",
+  "travelAddTitle" : "Título da viagem",
+  "travelAddStart" : "Início",
+  "travelAddFinal" : "Final",
+  "travelAddTypeLocomotion" : "Tipo de veiculo",
+  "travelAddTypeCar" : "Carro",
+  "travelAddTypeMotorcycle" : "Moto",
+  "travelAddTypeBuss" : "Ônibus",
+  "travelAddTypePlane" : "Avião",
+  "travelAddTypeCruise" : "Cruzeiro",
+  "travelAddStartintPoint" : "Escolher ponto de partida...",
+  "travelAddTypeInterest" : "Pontos de interesse do grupo"
+  "experiencePark" : "Parque",
+  "experienceBar" : "Bar",
+  "experienceCulinary" : "Culinaria",
+  "experienceHistoric" : "Lugares Historicos",
+  "experienceNature" : "Natureza",
+  "experienceCulture" : "Cultural",
+  "experienceShow" : "Show"
 }
