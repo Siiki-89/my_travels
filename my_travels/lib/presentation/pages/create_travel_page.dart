@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/presentation/provider/travel_provider.dart';
+import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/create_travel_dialog.dart';
+import 'package:provider/provider.dart';
 
 class CreateTravelPage extends StatelessWidget {
   const CreateTravelPage({super.key});
@@ -85,7 +89,18 @@ class CreateTravelPage extends StatelessWidget {
                       children: [
                         Text(loc.travelAddTypeInterest),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context
+                                .read<TravelProvider>()
+                                .loadAvailableExperiences(context);
+
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return const CreateTravelDialog();
+                              },
+                            );
+                          },
                           icon: const Icon(
                             Icons.arrow_drop_down_outlined,
                             color: Color(0xFF176FF2),
@@ -93,17 +108,40 @@ class CreateTravelPage extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            label: Text(loc.saveButton),
+                    Consumer<TravelProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.selectedExperiences.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Wrap(
+                            spacing: 8.0,
+                            children: provider.selectedExperiences.map((
+                              experience,
+                            ) {
+                              return Chip(
+                                label: Text(experience.label),
+                                onDeleted: () {
+                                  provider.toggleExperience(experience);
+                                },
+                              );
+                            }).toList(),
                           ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: AppButtonStyles.primaryButtonStyle,
+                        child: Text(
+                          loc.saveButton,
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

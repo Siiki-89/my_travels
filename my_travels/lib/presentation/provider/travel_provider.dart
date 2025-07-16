@@ -7,10 +7,14 @@ class TravelProvider with ChangeNotifier {
   List<ExperienceModel> get selectedExperiences => _selectedExperiences;
 
   final List<ExperienceModel> _availableExperiences = [];
+
+  List<ExperienceModel> get availableExperiences => _availableExperiences;
+
   void loadAvailableExperiences(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context)!;
 
     _availableExperiences.clear();
+
     _availableExperiences.addAll([
       ExperienceModel(
         label: appLocalizations.experiencePark,
@@ -41,7 +45,18 @@ class TravelProvider with ChangeNotifier {
         image: 'assets/images/show.png',
       ),
     ]);
+  }
 
+  bool isSelected(ExperienceModel experience) {
+    return _selectedExperiences.contains(experience);
+  }
+
+  void toggleExperience(ExperienceModel experience) {
+    if (isSelected(experience)) {
+      _selectedExperiences.remove(experience);
+    } else {
+      _selectedExperiences.add(experience);
+    }
     notifyListeners();
   }
 }

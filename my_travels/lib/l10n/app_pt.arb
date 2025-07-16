@@ -45,7 +45,8 @@
   "travelAddTypePlane" : "Avião",
   "travelAddTypeCruise" : "Cruzeiro",
   "travelAddStartintPoint" : "Escolher ponto de partida...",
-  "travelAddTypeInterest" : "Pontos de interesse do grupo"
+  "travelAddTypeInterest" : "Pontos de interesse do grupo",
+  "experienceTitle" : "Escolha os interesses",
   "experiencePark" : "Parque",
   "experienceBar" : "Bar",
   "experienceCulinary" : "Culinaria",

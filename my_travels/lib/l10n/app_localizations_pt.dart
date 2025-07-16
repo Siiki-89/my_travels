@@ -128,19 +128,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get travelAddTypeInterest => 'Pontos de interesse do grupo';
 
   @override
-  String get experiencePark => 'Park';
+  String get experienceTitle => 'Escolha os interesses';
+
+  @override
+  String get experiencePark => 'Parque';
 
   @override
   String get experienceBar => 'Bar';
 
   @override
-  String get experienceCulinary => 'Culinary';
+  String get experienceCulinary => 'Culinaria';
 
   @override
-  String get experienceHistoric => 'Historic Place';
+  String get experienceHistoric => 'Lugares Historicos';
 
   @override
-  String get experienceNature => 'Nature';
+  String get experienceNature => 'Natureza';
 
   @override
   String get experienceCulture => 'Cultural';

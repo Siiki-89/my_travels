@@ -128,6 +128,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get travelAddTypeInterest => 'Group\'s points of interest';
 
   @override
+  String get experienceTitle => 'Choose interests';
+
+  @override
   String get experiencePark => 'Park';
 
   @override

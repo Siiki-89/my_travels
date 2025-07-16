@@ -8,6 +8,7 @@ import 'package:my_travels/presentation/pages/travelers_page.dart';
 import 'package:my_travels/presentation/pages/home_page.dart';
 import 'package:my_travels/presentation/pages/navigator_page.dart';
 import 'package:my_travels/presentation/pages/settings_page.dart';
+import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';
 import 'package:my_travels/presentation/provider/theme_provider.dart';
@@ -23,6 +24,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
         ChangeNotifierProvider(create: (_) => TravelerProvider()),
+        ChangeNotifierProvider(create: (_) => TravelProvider()),
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(preferencesRepository),
         ),

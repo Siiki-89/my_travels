@@ -331,6 +331,12 @@ abstract class AppLocalizations {
   /// **'Group\'s points of interest'**
   String get travelAddTypeInterest;
 
+  /// No description provided for @experienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose interests'**
+  String get experienceTitle;
+
   /// No description provided for @experiencePark.
   ///
   /// In en, this message translates to:
