@@ -11,6 +11,7 @@ class TravelProvider with ChangeNotifier {
   List<ExperienceModel> get availableExperiences => _availableExperiences;
 
   void loadAvailableExperiences(BuildContext context) {
+    if (_availableExperiences.isNotEmpty) return;
     final appLocalizations = AppLocalizations.of(context)!;
 
     _availableExperiences.clear();

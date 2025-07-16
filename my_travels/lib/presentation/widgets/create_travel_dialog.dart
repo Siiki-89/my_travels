@@ -26,96 +26,98 @@ class CreateTravelDialog extends StatelessWidget {
             children: [
               Text(
                 appLocalizations.experienceTitle,
-                style: TextStyle(color: Colors.black, fontSize: 20),
+                style: TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 20),
               Expanded(
                 child: Consumer<TravelProvider>(
                   builder: (context, provider, child) {
-                    return GridView.builder(
-                      itemCount: provider.availableExperiences.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 0.73,
-                            mainAxisSpacing: 10,
-                          ),
-                      itemBuilder: (context, index) {
-                        final experience = provider.availableExperiences[index];
-                        final bool isSelected = provider.isSelected(experience);
-
-                        return GestureDetector(
-                          onTap: () => provider.toggleExperience(experience),
-                          child: Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Stack(
-                                  children: [
-                                    AnimatedContainer(
-                                      duration: Duration(milliseconds: 200),
-                                      width: 100,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? Colors.black
-                                              : Colors.white10,
-                                          width: isSelected ? 3 : 1.0,
-                                        ),
-                                        image: DecorationImage(
-                                          image: AssetImage(experience.image),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            blurRadius: 4,
-                                            offset: Offset(2, 2),
+                    return SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 12.0,
+                        runSpacing: 12.0,
+                        children: provider.availableExperiences.map((
+                          experience,
+                        ) {
+                          final bool isSelected = provider.isSelected(
+                            experience,
+                          );
+                          return GestureDetector(
+                            onTap: () => provider.toggleExperience(experience),
+                            child: Container(
+                              width: (size.width / 4),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      AnimatedContainer(
+                                        duration: Duration(milliseconds: 200),
+                                        width: 100,
+                                        height: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (isSelected)
-                                      Positioned(
-                                        top: 6,
-                                        right: 6,
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? Colors.black
+                                                : Colors.white10,
+                                            width: isSelected ? 3 : 1.0,
                                           ),
-                                          padding: const EdgeInsets.all(2),
-                                          child: const Icon(
-                                            Icons.check,
-                                            color: Colors.black,
-                                            size: 16,
+                                          image: DecorationImage(
+                                            image: AssetImage(experience.image),
+                                            fit: BoxFit.cover,
                                           ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black26,
+                                              blurRadius: 4,
+                                              offset: Offset(2, 2),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
+                                      if (isSelected)
+                                        Positioned(
+                                          top: 6,
+                                          right: 6,
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            padding: const EdgeInsets.all(2),
+                                            child: const Icon(
+                                              Icons.check,
+                                              color: Colors.black,
+                                              size: 16,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  child: Text(
-                                    experience.label,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                  const SizedBox(height: 8),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    child: Text(
+                                      experience.label,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        }).toList(),
+                      ),
                     );
                   },
                 ),
