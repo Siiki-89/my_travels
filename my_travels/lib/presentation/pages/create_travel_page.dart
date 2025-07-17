@@ -3,16 +3,22 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
-import 'package:my_travels/presentation/widgets/create_experience_dialog.dart';
-import 'package:my_travels/presentation/widgets/create_traveler_dialog.dart';
+import 'package:my_travels/presentation/widgets/select_experience_dialog.dart';
+import 'package:my_travels/presentation/widgets/select_transport.dart';
+import 'package:my_travels/presentation/widgets/select_traveler_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class CreateTravelPage extends StatelessWidget {
   const CreateTravelPage({super.key});
+  static final TextEditingController titleController = TextEditingController();
+  static final TextEditingController startDateController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final providerTravel = context.watch<TravelProvider>();
 
     return Scaffold(
       appBar: AppBar(title: Text(loc.add), centerTitle: true),
@@ -26,43 +32,81 @@ class CreateTravelPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    //Titulo da viagem
                     Text(loc.travelAddTitle),
+                    const SizedBox(height: 16),
                     TextFormField(
-                      decoration: InputDecoration(hintText: loc.travelAddTitle),
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+
+                        hintText: '  ...',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
+                          //Data inicial
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(loc.travelAddStart),
-                              TextFormField(),
+                              ElevatedButton(
+                                onPressed: () => _selectDate(context, true),
+                                style: ElevatedButton.styleFrom(
+                                  shape: ContinuousRectangleBorder(
+                                    borderRadius: BorderRadiusGeometry.circular(
+                                      6,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  providerTravel.startDateString,
+                                  style: TextStyle(
+                                    color: Color(0xff666666),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
+                          //Data final
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(loc.travelAddFinal),
-                              TextFormField(),
+                              ElevatedButton(
+                                onPressed: () => _selectDate(context, false),
+                                style: ElevatedButton.styleFrom(
+                                  shape: ContinuousRectangleBorder(
+                                    borderRadius: BorderRadiusGeometry.circular(
+                                      6,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  providerTravel.finalDateString,
+                                  style: TextStyle(
+                                    color: Color(0xff666666),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
+                    //Veiculo de locomoção
                     const SizedBox(height: 16),
                     Text(loc.travelAddTypeLocomotion),
-                    DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        hint: Text(''),
-                        items: [],
-                        onChanged: (value) {},
-                      ),
-                    ),
+                    SelectTransport(),
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -198,5 +242,20 @@ class CreateTravelPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStartDate) async {
+    final provider = context.read<TravelProvider>();
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: isStartDate ? provider.startData : provider.finalData,
+      firstDate: isStartDate ? DateTime(2020) : provider.startData,
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null) {
+      provider.updateDate(pickedDate, isStartDate);
+    }
   }
 }

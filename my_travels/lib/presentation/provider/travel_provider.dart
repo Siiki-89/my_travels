@@ -1,8 +1,36 @@
 import 'package:flutter/cupertino.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/experience_model.dart';
+import 'package:intl/intl.dart';
 
 class TravelProvider with ChangeNotifier {
+  //Data
+  DateTime _startData = DateTime.now();
+  DateTime _finalData = DateTime.now();
+
+  DateTime get startData => _startData;
+  DateTime get finalData => _finalData;
+
+  String get startDateString => formatDate(_startData);
+  String get finalDateString => formatDate(_finalData);
+
+  void updateDate(DateTime newDate, bool isStartDate) {
+    if (isStartDate) {
+      _startData = newDate;
+      if (_finalData.isBefore(_startData)) {
+        _finalData = _startData;
+      }
+    } else {
+      _finalData = newDate;
+    }
+    notifyListeners();
+  }
+
+  String formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  //Experiencias
   final List<ExperienceModel> _selectedExperiences = [];
   List<ExperienceModel> get selectedExperiences => _selectedExperiences;
 
@@ -17,30 +45,30 @@ class TravelProvider with ChangeNotifier {
     _availableExperiences.clear();
 
     _availableExperiences.addAll([
-      ExperienceModel(label: "bar", image: 'assets/images/park.png'),
+      ExperienceModel(label: "bar", image: 'assets/images/experience/park.png'),
       ExperienceModel(
         label: appLocalizations.experienceBar,
-        image: 'assets/images/bar.png',
+        image: 'assets/images/experience/bar.png',
       ),
       ExperienceModel(
         label: appLocalizations.experienceCulinary,
-        image: 'assets/images/culinary.png',
+        image: 'assets/images/experience/culinary.png',
       ),
       ExperienceModel(
         label: appLocalizations.experienceHistoric,
-        image: 'assets/images/historic.png',
+        image: 'assets/images/experience/historic.png',
       ),
       ExperienceModel(
         label: appLocalizations.experienceNature,
-        image: 'assets/images/nature.png',
+        image: 'assets/images/experience/nature.png',
       ),
       ExperienceModel(
         label: appLocalizations.experienceCulture,
-        image: 'assets/images/culture.png',
+        image: 'assets/images/experience/culture.png',
       ),
       ExperienceModel(
         label: appLocalizations.experienceShow,
-        image: 'assets/images/show.png',
+        image: 'assets/images/experience/show.png',
       ),
     ]);
   }
@@ -57,4 +85,12 @@ class TravelProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  //Tipo de veiculo
+  final String _transportSelect = '';
+  String get transportSelect => _transportSelect;
+
+  final List<ExperienceModel> _availableTransport = [];
+
+  List<ExperienceModel> get availableTransport => _availableTransport;
 }

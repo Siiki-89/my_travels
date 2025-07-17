@@ -51,12 +51,15 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF176FF2),
+              backgroundColor: Colors.black,
               foregroundColor: Colors.white,
             ),
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0xFF176FF2),
               foregroundColor: Colors.white,
+            ),
+            bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              selectedIconTheme: IconThemeData(color: Color(0xFF176FF2)),
             ),
           ),
           darkTheme: ThemeData(
