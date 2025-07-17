@@ -15,6 +15,7 @@ class TravelerProvider with ChangeNotifier {
   bool _isLoading = false;
   int? _editingId;
   String _optionNow = '';
+  final List<Traveler> _selectedTravelers = [];
 
   int? get editingId => _editingId;
   String get name => _name;
@@ -24,6 +25,7 @@ class TravelerProvider with ChangeNotifier {
   List<Traveler> get travelers => _travelers;
   bool get isLoading => _isLoading;
   String get optionNow => _optionNow;
+  List<Traveler> get selectedTravelers => _selectedTravelers;
 
   TravelerProvider() {
     loadTravelers();
@@ -45,6 +47,20 @@ class TravelerProvider with ChangeNotifier {
 
   void setOptionNow(String option) {
     _optionNow = option;
+    notifyListeners();
+  }
+
+  bool isSelected(Traveler traveler) {
+    return _selectedTravelers.any((t) => t.id == traveler.id);
+  }
+
+  void toggleTraveler(Traveler traveler) {
+    final index = _selectedTravelers.indexWhere((t) => t.id == traveler.id);
+    if (index != -1) {
+      _selectedTravelers.removeAt(index);
+    } else {
+      _selectedTravelers.add(traveler);
+    }
     notifyListeners();
   }
 

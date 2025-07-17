@@ -53,5 +53,6 @@
   "experienceHistoric" : "Lugares Historicos",
   "experienceNature" : "Natureza",
   "experienceCulture" : "Cultural",
-  "experienceShow" : "Show"
+  "experienceShow" : "Show",
+  "travelerToTravelTitle" : "Escolha os viajantes"
 }

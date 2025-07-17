@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
+import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
-import 'package:my_travels/presentation/widgets/create_travel_dialog.dart';
+import 'package:my_travels/presentation/widgets/create_experience_dialog.dart';
+import 'package:my_travels/presentation/widgets/create_traveler_dialog.dart';
 import 'package:provider/provider.dart';
 
 class CreateTravelPage extends StatelessWidget {
@@ -62,7 +64,52 @@ class CreateTravelPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(loc.users),
+                    Row(
+                      children: [
+                        Text(loc.users),
+                        IconButton(
+                          onPressed: () {
+                            context.read<TravelerProvider>().loadTravelers(
+                              context,
+                            );
+
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext dialogContext) {
+                                return const CreateTravelerDialog();
+                              },
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.arrow_drop_down_outlined,
+                            color: Color(0xFF176FF2),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Consumer<TravelerProvider>(
+                      builder: (context, provider, child) {
+                        if (provider.selectedTravelers.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Wrap(
+                            spacing: 8.0,
+                            children: provider.selectedTravelers.map((
+                              travelers,
+                            ) {
+                              return Chip(
+                                label: Text(travelers.name),
+                                onDeleted: () {
+                                  provider.toggleTraveler(travelers);
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      },
+                    ),
                     Row(
                       children: [
                         Icon(Icons.circle, size: 20),

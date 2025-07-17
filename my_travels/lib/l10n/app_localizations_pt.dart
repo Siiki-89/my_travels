@@ -150,4 +150,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get experienceShow => 'Show';
+
+  @override
+  String get travelerToTravelTitle => 'Escolha os viajantes';
 }

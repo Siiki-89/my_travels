@@ -1,12 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
-import 'package:my_travels/model/experience_model.dart';
-import 'package:my_travels/presentation/provider/travel_provider.dart';
+import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:provider/provider.dart';
 
-class CreateTravelDialog extends StatelessWidget {
-  const CreateTravelDialog({super.key});
+class CreateTravelerDialog extends StatelessWidget {
+  const CreateTravelerDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,27 +25,29 @@ class CreateTravelDialog extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                appLocalizations.experienceTitle,
-                style: TextStyle(fontSize: 20),
+                appLocalizations.travelerToTravelTitle,
+                style: const TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: Consumer<TravelProvider>(
+                child: Consumer<TravelerProvider>(
                   builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (provider.errorMessage != null) {
+                      return Center(child: Text(provider.errorMessage!));
+                    }
                     return SingleChildScrollView(
                       child: Wrap(
                         spacing: 12.0,
                         runSpacing: 12.0,
-                        children: provider.availableExperiences.map((
-                          experience,
-                        ) {
-                          final bool isSelected = provider.isSelected(
-                            experience,
-                          );
+                        children: provider.travelers.map((traveler) {
+                          final bool isSelected = provider.isSelected(traveler);
                           return GestureDetector(
-                            onTap: () => provider.toggleExperience(experience),
+                            onTap: () => provider.toggleTraveler(traveler),
                             child: Container(
-                              width: (size.width / 4),
+                              width: (size.width / 4.0),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -66,7 +68,11 @@ class CreateTravelDialog extends StatelessWidget {
                                             width: isSelected ? 3 : 1.0,
                                           ),
                                           image: DecorationImage(
-                                            image: AssetImage(experience.image),
+                                            image: traveler.photoPath != null
+                                                ? FileImage(
+                                                    File(traveler.photoPath!),
+                                                  )
+                                                : AssetImage(''),
                                             fit: BoxFit.cover,
                                           ),
                                           boxShadow: [
@@ -77,7 +83,15 @@ class CreateTravelDialog extends StatelessWidget {
                                             ),
                                           ],
                                         ),
+                                        child: traveler.photoPath == null
+                                            ? const Icon(
+                                                Icons.person,
+                                                size: 40,
+                                                color: Colors.black,
+                                              )
+                                            : null,
                                       ),
+
                                       if (isSelected)
                                         Positioned(
                                           top: 6,
@@ -98,18 +112,15 @@ class CreateTravelDialog extends StatelessWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    child: Text(
-                                      experience.label,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
+                                  Text(
+                                    traveler.name,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                     ),
                                   ),
                                 ],
@@ -127,7 +138,6 @@ class CreateTravelDialog extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: AppButtonStyles.primaryButtonStyle,
-
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     appLocalizations.saveButton,

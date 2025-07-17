@@ -378,6 +378,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show'**
   String get experienceShow;
+
+  /// No description provided for @travelerToTravelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose travels'**
+  String get travelerToTravelTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

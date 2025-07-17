@@ -150,4 +150,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get experienceShow => 'Espectáculo';
+
+  @override
+  String get travelerToTravelTitle => 'Elige viajeros';
 }

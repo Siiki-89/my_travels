@@ -17,10 +17,7 @@ class TravelProvider with ChangeNotifier {
     _availableExperiences.clear();
 
     _availableExperiences.addAll([
-      ExperienceModel(
-        label: appLocalizations.experiencePark,
-        image: 'assets/images/park.png',
-      ),
+      ExperienceModel(label: "bar", image: 'assets/images/park.png'),
       ExperienceModel(
         label: appLocalizations.experienceBar,
         image: 'assets/images/bar.png',
