@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:intl/intl.dart';
+import 'package:my_travels/model/transport_model.dart';
 
 class TravelProvider with ChangeNotifier {
   //Data
@@ -45,7 +46,10 @@ class TravelProvider with ChangeNotifier {
     _availableExperiences.clear();
 
     _availableExperiences.addAll([
-      ExperienceModel(label: "bar", image: 'assets/images/experience/park.png'),
+      ExperienceModel(
+        label: appLocalizations.experiencePark,
+        image: 'assets/images/experience/park.png',
+      ),
       ExperienceModel(
         label: appLocalizations.experienceBar,
         image: 'assets/images/experience/bar.png',
@@ -73,12 +77,12 @@ class TravelProvider with ChangeNotifier {
     ]);
   }
 
-  bool isSelected(ExperienceModel experience) {
+  bool isSelectedExperience(ExperienceModel experience) {
     return _selectedExperiences.contains(experience);
   }
 
   void toggleExperience(ExperienceModel experience) {
-    if (isSelected(experience)) {
+    if (isSelectedExperience(experience)) {
       _selectedExperiences.remove(experience);
     } else {
       _selectedExperiences.add(experience);
@@ -87,10 +91,48 @@ class TravelProvider with ChangeNotifier {
   }
 
   //Tipo de veiculo
-  final String _transportSelect = '';
-  String get transportSelect => _transportSelect;
+  TransportModel _transportSelect = TransportModel(label: '', image: '');
+  TransportModel get transportSelect => _transportSelect;
 
-  final List<ExperienceModel> _availableTransport = [];
+  final List<TransportModel> _availableTransport = [];
 
-  List<ExperienceModel> get availableTransport => _availableTransport;
+  List<TransportModel> get availableTransport => _availableTransport;
+
+  bool isSelectedVehicle(TransportModel transport) =>
+      _transportSelect.label == transport.label;
+
+  void selectVehicle(TransportModel transport) {
+    _transportSelect = transport;
+    notifyListeners();
+  }
+
+  void loadAvailableVehicles(BuildContext context) {
+    if (_availableTransport.isNotEmpty) return;
+    final appLocalizations = AppLocalizations.of(context)!;
+
+    _availableTransport.clear();
+
+    _availableTransport.addAll([
+      TransportModel(
+        label: appLocalizations.vehicleCar,
+        image: 'assets/images/typelocomotion/car.png',
+      ),
+      TransportModel(
+        label: appLocalizations.vehicleMotorcycle,
+        image: 'assets/images/typelocomotion/motorcycle.png',
+      ),
+      TransportModel(
+        label: appLocalizations.vehicleBus,
+        image: 'assets/images/typelocomotion/bus.png',
+      ),
+      TransportModel(
+        label: appLocalizations.vehicleAirplane,
+        image: 'assets/images/typelocomotion/airplane.png',
+      ),
+      TransportModel(
+        label: appLocalizations.vehicleCruise,
+        image: 'assets/images/typelocomotion/cruise.png',
+      ),
+    ]);
+  }
 }

@@ -39,12 +39,13 @@
   "travelAddStart": "Start",
   "travelAddFinal": "End",
   "travelAddTypeLocomotion": "Type of vehicle",
-  "travelAddTypeCar": "Car",
-  "travelAddTypeMotorcycle": "Motorcycle",
-  "travelAddTypeBuss": "Bus",
-  "travelAddTypePlane": "Plane",
-  "travelAddTypeCruise": "Cruise",
+  "vehicleAirplane": "Airplane",
+  "vehicleBus": "Bus",
+  "vehicleCar": "Car",
+  "vehicleCruise": "Cruise",
+  "vehicleMotorcycle": "Motorcycle",
   "travelAddStartintPoint": "Choose starting point...",
+  "travelAddFinalPoint": "Inform the destination...",
   "travelAddTypeInterest": "Group's points of interest",
   "experienceTitle" : "Choose interests",
   "experiencePark": "Park",
@@ -55,4 +56,5 @@
   "experienceCulture": "Cultural",
   "experienceShow": "Show",
   "travelerToTravelTitle" : "Choose travels"
+
 }

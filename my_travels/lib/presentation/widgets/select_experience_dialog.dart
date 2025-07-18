@@ -38,7 +38,7 @@ class CreateTravelDialog extends StatelessWidget {
                         children: provider.availableExperiences.map((
                           experience,
                         ) {
-                          final bool isSelected = provider.isSelected(
+                          final bool isSelected = provider.isSelectedExperience(
                             experience,
                           );
                           return GestureDetector(

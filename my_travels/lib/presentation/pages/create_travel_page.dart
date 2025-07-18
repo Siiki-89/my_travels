@@ -105,10 +105,22 @@ class CreateTravelPage extends StatelessWidget {
                     ),
                     //Veiculo de locomoção
                     const SizedBox(height: 16),
-                    Text(loc.travelAddTypeLocomotion),
-                    SelectTransport(),
-                    const SizedBox(height: 16),
                     Row(
+                      children: [
+                        Text('${loc.travelAddTypeLocomotion}: '),
+                        SizedBox(width: 76),
+                        Text(
+                          providerTravel.transportSelect.label,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SelectTransport(),
+                    const SizedBox(height: 10),
+                    //Viajantes
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(loc.users),
                         IconButton(
@@ -130,7 +142,7 @@ class CreateTravelPage extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
+                    ), //Listagem dos viajantes
                     Consumer<TravelerProvider>(
                       builder: (context, provider, child) {
                         if (provider.selectedTravelers.isEmpty) {
@@ -154,6 +166,9 @@ class CreateTravelPage extends StatelessWidget {
                         );
                       },
                     ),
+                    SizedBox(height: 16),
+
+                    //Local de partida
                     Row(
                       children: [
                         Icon(Icons.circle, size: 20),
@@ -161,7 +176,28 @@ class CreateTravelPage extends StatelessWidget {
                         Expanded(
                           child: TextFormField(
                             decoration: InputDecoration(
-                              hintText: loc.travelerNameHint,
+                              hintText: loc.travelAddStartintPoint,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Icon(Icons.more_vert, size: 20),
+                    Row(
+                      //destino
+                      children: [
+                        Icon(Icons.pin_drop, color: Colors.red, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              hintText: loc.travelAddFinalPoint,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),
@@ -169,14 +205,7 @@ class CreateTravelPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Row(
-                      children: [
-                        Icon(Icons.pin_drop, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text(loc.travelAddStartintPoint),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(loc.travelAddTypeInterest),
                         IconButton(

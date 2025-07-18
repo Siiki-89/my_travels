@@ -289,41 +289,47 @@ abstract class AppLocalizations {
   /// **'Type of vehicle'**
   String get travelAddTypeLocomotion;
 
-  /// No description provided for @travelAddTypeCar.
+  /// No description provided for @vehicleAirplane.
   ///
   /// In en, this message translates to:
-  /// **'Car'**
-  String get travelAddTypeCar;
+  /// **'Airplane'**
+  String get vehicleAirplane;
 
-  /// No description provided for @travelAddTypeMotorcycle.
-  ///
-  /// In en, this message translates to:
-  /// **'Motorcycle'**
-  String get travelAddTypeMotorcycle;
-
-  /// No description provided for @travelAddTypeBuss.
+  /// No description provided for @vehicleBus.
   ///
   /// In en, this message translates to:
   /// **'Bus'**
-  String get travelAddTypeBuss;
+  String get vehicleBus;
 
-  /// No description provided for @travelAddTypePlane.
+  /// No description provided for @vehicleCar.
   ///
   /// In en, this message translates to:
-  /// **'Plane'**
-  String get travelAddTypePlane;
+  /// **'Car'**
+  String get vehicleCar;
 
-  /// No description provided for @travelAddTypeCruise.
+  /// No description provided for @vehicleCruise.
   ///
   /// In en, this message translates to:
   /// **'Cruise'**
-  String get travelAddTypeCruise;
+  String get vehicleCruise;
+
+  /// No description provided for @vehicleMotorcycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorcycle'**
+  String get vehicleMotorcycle;
 
   /// No description provided for @travelAddStartintPoint.
   ///
   /// In en, this message translates to:
   /// **'Choose starting point...'**
   String get travelAddStartintPoint;
+
+  /// No description provided for @travelAddFinalPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inform the destination...'**
+  String get travelAddFinalPoint;
 
   /// No description provided for @travelAddTypeInterest.
   ///

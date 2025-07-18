@@ -107,22 +107,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get travelAddTypeLocomotion => 'Tipo de vehículo';
 
   @override
-  String get travelAddTypeCar => 'Auto';
+  String get vehicleAirplane => 'Avión';
 
   @override
-  String get travelAddTypeMotorcycle => 'Moto';
+  String get vehicleBus => 'Autobús';
 
   @override
-  String get travelAddTypeBuss => 'Autobús';
+  String get vehicleCar => 'Coche';
 
   @override
-  String get travelAddTypePlane => 'Avión';
+  String get vehicleCruise => 'Crucero';
 
   @override
-  String get travelAddTypeCruise => 'Crucero';
+  String get vehicleMotorcycle => 'Motocicleta';
 
   @override
   String get travelAddStartintPoint => 'Elegir punto de partida...';
+
+  @override
+  String get travelAddFinalPoint => 'informar el destino...';
 
   @override
   String get travelAddTypeInterest => 'Puntos de interés del grupo';
