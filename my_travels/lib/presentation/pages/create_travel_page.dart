@@ -6,6 +6,7 @@ import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/presentation/widgets/select_experience_dialog.dart';
 import 'package:my_travels/presentation/widgets/select_transport.dart';
 import 'package:my_travels/presentation/widgets/select_traveler_dialog.dart';
+import 'package:my_travels/services/location_service.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -167,7 +168,16 @@ class CreateTravelPage extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: 16),
-
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          LocationService().getLocation();
+                          Navigator.pushNamed(context, '/mappage');
+                        },
+                        child: Text('Adicionar Rota'),
+                      ),
+                    ),
                     //Local de partida
                     Row(
                       children: [
