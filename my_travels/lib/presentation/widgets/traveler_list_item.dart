@@ -42,10 +42,7 @@ class TravelerListItem extends StatelessWidget {
             ),
           if (travelerProvider.optionNow == 'delete')
             IconButton(
-              icon: Icon(
-                appLocalizations.deleteButton as IconData? ?? Icons.delete,
-                color: Colors.red,
-              ),
+              icon: Icon(Icons.delete, color: Colors.red),
               onPressed: () async {
                 await context.read<TravelerProvider>().deleteTraveler(
                   traveler.id,

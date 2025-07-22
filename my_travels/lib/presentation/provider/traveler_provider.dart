@@ -92,7 +92,7 @@ class TravelerProvider with ChangeNotifier {
   }
 
   Future<void> addTraveler([BuildContext? context]) async {
-    final t = AppLocalizations.of(context!);
+    final t = context != null ? AppLocalizations.of(context) : null;
     _errorMessage = null;
 
     if (_name.trim().isEmpty) {
@@ -125,7 +125,7 @@ class TravelerProvider with ChangeNotifier {
   }
 
   Future<void> deleteTraveler(int? id, [BuildContext? context]) async {
-    final t = AppLocalizations.of(context!);
+    final t = context != null ? AppLocalizations.of(context) : null;
     if (id == null) {
       _errorMessage = 'ID inválido';
       notifyListeners();
@@ -144,7 +144,7 @@ class TravelerProvider with ChangeNotifier {
   }
 
   Future<void> editTraveler(Traveler traveler, [BuildContext? context]) async {
-    final t = AppLocalizations.of(context!);
+    final t = context != null ? AppLocalizations.of(context) : null;
     _errorMessage = null;
 
     if (traveler.id == null ||

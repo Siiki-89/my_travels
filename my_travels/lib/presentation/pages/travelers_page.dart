@@ -17,38 +17,23 @@ class TravelersPage extends StatelessWidget {
         title: Text(appLocalizations.users),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: () {
-              travelerProvider.changeOptionNow('delete');
-              travelerProvider.setEditingId(null);
-            },
-            icon: Icon(
-              travelerProvider.optionNow == 'delete'
-                  ? Icons.cancel
-                  : Icons.delete,
-            ),
+          _buildAppBarAction(
+            context,
+            option: 'delete',
+            activeIcon: Icons.cancel,
+            inactiveIcon: Icons.delete,
           ),
-          IconButton(
-            onPressed: () {
-              travelerProvider.changeOptionNow('edit');
-              travelerProvider.setEditingId(null);
-            },
-            icon: Icon(
-              travelerProvider.optionNow == 'edit'
-                  ? Icons.cancel
-                  : Icons.mode_edit_outline_outlined,
-            ),
+          _buildAppBarAction(
+            context,
+            option: 'edit',
+            activeIcon: Icons.cancel,
+            inactiveIcon: Icons.mode_edit_outline_outlined,
           ),
-          IconButton(
-            onPressed: () {
-              travelerProvider.changeOptionNow('add');
-              travelerProvider.setEditingId(null);
-            },
-            icon: Icon(
-              travelerProvider.optionNow == 'add'
-                  ? Icons.cancel
-                  : Icons.add_circle_outline,
-            ),
+          _buildAppBarAction(
+            context,
+            option: 'add',
+            activeIcon: Icons.cancel,
+            inactiveIcon: Icons.add_circle_outline,
           ),
         ],
       ),
@@ -132,6 +117,24 @@ class TravelersPage extends StatelessWidget {
               },
             )
           : null,
+    );
+  }
+
+  Widget _buildAppBarAction(
+    BuildContext context, {
+    required String option,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
+  }) {
+    final travelerProvider = context.read<TravelerProvider>();
+    final bool isActive = travelerProvider.optionNow == option;
+
+    return IconButton(
+      onPressed: () {
+        travelerProvider.changeOptionNow(option);
+        travelerProvider.setEditingId(null);
+      },
+      icon: Icon(isActive ? activeIcon : inactiveIcon),
     );
   }
 }
