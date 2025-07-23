@@ -11,7 +11,7 @@ class LocationService {
 
   double get altitude => _altitude;
 
-  Future<void> getLocation() async {
+  Future<void> getDeviceLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 

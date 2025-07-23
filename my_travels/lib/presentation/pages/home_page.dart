@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_travels/services/location_service.dart';
+import 'package:my_travels/services/geolocator_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

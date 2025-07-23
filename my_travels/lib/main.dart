@@ -4,6 +4,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/navigator_provider.dart';
 import 'package:my_travels/presentation/pages/travelers_page.dart';
 import 'package:my_travels/presentation/pages/home_page.dart';
@@ -16,9 +17,11 @@ import 'package:my_travels/presentation/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
   final preferencesRepository = PreferencesRepository();
+  await dotenv.load();
 
   runApp(
     MultiProvider(
@@ -26,6 +29,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
         ChangeNotifierProvider(create: (_) => TravelerProvider()),
         ChangeNotifierProvider(create: (_) => TravelProvider()),
+        ChangeNotifierProvider(create: (_) => MapProvider()),
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(preferencesRepository),
         ),
