@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/place_search_field.dart';
 import 'package:my_travels/presentation/widgets/select_experience_dialog.dart';
 import 'package:my_travels/presentation/widgets/select_transport.dart';
 import 'package:my_travels/presentation/widgets/select_traveler_dialog.dart';
@@ -50,7 +52,6 @@ class CreateTravelPage extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          //Data inicial
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -59,9 +60,7 @@ class CreateTravelPage extends StatelessWidget {
                                 onPressed: () => _selectDate(context, true),
                                 style: ElevatedButton.styleFrom(
                                   shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadiusGeometry.circular(
-                                      6,
-                                    ),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),
                                 child: Text(
@@ -77,7 +76,6 @@ class CreateTravelPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          //Data final
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -86,11 +84,10 @@ class CreateTravelPage extends StatelessWidget {
                                 onPressed: () => _selectDate(context, false),
                                 style: ElevatedButton.styleFrom(
                                   shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadiusGeometry.circular(
-                                      6,
-                                    ),
+                                    borderRadius: BorderRadius.circular(6),
                                   ),
                                 ),
+
                                 child: Text(
                                   providerTravel.finalDateString,
                                   style: TextStyle(
@@ -104,6 +101,7 @@ class CreateTravelPage extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     //Veiculo de locomoção
                     const SizedBox(height: 16),
                     Row(
@@ -167,53 +165,8 @@ class CreateTravelPage extends StatelessWidget {
                         );
                       },
                     ),
-                    SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          LocationService().getDeviceLocation();
-                          Navigator.pushNamed(context, '/mappage');
-                        },
-                        child: Text('Adicionar Rota'),
-                      ),
-                    ),
-                    //Local de partida
-                    Row(
-                      children: [
-                        Icon(Icons.circle, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              hintText: loc.travelAddStartintPoint,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Icon(Icons.more_vert, size: 20),
-                    Row(
-                      //destino
-                      children: [
-                        Icon(Icons.pin_drop, color: Colors.red, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              hintText: loc.travelAddFinalPoint,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                    //Pontos de interesse
+                    const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -227,7 +180,7 @@ class CreateTravelPage extends StatelessWidget {
                             showDialog(
                               context: context,
                               builder: (BuildContext dialogContext) {
-                                return const CreateTravelDialog();
+                                return CreateTravelDialog();
                               },
                             );
                           },
@@ -237,7 +190,7 @@ class CreateTravelPage extends StatelessWidget {
                           ),
                         ),
                       ],
-                    ),
+                    ), //Listar interesses
                     Consumer<TravelProvider>(
                       builder: (context, provider, child) {
                         if (provider.selectedExperiences.isEmpty) {
@@ -261,6 +214,76 @@ class CreateTravelPage extends StatelessWidget {
                         );
                       },
                     ),
+                    //Trajeto da viagem
+                    SizedBox(height: 16),
+                    Text('Trajeto da viagem'),
+                    SizedBox(height: 16),
+                    //Local de partida
+                    Consumer<MapProvider>(
+                      builder: (context, provider, child) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.circle, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: const PlaceSearchField(
+                                    index: 0,
+                                    hint: 'Local de partida',
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            ...List.generate(
+                              provider.stops.length > 1
+                                  ? provider.stops.length - 1
+                                  : 0,
+                              (i) => Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.more_vert, size: 20),
+
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.pin_drop,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: PlaceSearchField(
+                                          index: i + 1,
+                                          hint: 'Destino ${i + 1}',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            SizedBox(height: 16),
+                            Center(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  provider.addEmptyStop();
+                                },
+                                icon: const Icon(Icons.add),
+                                label: Text(
+                                  'Adicionar destino',
+                                  style: TextStyle(color: Color(0xFF666666)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,

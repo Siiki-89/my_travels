@@ -17,4 +17,9 @@ class MapProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void addEmptyStop() {
+    _stops.add(null);
+    notifyListeners();
+  }
 }

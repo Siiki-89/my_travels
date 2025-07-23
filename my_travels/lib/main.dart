@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
     return Consumer2<ThemeProvider, LocaleProvider>(
       builder: (context, themeProvider, localeProvider, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: AppLocalizations.of(context)?.appName ?? 'My Travels',
           theme: ThemeData(
             fontFamily: GoogleFonts.notoSans().fontFamily,

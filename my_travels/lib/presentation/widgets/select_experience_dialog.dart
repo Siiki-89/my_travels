@@ -61,7 +61,7 @@ class CreateTravelDialog extends StatelessWidget {
                                           border: Border.all(
                                             color: isSelected
                                                 ? Colors.black
-                                                : Colors.white10,
+                                                : Colors.transparent,
                                             width: isSelected ? 3 : 1.0,
                                           ),
                                           image: DecorationImage(

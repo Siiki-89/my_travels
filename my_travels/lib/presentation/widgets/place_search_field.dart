@@ -22,10 +22,8 @@ class PlaceSearchField extends StatelessWidget {
         return TextFormField(
           controller: controller,
           focusNode: focus,
-
           decoration: InputDecoration(
-            fillColor: Colors.white,
-            prefixIcon: const Icon(Icons.place),
+            fillColor: Colors.transparent,
             hintText: hint,
             filled: true,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
