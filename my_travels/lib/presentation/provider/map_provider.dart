@@ -4,7 +4,9 @@ import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/services/google_maps_service.dart';
 
 class MapProvider extends ChangeNotifier {
-  final _service = GoogleMapsSerivce();
+  final _service = GoogleMapsService();
+
+  final List<Marker> markers = [];
 
   final List<LocationMapModel?> _stops = [null, null];
   List<LocationMapModel?> get stops => _stops;

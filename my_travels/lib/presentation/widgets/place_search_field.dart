@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/services/google_maps_service.dart';
 import 'package:provider/provider.dart';
 
@@ -14,10 +15,20 @@ class PlaceSearchField extends StatelessWidget {
     return Autocomplete<LocationMapModel>(
       optionsBuilder: (textEditingValue) async {
         if (textEditingValue.text.isEmpty) return [];
-        final service = GoogleMapsSerivce();
+        final service = GoogleMapsService();
         return await service.searchLocation(textEditingValue.text);
       },
       displayStringForOption: (place) => place.description,
+      onSelected: (prediction) async {
+        final service = GoogleMapsService();
+        final detail = await service.placeDetail(
+          prediction.locationId,
+          prediction.description,
+        );
+        if (detail != null && context.mounted) {
+          context.read<MapProvider>().setStop(index, detail);
+        }
+      },
       fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
         return TextFormField(
           controller: controller,

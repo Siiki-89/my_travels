@@ -6,6 +6,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 
 class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
+  final TextEditingController titleController = TextEditingController();
 
   String _name = '';
   int? _age;
@@ -175,6 +176,7 @@ class TravelerProvider with ChangeNotifier {
     _selectedImage = null;
     _errorMessage = null;
     _editingId = null;
+    titleController.clear();
     notifyListeners();
   }
 

@@ -19,45 +19,28 @@ class MapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final Completer<GoogleMapController> _controller = Completer();
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder<LocationService>(
-            future: _getLocation(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
-              }
-              final location = snapshot.data!;
-              final CameraPosition _initialPosition = CameraPosition(
-                target: LatLng(location.latitude, location.longitude),
-                zoom: 14,
-              );
-              return GoogleMap(
-                initialCameraPosition: _initialPosition,
-                onMapCreated: (controller) {
-                  _controller.complete(controller);
-                },
-              );
-            },
-          ),
-
-          Positioned(
-            top: 70,
-            left: 10,
-            right: 10,
-            child: Consumer<MapProvider>(
-              builder: (_, provider, __) {
-                return Column(
-                  children: [
-                    const PlaceSearchField(index: 0, hint: 'Local de partida'),
-                  ],
-                );
+    return Stack(
+      children: [
+        FutureBuilder<LocationService>(
+          future: _getLocation(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+            final location = snapshot.data!;
+            final CameraPosition _initialPosition = CameraPosition(
+              target: LatLng(location.latitude, location.longitude),
+              zoom: 14,
+            );
+            return GoogleMap(
+              initialCameraPosition: _initialPosition,
+              onMapCreated: (controller) {
+                _controller.complete(controller);
               },
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

@@ -6,7 +6,7 @@ import '../model/location_map_model.dart';
 
 final _apiKey = dotenv.env['ANDROID_MAPS_APIKEY'] ?? '';
 
-class GoogleMapsSerivce {
+class GoogleMapsService {
   static const _baseURL = 'https://maps.googleapis.com/maps/api';
 
   Future<List<LocationMapModel>> searchLocation(String location) async {
@@ -42,6 +42,48 @@ class GoogleMapsSerivce {
     } catch (e) {
       print('fetchPredictions: $e');
       return [];
+    }
+  }
+
+  Future<LocationMapModel?> placeDetail(
+    String placeId,
+    String description,
+  ) async {
+    try {
+      if (_apiKey.isEmpty) {
+        print('API não configurada');
+        return null;
+      }
+
+      final uri = Uri.parse(
+        '$_baseURL/place/details/json?place_id=$placeId&fields=geometry&key=$_apiKey',
+      );
+      print('plaDetail URI: $uri');
+      final res = await http.get(uri);
+      print('status code: ${res.statusCode}');
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      if (json['status'] != 'OK') {
+        print(
+          '[ERRO] Detalhes falharam: ${json['status']} - ${json['error_message'] ?? 'sem mensagem'}',
+        );
+        return null;
+      }
+
+      // Extrai coordenadas do JSON
+      final loc = json['result']['geometry']['location'];
+      final lat = (loc['lat'] as num).toDouble();
+      final lng = (loc['lng'] as num).toDouble();
+      print('[DEBUG] Localização: $lat, $lng');
+
+      return LocationMapModel(
+        locationId: placeId,
+        description: description,
+        lat: lat,
+        long: lng,
+      );
+    } catch (e) {
+      print('[EXCEPTION] getPlaceDetail: $e');
+      return null;
     }
   }
 }
