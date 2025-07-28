@@ -25,17 +25,44 @@ class MapPage extends StatelessWidget {
           future: _getLocation(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
+
             final location = snapshot.data!;
             final CameraPosition _initialPosition = CameraPosition(
               target: LatLng(location.latitude, location.longitude),
               zoom: 14,
             );
-            return GoogleMap(
-              initialCameraPosition: _initialPosition,
-              onMapCreated: (controller) {
-                _controller.complete(controller);
+
+            return Consumer<MapProvider>(
+              builder: (context, mapProvider, _) {
+                final markers = mapProvider.stops
+                    .where((stop) => stop != null)
+                    .map(
+                      (stop) => Marker(
+                        markerId: MarkerId(stop!.locationId),
+                        position: LatLng(stop.lat, stop.long),
+                        infoWindow: InfoWindow(title: stop.description),
+                      ),
+                    )
+                    .toSet();
+
+                return GoogleMap(
+                  initialCameraPosition: _initialPosition,
+                  onMapCreated: (controller) {
+                    _controller.complete(controller);
+                  },
+                  markers: markers,
+                  /*polylines: {
+                    Polyline(
+                      polylineId: const PolylineId('rota'),
+                      color: Colors.blue,
+                      width: 4,
+                      points: mapProvider.polylinePoints,
+                    ),
+                  },
+                  */
+                );
               },
             );
           },

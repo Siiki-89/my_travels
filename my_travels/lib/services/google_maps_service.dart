@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../model/location_map_model.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 final _apiKey = dotenv.env['ANDROID_MAPS_APIKEY'] ?? '';
 
@@ -69,7 +70,6 @@ class GoogleMapsService {
         return null;
       }
 
-      // Extrai coordenadas do JSON
       final loc = json['result']['geometry']['location'];
       final lat = (loc['lat'] as num).toDouble();
       final lng = (loc['lng'] as num).toDouble();
@@ -86,4 +86,46 @@ class GoogleMapsService {
       return null;
     }
   }
+
+  /*
+  Future<List<LatLng>> getRouteCoordinates(
+    LatLng origin,
+    LatLng destination,
+  ) async {
+    if (_apiKey.isEmpty) {
+      print('API não configurada');
+      return [];
+    }
+
+    final url = Uri.parse(
+      '$_baseURL/directions/json?origin=${origin.latitude},${origin.longitude}'
+      '&destination=${destination.latitude},${destination.longitude}'
+      '&key=$_apiKey',
+    );
+
+    print('[ROTA] Chamando: $url');
+
+    final response = await http.get(url);
+    final json = jsonDecode(response.body);
+
+    if (json['status'] != 'OK') {
+      print(
+        '[ROTA] Erro: ${json['status']} - ${json['error_message'] ?? 'sem mensagem'}',
+      );
+      return [];
+    }
+
+    final polyline = json['routes'][0]['overview_polyline']['points'];
+    return _decodePolyline(polyline);
+  }
+
+  List<LatLng> _decodePolyline(String encoded) {
+    PolylinePoints polylinePoints = PolylinePoints(apiKey: _apiKey);
+    List<PointLatLng> result = PolylinePoints.decodePolyline(encoded);
+
+    return result
+        .map((point) => LatLng(point.latitude, point.longitude))
+        .toList();
+  }
+  */
 }
