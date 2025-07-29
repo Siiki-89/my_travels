@@ -29,7 +29,6 @@ class CreateTravelPage extends StatelessWidget {
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -51,6 +50,7 @@ class CreateTravelPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Column(
+                          //Inicio
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(loc.travelAddStart),
@@ -75,6 +75,7 @@ class CreateTravelPage extends StatelessWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
+                          //final
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(loc.travelAddFinal),

@@ -87,7 +87,6 @@ class GoogleMapsService {
     }
   }
 
-  /*
   Future<List<LatLng>> getRouteCoordinates(
     LatLng origin,
     LatLng destination,
@@ -127,5 +126,4 @@ class GoogleMapsService {
         .map((point) => LatLng(point.latitude, point.longitude))
         .toList();
   }
-  */
 }

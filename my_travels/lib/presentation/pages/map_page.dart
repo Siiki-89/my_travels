@@ -53,15 +53,14 @@ class MapPage extends StatelessWidget {
                     _controller.complete(controller);
                   },
                   markers: markers,
-                  /*polylines: {
+                  polylines: {
                     Polyline(
                       polylineId: const PolylineId('rota'),
-                      color: Colors.blue,
+                      color: Colors.red,
                       width: 4,
                       points: mapProvider.polylinePoints,
                     ),
                   },
-                  */
                 );
               },
             );

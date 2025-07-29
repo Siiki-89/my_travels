@@ -9,8 +9,8 @@ class MapProvider extends ChangeNotifier {
   final List<LocationMapModel?> _stops = [null, null];
   List<LocationMapModel?> get stops => _stops;
 
-  // final List<LatLng> _polylinePoints = [];
-  // List<LatLng> get polylinePoints => _polylinePoints;
+  final List<LatLng> _polylinePoints = [];
+  List<LatLng> get polylinePoints => _polylinePoints;
 
   void setStop(int index, LocationMapModel location) {
     if (index >= _stops.length) {
@@ -18,7 +18,7 @@ class MapProvider extends ChangeNotifier {
     } else {
       _stops[index] = location;
     }
-    //_updateRoute();
+    _updateRoute();
     notifyListeners();
   }
 
@@ -27,7 +27,6 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /*
   Future<void> _updateRoute() async {
     _polylinePoints.clear();
 
@@ -45,5 +44,4 @@ class MapProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-  */
 }
