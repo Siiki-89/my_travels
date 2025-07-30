@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:intl/intl.dart';
 import 'package:my_travels/model/transport_model.dart';
@@ -134,5 +135,35 @@ class TravelProvider with ChangeNotifier {
         image: 'assets/images/typelocomotion/cruise.png',
       ),
     ]);
+  }
+
+  final TextEditingController descriptionController = TextEditingController();
+  DateTime? _arrivalDate;
+  DateTime? _departureDate;
+
+  DateTime? get arrivalDate => _arrivalDate;
+  DateTime? get departureDate => _departureDate;
+
+  final List<DestinationModel> _destinations = [];
+  List<DestinationModel> get destinations => _destinations;
+
+  int _nextId = 0;
+
+  void addDestination() {
+    _destinations.add(DestinationModel(id: _nextId++));
+    // Notifica todos os 'ouvintes' (a UI) que o estado mudou.
+    notifyListeners();
+  }
+
+  /// Atualiza a data de chegada de um destino específico.
+  void updateArrivalDate(int? id, DateTime date) {
+    _arrivalDate = date;
+    notifyListeners();
+  }
+
+  /// Atualiza a data de partida de um destino específico.
+  void updateDepartureDate(int? id, DateTime date) {
+    _departureDate = date;
+    notifyListeners();
   }
 }

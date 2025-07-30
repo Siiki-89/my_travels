@@ -226,7 +226,8 @@ class CreateTravelPage extends StatelessWidget {
                               Icon(Icons.circle, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: const PlaceSearchField(
+                                child: PlaceSearchField(
+                                  destination: null,
                                   index: 0,
                                   hint: 'Local de partida',
                                 ),
@@ -238,29 +239,35 @@ class CreateTravelPage extends StatelessWidget {
                             provider.stops.length > 1
                                 ? provider.stops.length - 1
                                 : 0,
-                            (i) => Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.more_vert, size: 20),
-
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.pin_drop,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: PlaceSearchField(
-                                        index: i + 1,
-                                        hint: 'Destino ${i + 1}',
+                            (i) {
+                              final destination =
+                                  (i < providerTravel.destinations.length)
+                                  ? providerTravel.destinations[i]
+                                  : null;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.more_vert, size: 20),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.pin_drop,
+                                        color: Colors.red,
+                                        size: 20,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: PlaceSearchField(
+                                          destination: destination,
+                                          index: i + 1,
+                                          hint: 'Destino ${i + 1}',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
                           ),
 
                           SizedBox(height: 16),
@@ -268,6 +275,7 @@ class CreateTravelPage extends StatelessWidget {
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 provider.addEmptyStop();
+                                providerTravel.addDestination();
                               },
                               icon: const Icon(Icons.add),
                               label: Text(
