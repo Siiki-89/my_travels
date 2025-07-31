@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
@@ -7,96 +8,178 @@ import 'package:my_travels/services/google_maps_service.dart';
 import 'package:provider/provider.dart';
 
 class PlaceSearchField extends StatelessWidget {
-  DestinationModel? destination;
+  final DestinationModel destination;
   final int index;
   final String hint;
 
-  PlaceSearchField({
+  const PlaceSearchField({
     super.key,
     required this.index,
     required this.hint,
-    this.destination,
+    required this.destination,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TravelProvider>(
-      builder: (context, provider, child) {
-        return Column(
-          children: [
-            Autocomplete<LocationMapModel>(
-              optionsBuilder: (textEditingValue) async {
-                if (textEditingValue.text.isEmpty) return [];
-                final service = GoogleMapsService();
-                return await service.searchLocation(textEditingValue.text);
-              },
-              displayStringForOption: (place) => place.description,
-              onSelected: (prediction) async {
-                final service = GoogleMapsService();
-                final detail = await service.placeDetail(
-                  prediction.locationId,
-                  prediction.description,
-                );
-                if (detail != null && context.mounted) {
-                  context.read<MapProvider>().setStop(index, detail);
-                }
-              },
-              fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-                return TextFormField(
-                  controller: controller,
-                  focusNode: focus,
-                  decoration: InputDecoration(
-                    fillColor: Colors.transparent,
-                    labelText: hint,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 16),
-            if (index >= 1)
-              Column(
+    final loc = AppLocalizations.of(context)!;
+    final provider = context.watch<TravelProvider>();
+
+    // Mostra o formulário de edição se o índice corresponder ao índice de edição
+    if (provider.editingIndex == index) {
+      return _buildEditingView(context, provider, loc);
+    } else {
+      // Caso contrário, mostra a visualização de exibição (clicável para editar)
+      return _buildDisplayView(context, provider);
+    }
+  }
+
+  // Visualização para quando o destino NÃO está sendo editado
+  Widget _buildDisplayView(BuildContext context, TravelProvider provider) {
+    return InkWell(
+      onTap: () => provider.startEditing(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Text(
+          destination.location?.description ?? hint,
+          style: TextStyle(
+            color: destination.location == null
+                ? Colors.grey.shade600
+                : Colors.black,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Visualização para quando o destino ESTÁ sendo editado
+  Widget _buildEditingView(
+    BuildContext context,
+    TravelProvider provider,
+    AppLocalizations loc,
+  ) {
+    return Column(
+      children: [
+        Autocomplete<LocationMapModel>(
+          initialValue: TextEditingValue(
+            text: destination.location?.description ?? '',
+          ),
+          optionsBuilder: (textEditingValue) async {
+            if (textEditingValue.text.isEmpty) return [];
+            final service = GoogleMapsService();
+            return await service.searchLocation(textEditingValue.text);
+          },
+          displayStringForOption: (place) => place.description,
+          onSelected: (prediction) async {
+            final service = GoogleMapsService();
+            final detail = await service.placeDetail(
+              prediction.locationId,
+              prediction.description,
+            );
+            if (detail != null) {
+              // Atualiza o destino no provider
+              provider.updateDestinationLocation(detail);
+              // Atualiza o marcador no mapa
+              context.read<MapProvider>().setStop(index, detail);
+            }
+          },
+          fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
+            return TextFormField(
+              controller: controller,
+              focusNode: focus,
+              decoration: InputDecoration(
+                fillColor: Colors.transparent,
+                labelText: hint,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: provider.descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Descrição (o que fará aqui?)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  TextFormField(
-                    controller: provider.descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Descrição (o que fará aqui?)',
-                      border: OutlineInputBorder(),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(loc.travelAddStart),
+                        ElevatedButton(
+                          onPressed: () => _selectDate(context, true, provider),
+                          child: Text(provider.arrivalDateString),
+                          style: ElevatedButton.styleFrom(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    maxLines: 2,
                   ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildDateSelector(
-                          context: context,
-                          label: 'Chegada',
-                          date: provider.arrivalDate ?? DateTime.now(),
-                          onTap: () => _selectDate(context, true, provider),
-                          provider: provider,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(loc.travelAddFinal),
+                        ElevatedButton(
+                          onPressed: () =>
+                              _selectDate(context, false, provider),
+                          child: Text(provider.departureDateString),
+                          style: ElevatedButton.styleFrom(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _buildDateSelector(
-                          context: context,
-                          label: 'Saída',
-                          date: provider.departureDate ?? DateTime.now(),
-                          onTap: () => _selectDate(context, false, provider),
-                          provider: provider,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-          ],
-        );
-      },
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () => provider.concludeEditing(),
+                    child: const Text('Concluir'),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      provider.removeDestinationById(destination.id);
+                    },
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    label: const Text(
+                      'Excluir destino',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -105,50 +188,19 @@ class PlaceSearchField extends StatelessWidget {
     bool isArrival,
     TravelProvider provider,
   ) async {
-    final initialDate =
-        (isArrival ? provider.arrivalDate : provider.departureDate) ??
-        DateTime.now();
-    final firstDate = DateTime(2020);
-    final lastDate = DateTime(2100);
-
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
     );
 
     if (pickedDate != null) {
       if (isArrival) {
-        provider.updateArrivalDate(destination?.id, pickedDate);
+        provider.updateArrivalDate(pickedDate);
       } else {
-        provider.updateDepartureDate(destination?.id, pickedDate);
+        provider.updateDepartureDate(pickedDate);
       }
     }
-  }
-
-  Widget _buildDateSelector({
-    required BuildContext context,
-    required String label,
-    required DateTime date,
-    required VoidCallback onTap,
-    required TravelProvider provider,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(provider.formatDate(date)),
-            const Icon(Icons.calendar_today),
-          ],
-        ),
-      ),
-    );
   }
 }

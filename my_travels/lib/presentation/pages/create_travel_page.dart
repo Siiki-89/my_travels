@@ -215,62 +215,62 @@ class CreateTravelPage extends StatelessWidget {
                   SizedBox(height: 16),
                   Text('Trajeto da viagem'),
                   SizedBox(height: 16),
+
                   //Local de partida
+                  // Seu widget da tela principal
                   Consumer<MapProvider>(
                     builder: (context, provider, child) {
+                      // Busca o provider de viagens aqui
+                      final providerTravel = context.watch<TravelProvider>();
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.circle, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: PlaceSearchField(
-                                  destination: null,
-                                  index: 0,
-                                  hint: 'Local de partida',
+                          // ✅ UM ÚNICO LIST.GENERATE PARA TODOS OS PONTOS
+                          ...List.generate(providerTravel.destinations.length, (
+                            i,
+                          ) {
+                            final destination = providerTravel.destinations[i];
+                            final bool isStartPoint = (i == 0);
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Mostra o conector vertical apenas ANTES dos destinos (não antes da partida)
+                                if (!isStartPoint)
+                                  const Icon(Icons.more_vert, size: 20),
+
+                                Row(
+                                  children: [
+                                    Icon(
+                                      // Muda o ícone se for o ponto de partida
+                                      isStartPoint
+                                          ? Icons.trip_origin
+                                          : Icons.pin_drop,
+                                      color: isStartPoint
+                                          ? Colors.blue
+                                          : Colors.red,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: PlaceSearchField(
+                                        // destination NUNCA será nulo aqui
+                                        destination: destination,
+                                        index: i,
+                                        // Muda o hint se for o ponto de partida
+                                        hint: isStartPoint
+                                            ? 'Local de partida'
+                                            : 'Destino $i',
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            );
+                          }),
 
-                          ...List.generate(
-                            provider.stops.length > 1
-                                ? provider.stops.length - 1
-                                : 0,
-                            (i) {
-                              final destination =
-                                  (i < providerTravel.destinations.length)
-                                  ? providerTravel.destinations[i]
-                                  : null;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.more_vert, size: 20),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.pin_drop,
-                                        color: Colors.red,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: PlaceSearchField(
-                                          destination: destination,
-                                          index: i + 1,
-                                          hint: 'Destino ${i + 1}',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Center(
                             child: ElevatedButton.icon(
                               onPressed: () {
@@ -278,7 +278,7 @@ class CreateTravelPage extends StatelessWidget {
                                 providerTravel.addDestination();
                               },
                               icon: const Icon(Icons.add),
-                              label: Text(
+                              label: const Text(
                                 'Adicionar destino',
                                 style: TextStyle(color: Color(0xFF666666)),
                               ),

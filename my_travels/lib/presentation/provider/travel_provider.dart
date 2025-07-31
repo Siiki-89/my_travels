@@ -3,6 +3,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:intl/intl.dart';
+import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 
 class TravelProvider with ChangeNotifier {
@@ -137,33 +138,105 @@ class TravelProvider with ChangeNotifier {
     ]);
   }
 
-  final TextEditingController descriptionController = TextEditingController();
-  DateTime? _arrivalDate;
-  DateTime? _departureDate;
-
-  DateTime? get arrivalDate => _arrivalDate;
-  DateTime? get departureDate => _departureDate;
-
-  final List<DestinationModel> _destinations = [];
+  // ✅ INICIALIZE A LISTA COM UM DESTINO VAZIO PARA O PONTO DE PARTIDA
+  final List<DestinationModel> _destinations = [DestinationModel(id: 0)];
   List<DestinationModel> get destinations => _destinations;
 
-  int _nextId = 0;
+  // O próximo ID a ser usado será 1
+  int _nextId = 1;
 
+  // Rastreia o índice do destino que está sendo editado
+  int? _editingIndex;
+  int? get editingIndex => _editingIndex;
+
+  // Controladores e datas temporárias para o formulário de edição
+  final TextEditingController descriptionController = TextEditingController();
+  DateTime? _tempArrivalDate;
+  DateTime? _tempDepartureDate;
+
+  // Getters para formatar as datas temporárias para a UI
+  String get arrivalDateString => _tempArrivalDate != null
+      ? DateFormat('dd/MM/yyyy').format(_tempArrivalDate!)
+      : 'Selecione';
+  String get departureDateString => _tempDepartureDate != null
+      ? DateFormat('dd/MM/yyyy').format(_tempDepartureDate!)
+      : 'Selecione';
+
+  /// Inicia a edição de um destino, carregando seus dados para os controladores temporários.
+  void startEditing(int index) {
+    _editingIndex = index;
+    final destination = _destinations[index];
+
+    descriptionController.text = destination.description ?? '';
+    _tempArrivalDate = destination.arrivalDate ?? DateTime.now();
+    _tempDepartureDate =
+        destination.departureDate ??
+        DateTime.now().add(const Duration(days: 1));
+
+    notifyListeners();
+  }
+
+  /// Salva as alterações e finaliza o modo de edição.
+  void concludeEditing() {
+    if (_editingIndex != null) {
+      final destination = _destinations[_editingIndex!];
+      _destinations[_editingIndex!] = destination.copyWith(
+        description: descriptionController.text,
+        arrivalDate: _tempArrivalDate,
+        departureDate: _tempDepartureDate,
+      );
+
+      _editingIndex = null;
+      descriptionController.clear();
+      _tempArrivalDate = null;
+      _tempDepartureDate = null;
+
+      notifyListeners();
+    }
+  }
+
+  /// Adiciona um novo destino à lista e o coloca em modo de edição.
   void addDestination() {
-    _destinations.add(DestinationModel(id: _nextId++));
-    // Notifica todos os 'ouvintes' (a UI) que o estado mudou.
+    final newDestination = DestinationModel(id: _nextId++);
+    _destinations.add(newDestination);
+    // Começa a editar o destino recém-adicionado
+    startEditing(_destinations.length - 1);
+  }
+
+  /// Atualiza a localização de um destino que está sendo editado.
+  void updateDestinationLocation(LocationMapModel location) {
+    if (_editingIndex != null) {
+      final destination = _destinations[_editingIndex!];
+      _destinations[_editingIndex!] = destination.copyWith(location: location);
+      notifyListeners();
+    }
+  }
+
+  /// Atualiza a data de chegada temporária.
+  void updateArrivalDate(DateTime date) {
+    _tempArrivalDate = date;
     notifyListeners();
   }
 
-  /// Atualiza a data de chegada de um destino específico.
-  void updateArrivalDate(int? id, DateTime date) {
-    _arrivalDate = date;
+  /// Atualiza a data de partida temporária.
+  void updateDepartureDate(DateTime date) {
+    _tempDepartureDate = date;
     notifyListeners();
   }
 
-  /// Atualiza a data de partida de um destino específico.
-  void updateDepartureDate(int? id, DateTime date) {
-    _departureDate = date;
+  void removeDestinationById(int id) {
+    _destinations.removeWhere((dest) => dest.id == id);
+
+    // Se estava editando esse destino, encerra a edição
+    if (_editingIndex != null && _editingIndex! < _destinations.length) {
+      if (_destinations[_editingIndex!].id == id) {
+        _editingIndex = null;
+        descriptionController.clear();
+        _tempArrivalDate = null;
+        _tempDepartureDate = null;
+      }
+    }
+
     notifyListeners();
   }
 }
