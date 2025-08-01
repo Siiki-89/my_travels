@@ -1,5 +1,3 @@
-// model/destination_model.dart
-
 import 'package:my_travels/model/location_map_model.dart';
 
 class DestinationModel {

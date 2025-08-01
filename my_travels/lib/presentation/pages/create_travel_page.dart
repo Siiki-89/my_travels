@@ -216,17 +216,14 @@ class CreateTravelPage extends StatelessWidget {
                   Text('Trajeto da viagem'),
                   SizedBox(height: 16),
 
-                  //Local de partida
-                  // Seu widget da tela principal
+                  //Local
                   Consumer<MapProvider>(
                     builder: (context, provider, child) {
-                      // Busca o provider de viagens aqui
                       final providerTravel = context.watch<TravelProvider>();
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // ✅ UM ÚNICO LIST.GENERATE PARA TODOS OS PONTOS
                           ...List.generate(providerTravel.destinations.length, (
                             i,
                           ) {
@@ -236,14 +233,12 @@ class CreateTravelPage extends StatelessWidget {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Mostra o conector vertical apenas ANTES dos destinos (não antes da partida)
                                 if (!isStartPoint)
                                   const Icon(Icons.more_vert, size: 20),
 
                                 Row(
                                   children: [
                                     Icon(
-                                      // Muda o ícone se for o ponto de partida
                                       isStartPoint
                                           ? Icons.trip_origin
                                           : Icons.pin_drop,
@@ -255,10 +250,8 @@ class CreateTravelPage extends StatelessWidget {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: PlaceSearchField(
-                                        // destination NUNCA será nulo aqui
                                         destination: destination,
                                         index: i,
-                                        // Muda o hint se for o ponto de partida
                                         hint: isStartPoint
                                             ? 'Local de partida'
                                             : 'Destino $i',
@@ -271,19 +264,20 @@ class CreateTravelPage extends StatelessWidget {
                           }),
 
                           const SizedBox(height: 16),
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                provider.addEmptyStop();
-                                providerTravel.addDestination();
-                              },
-                              icon: const Icon(Icons.add),
-                              label: const Text(
-                                'Adicionar destino',
-                                style: TextStyle(color: Color(0xFF666666)),
+                          if (providerTravel.editingIndex == null)
+                            Center(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  provider.addEmptyStop();
+                                  providerTravel.addDestination();
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text(
+                                  'Adicionar destino',
+                                  style: TextStyle(color: Color(0xFF666666)),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       );
                     },

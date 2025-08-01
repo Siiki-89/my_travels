@@ -138,23 +138,18 @@ class TravelProvider with ChangeNotifier {
     ]);
   }
 
-  // ✅ INICIALIZE A LISTA COM UM DESTINO VAZIO PARA O PONTO DE PARTIDA
   final List<DestinationModel> _destinations = [DestinationModel(id: 0)];
   List<DestinationModel> get destinations => _destinations;
 
-  // O próximo ID a ser usado será 1
   int _nextId = 1;
 
-  // Rastreia o índice do destino que está sendo editado
   int? _editingIndex;
   int? get editingIndex => _editingIndex;
 
-  // Controladores e datas temporárias para o formulário de edição
   final TextEditingController descriptionController = TextEditingController();
   DateTime? _tempArrivalDate;
   DateTime? _tempDepartureDate;
 
-  // Getters para formatar as datas temporárias para a UI
   String get arrivalDateString => _tempArrivalDate != null
       ? DateFormat('dd/MM/yyyy').format(_tempArrivalDate!)
       : 'Selecione';
@@ -162,7 +157,6 @@ class TravelProvider with ChangeNotifier {
       ? DateFormat('dd/MM/yyyy').format(_tempDepartureDate!)
       : 'Selecione';
 
-  /// Inicia a edição de um destino, carregando seus dados para os controladores temporários.
   void startEditing(int index) {
     _editingIndex = index;
     final destination = _destinations[index];
@@ -176,7 +170,6 @@ class TravelProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Salva as alterações e finaliza o modo de edição.
   void concludeEditing() {
     if (_editingIndex != null) {
       final destination = _destinations[_editingIndex!];
@@ -195,15 +188,12 @@ class TravelProvider with ChangeNotifier {
     }
   }
 
-  /// Adiciona um novo destino à lista e o coloca em modo de edição.
   void addDestination() {
     final newDestination = DestinationModel(id: _nextId++);
     _destinations.add(newDestination);
-    // Começa a editar o destino recém-adicionado
     startEditing(_destinations.length - 1);
   }
 
-  /// Atualiza a localização de um destino que está sendo editado.
   void updateDestinationLocation(LocationMapModel location) {
     if (_editingIndex != null) {
       final destination = _destinations[_editingIndex!];
@@ -212,13 +202,11 @@ class TravelProvider with ChangeNotifier {
     }
   }
 
-  /// Atualiza a data de chegada temporária.
   void updateArrivalDate(DateTime date) {
     _tempArrivalDate = date;
     notifyListeners();
   }
 
-  /// Atualiza a data de partida temporária.
   void updateDepartureDate(DateTime date) {
     _tempDepartureDate = date;
     notifyListeners();
@@ -227,7 +215,6 @@ class TravelProvider with ChangeNotifier {
   void removeDestinationById(int id) {
     _destinations.removeWhere((dest) => dest.id == id);
 
-    // Se estava editando esse destino, encerra a edição
     if (_editingIndex != null && _editingIndex! < _destinations.length) {
       if (_destinations[_editingIndex!].id == id) {
         _editingIndex = null;

@@ -24,16 +24,13 @@ class PlaceSearchField extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     final provider = context.watch<TravelProvider>();
 
-    // Mostra o formulário de edição se o índice corresponder ao índice de edição
     if (provider.editingIndex == index) {
       return _buildEditingView(context, provider, loc);
     } else {
-      // Caso contrário, mostra a visualização de exibição (clicável para editar)
       return _buildDisplayView(context, provider);
     }
   }
 
-  // Visualização para quando o destino NÃO está sendo editado
   Widget _buildDisplayView(BuildContext context, TravelProvider provider) {
     return InkWell(
       onTap: () => provider.startEditing(index),
@@ -56,7 +53,6 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
-  // Visualização para quando o destino ESTÁ sendo editado
   Widget _buildEditingView(
     BuildContext context,
     TravelProvider provider,
@@ -81,9 +77,7 @@ class PlaceSearchField extends StatelessWidget {
               prediction.description,
             );
             if (detail != null) {
-              // Atualiza o destino no provider
               provider.updateDestinationLocation(detail);
-              // Atualiza o marcador no mapa
               context.read<MapProvider>().setStop(index, detail);
             }
           },
