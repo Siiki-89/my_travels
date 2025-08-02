@@ -31,6 +31,7 @@ class PlaceSearchField extends StatelessWidget {
     }
   }
 
+
   Widget _buildDisplayView(BuildContext context, TravelProvider provider) {
     return InkWell(
       onTap: () => provider.startEditing(index),
@@ -43,9 +44,7 @@ class PlaceSearchField extends StatelessWidget {
         child: Text(
           destination.location?.description ?? hint,
           style: TextStyle(
-            color: destination.location == null
-                ? Colors.grey.shade600
-                : Colors.black,
+            color: destination.location == null ? Colors.grey.shade600 : Colors.black,
             fontSize: 16,
           ),
         ),
@@ -53,148 +52,167 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
+
   Widget _buildEditingView(
-    BuildContext context,
-    TravelProvider provider,
-    AppLocalizations loc,
-  ) {
-    return Column(
-      children: [
-        Autocomplete<LocationMapModel>(
-          initialValue: TextEditingValue(
-            text: destination.location?.description ?? '',
-          ),
-          optionsBuilder: (textEditingValue) async {
-            if (textEditingValue.text.isEmpty) return [];
-            final service = GoogleMapsService();
-            return await service.searchLocation(textEditingValue.text);
-          },
-          displayStringForOption: (place) => place.description,
-          onSelected: (prediction) async {
-            final service = GoogleMapsService();
-            final detail = await service.placeDetail(
-              prediction.locationId,
-              prediction.description,
-            );
-            if (detail != null) {
-              provider.updateDestinationLocation(detail);
-              context.read<MapProvider>().setStop(index, detail);
-            }
-          },
-          fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-            return TextFormField(
-              controller: controller,
-              focusNode: focus,
-              decoration: InputDecoration(
-                fillColor: Colors.transparent,
-                labelText: hint,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+      BuildContext context,
+      TravelProvider provider,
+      AppLocalizations loc,
+      ) {
+
+    final bool isStartPoint = (index == 0);
+
+
+    if (isStartPoint) {
+      return Autocomplete<LocationMapModel>(
+        initialValue: TextEditingValue(text: destination.location?.description ?? ''),
+        optionsBuilder: (textEditingValue) async {
+          if (textEditingValue.text.isEmpty) return [];
+          final service = GoogleMapsService();
+          return await service.searchLocation(textEditingValue.text);
+        },
+        displayStringForOption: (place) => place.description,
+        onSelected: (prediction) async {
+          final service = GoogleMapsService();
+          final detail = await service.placeDetail(
+            prediction.locationId,
+            prediction.description,
+          );
+          if (detail != null && context.mounted) {
+            provider.updateDestinationLocation(detail);
+            context.read<MapProvider>().setStop(index, detail);
+            provider.concludeEditing();
+          }
+        },
+        fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
+
+          FocusScope.of(ctx).requestFocus(focus);
+          return TextFormField(
+            controller: controller,
+            focusNode: focus,
+            decoration: InputDecoration(
+              labelText: hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    else {
+      return Column(
+        children: [
+          Autocomplete<LocationMapModel>(
+            initialValue: TextEditingValue(text: destination.location?.description ?? ''),
+            optionsBuilder: (textEditingValue) async {
+              if (textEditingValue.text.isEmpty) return [];
+              final service = GoogleMapsService();
+              return await service.searchLocation(textEditingValue.text);
+            },
+            displayStringForOption: (place) => place.description,
+            onSelected: (prediction) async {
+              final service = GoogleMapsService();
+              final detail = await service.placeDetail(
+                prediction.locationId,
+                prediction.description,
+              );
+              if (detail != null) {
+                provider.updateDestinationLocation(detail);
+                context.read<MapProvider>().setStop(index, detail);
+              }
+            },
+            fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
+              FocusScope.of(ctx).requestFocus(focus);
+              return TextFormField(
+                controller: controller,
+                focusNode: focus,
+                decoration: InputDecoration(
+                  fillColor: Colors.transparent,
+                  labelText: hint,
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: provider.descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição (o que fará aqui?)',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.travelAddStart),
-                        ElevatedButton(
-                          onPressed: () => _selectDate(context, true, provider),
-                          child: Text(provider.arrivalDateString),
-                          style: ElevatedButton.styleFrom(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.travelAddFinal),
-                        ElevatedButton(
-                          onPressed: () =>
-                              _selectDate(context, false, provider),
-                          child: Text(provider.departureDateString),
-                          style: ElevatedButton.styleFrom(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () => provider.concludeEditing(),
-                    child: const Text('Concluir'),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      provider.removeDestinationById(destination.id);
-                    },
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    label: const Text(
-                      'Excluir destino',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              );
+            },
           ),
-        ),
-      ],
-    );
+          const SizedBox(height: 16),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: provider.descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Descrição (o que fará aqui?)',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(loc.travelAddStart),
+                          ElevatedButton(
+                            onPressed: () => _selectDate(context, true, provider),
+                            child: Text(provider.arrivalDateString),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(loc.travelAddFinal),
+                          ElevatedButton(
+                            onPressed: () => _selectDate(context, false, provider),
+                            child: Text(provider.departureDateString),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => provider.concludeEditing(),
+                      child: const Text('Concluir'),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        provider.removeDestinationById(destination.id);
+                      },
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: const Text(
+                        'Excluir destino',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Future<void> _selectDate(
-    BuildContext context,
-    bool isArrival,
-    TravelProvider provider,
-  ) async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-
-    if (pickedDate != null) {
-      if (isArrival) {
-        provider.updateArrivalDate(pickedDate);
-      } else {
-        provider.updateDepartureDate(pickedDate);
-      }
-    }
+      BuildContext context,
+      bool isArrival,
+      TravelProvider provider,
+      ) async {
   }
 }

@@ -319,6 +319,12 @@ abstract class AppLocalizations {
   /// **'Motorcycle'**
   String get vehicleMotorcycle;
 
+  /// No description provided for @travelAddTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel route'**
+  String get travelAddTrip;
+
   /// No description provided for @travelAddStartintPoint.
   ///
   /// In en, this message translates to:
@@ -328,7 +334,7 @@ abstract class AppLocalizations {
   /// No description provided for @travelAddFinalPoint.
   ///
   /// In en, this message translates to:
-  /// **'Inform the destination...'**
+  /// **'Inform the destination '**
   String get travelAddFinalPoint;
 
   /// No description provided for @travelAddTypeInterest.
@@ -390,6 +396,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose travels'**
   String get travelerToTravelTitle;
+
+  /// No description provided for @mapAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get mapAppBarTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -122,10 +122,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get vehicleMotorcycle => 'Moto';
 
   @override
+  String get travelAddTrip => 'Trajeto da viagem';
+
+  @override
   String get travelAddStartintPoint => 'Escolha ponto de partida...';
 
   @override
-  String get travelAddFinalPoint => 'Informe o destino...';
+  String get travelAddFinalPoint => 'Informe o destino ';
 
   @override
   String get travelAddTypeInterest => 'Pontos de interesse do grupo';
@@ -156,4 +159,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get travelerToTravelTitle => 'Escolha os viajantes';
+
+  @override
+  String get mapAppBarTitle => 'Percurso';
 }

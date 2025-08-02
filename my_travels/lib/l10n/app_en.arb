@@ -44,8 +44,9 @@
   "vehicleCar": "Car",
   "vehicleCruise": "Cruise",
   "vehicleMotorcycle": "Motorcycle",
+  "travelAddTrip" : "Travel route",
   "travelAddStartintPoint": "Choose starting point...",
-  "travelAddFinalPoint": "Inform the destination...",
+  "travelAddFinalPoint": "Inform the destination ",
   "travelAddTypeInterest": "Group's points of interest",
   "experienceTitle" : "Choose interests",
   "experiencePark": "Park",
@@ -55,6 +56,7 @@
   "experienceNature": "Nature",
   "experienceCulture": "Cultural",
   "experienceShow": "Show",
-  "travelerToTravelTitle" : "Choose travels"
+  "travelerToTravelTitle" : "Choose travels",
+  "mapAppBarTitle" : "Route"
 
 }

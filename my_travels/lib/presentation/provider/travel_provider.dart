@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
@@ -16,6 +18,16 @@ class TravelProvider with ChangeNotifier {
 
   String get startDateString => formatDate(_startData);
   String get finalDateString => formatDate(_finalData);
+
+  File? _coverImage;
+
+  File? get coverImage => _coverImage;
+
+  void setImage(File? newImage) {
+    _coverImage = newImage;
+    notifyListeners();
+  }
+
 
   void updateDate(DateTime newDate, bool isStartDate) {
     if (isStartDate) {

@@ -44,8 +44,9 @@
   "vehicleCar": "Carro",
   "vehicleCruise": "Cruzeiro",
   "vehicleMotorcycle": "Moto",
+  "travelAddTrip" : "Trajeto da viagem",
   "travelAddStartintPoint" : "Escolha ponto de partida...",
-  "travelAddFinalPoint": "Informe o destino...",
+  "travelAddFinalPoint": "Informe o destino ",
   "travelAddTypeInterest" : "Pontos de interesse do grupo",
   "experienceTitle" : "Escolha os interesses",
   "experiencePark" : "Parque",
@@ -55,5 +56,6 @@
   "experienceNature" : "Natureza",
   "experienceCulture" : "Cultural",
   "experienceShow" : "Show",
-  "travelerToTravelTitle" : "Escolha os viajantes"
+  "travelerToTravelTitle" : "Escolha os viajantes",
+  "mapAppBarTitle" : "Percurso"
 }

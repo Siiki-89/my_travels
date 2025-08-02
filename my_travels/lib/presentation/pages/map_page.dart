@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -17,56 +18,60 @@ class MapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final Completer<GoogleMapController> _controller = Completer();
 
-    return Stack(
-      children: [
-        FutureBuilder<LocationService>(
-          future: _getLocation(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return Scaffold(
+      appBar: AppBar(title: Text(loc.mapAppBarTitle), centerTitle: true),
+      body: Stack(
+        children: [
+          FutureBuilder<LocationService>(
+            future: _getLocation(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            final location = snapshot.data!;
-            final CameraPosition _initialPosition = CameraPosition(
-              target: LatLng(location.latitude, location.longitude),
-              zoom: 14,
-            );
+              final location = snapshot.data!;
+              final CameraPosition _initialPosition = CameraPosition(
+                target: LatLng(location.latitude, location.longitude),
+                zoom: 14,
+              );
 
-            return Consumer<MapProvider>(
-              builder: (context, mapProvider, _) {
-                final markers = mapProvider.stops
-                    .where((stop) => stop != null)
-                    .map(
-                      (stop) => Marker(
-                        markerId: MarkerId(stop!.locationId),
-                        position: LatLng(stop.lat, stop.long),
-                        infoWindow: InfoWindow(title: stop.description),
+              return Consumer<MapProvider>(
+                builder: (context, mapProvider, _) {
+                  final markers = mapProvider.stops
+                      .where((stop) => stop != null)
+                      .map(
+                        (stop) => Marker(
+                          markerId: MarkerId(stop!.locationId),
+                          position: LatLng(stop.lat, stop.long),
+                          infoWindow: InfoWindow(title: stop.description),
+                        ),
+                      )
+                      .toSet();
+
+                  return GoogleMap(
+                    initialCameraPosition: _initialPosition,
+                    onMapCreated: (controller) {
+                      _controller.complete(controller);
+                    },
+                    markers: markers,
+                    polylines: {
+                      Polyline(
+                        polylineId: const PolylineId('rota'),
+                        color: Colors.red,
+                        width: 4,
+                        points: mapProvider.polylinePoints,
                       ),
-                    )
-                    .toSet();
-
-                return GoogleMap(
-                  initialCameraPosition: _initialPosition,
-                  onMapCreated: (controller) {
-                    _controller.complete(controller);
-                  },
-                  markers: markers,
-                  polylines: {
-                    Polyline(
-                      polylineId: const PolylineId('rota'),
-                      color: Colors.red,
-                      width: 4,
-                      points: mapProvider.polylinePoints,
-                    ),
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ],
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
