@@ -7,6 +7,8 @@ import 'package:my_travels/l10n/app_localizations.dart';
 class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
   final TextEditingController titleController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
 
   String _name = '';
   int? _age;

@@ -39,7 +39,7 @@ class CreateTravelPage extends StatelessWidget {
                       child: providerTravel.coverImage == null
                           ? const Icon(Icons.add_a_photo, size: 48, color: Colors.black)
                           : null,
-                      height: providerTravel.coverImage != null ? 300 : 150,
+                      height: providerTravel.coverImage != null || providerTravel.coverImage == '' ? 300 : 150,
                       width: double.infinity,
 
                       decoration: providerTravel.coverImage != null ? BoxDecoration(
@@ -50,15 +50,12 @@ class CreateTravelPage extends StatelessWidget {
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.shade300,
-                            // Shadow color with opacity
                             spreadRadius: 5,
-                            // How much the shadow spreads
                             blurRadius: 10,
-                            // How blurry the shadow is
-                            offset: Offset(0, 5), // Shadow offset (x, y)
+                            offset: Offset(0, 5), 
                           ),
                         ],
-                        image: providerTravel.coverImage != null
+                        image: providerTravel.coverImage != null 
                             ? DecorationImage(
                                 image: FileImage(providerTravel.coverImage!),
                                 fit: BoxFit.cover,
@@ -173,7 +170,7 @@ class CreateTravelPage extends StatelessWidget {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext dialogContext) {
-                                    return const CreateTravelerDialog();
+                                    return const CreateSelectTravelerDialog();
                                   },
                                 );
                               },

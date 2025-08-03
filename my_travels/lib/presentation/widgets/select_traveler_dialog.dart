@@ -5,8 +5,8 @@ import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:provider/provider.dart';
 
-class CreateTravelerDialog extends StatelessWidget {
-  const CreateTravelerDialog({super.key});
+class CreateSelectTravelerDialog extends StatelessWidget {
+  const CreateSelectTravelerDialog({super.key});
 
   @override
   Widget build(BuildContext context) {

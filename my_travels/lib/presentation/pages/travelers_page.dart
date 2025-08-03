@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/presentation/widgets/traveler_create_dialog.dart';
 import 'package:my_travels/presentation/widgets/traveler_form_input.dart';
 import 'package:my_travels/presentation/widgets/traveler_list_item.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,17 @@ class TravelersPage extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext dialogContext) {
+                    return CreateAddTrevelerDialog();
+                  },
+                );
+              },
+              child: Text(appLocalizations.addTraveler),
+            ),
             if (travelerProvider.optionNow == 'add' ||
                 travelerProvider.editingId != null)
               const TravelerFormInput(),
