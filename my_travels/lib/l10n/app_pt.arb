@@ -47,6 +47,7 @@
   "travelAddTrip" : "Trajeto da viagem",
   "travelAddStartintPoint" : "Escolha ponto de partida...",
   "travelAddFinalPoint": "Informe o destino ",
+  "travelAddDecriptionText" : "O que fará aqui?",
   "travelAddTypeInterest" : "Pontos de interesse do grupo",
   "experienceTitle" : "Escolha os interesses",
   "experiencePark" : "Parque",

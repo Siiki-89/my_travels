@@ -131,6 +131,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get travelAddFinalPoint => 'informar el destino ';
 
   @override
+  String get travelAddDecriptionText => '¿Qué harás aquí?';
+
+  @override
   String get travelAddTypeInterest => 'Puntos de interés del grupo';
 
   @override

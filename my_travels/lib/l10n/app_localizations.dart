@@ -337,6 +337,12 @@ abstract class AppLocalizations {
   /// **'Inform the destination '**
   String get travelAddFinalPoint;
 
+  /// No description provided for @travelAddDecriptionText.
+  ///
+  /// In en, this message translates to:
+  /// **'What will you do here?'**
+  String get travelAddDecriptionText;
+
   /// No description provided for @travelAddTypeInterest.
   ///
   /// In en, this message translates to:

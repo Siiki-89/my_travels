@@ -37,31 +37,43 @@ class CreateTravelPage extends StatelessWidget {
                   InkWell(
                     child: Container(
                       child: providerTravel.coverImage == null
-                          ? const Icon(Icons.add_a_photo, size: 48, color: Colors.black)
+                          ? const Icon(
+                              Icons.add_a_photo,
+                              size: 48,
+                              color: Colors.black,
+                            )
                           : null,
-                      height: providerTravel.coverImage != null || providerTravel.coverImage == '' ? 300 : 150,
+                      height:
+                          providerTravel.coverImage != null ||
+                              providerTravel.coverImage == ''
+                          ? 300
+                          : 150,
                       width: double.infinity,
 
-                      decoration: providerTravel.coverImage != null ? BoxDecoration(
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(8),
-                        ),
+                      decoration: providerTravel.coverImage != null
+                          ? BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(8),
+                              ),
 
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.shade300,
-                            spreadRadius: 5,
-                            blurRadius: 10,
-                            offset: Offset(0, 5), 
-                          ),
-                        ],
-                        image: providerTravel.coverImage != null 
-                            ? DecorationImage(
-                                image: FileImage(providerTravel.coverImage!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                      ) : null
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.shade300,
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                              image: providerTravel.coverImage != null
+                                  ? DecorationImage(
+                                      image: FileImage(
+                                        providerTravel.coverImage!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            )
+                          : null,
                     ),
                     onTap: () async {
                       await _cropImage(context, providerTravel);
@@ -274,37 +286,54 @@ class CreateTravelPage extends StatelessWidget {
                                         providerTravel.destinations[i];
                                     final bool isStartPoint = (i == 0);
 
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        if (!isStartPoint)
-                                          const Icon(Icons.more_vert, size: 20),
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // Ícone de origem ou parada
+                                          Icon(
+                                            isStartPoint
+                                                ? Icons.trip_origin
+                                                : Icons.pin_drop,
+                                            color: isStartPoint
+                                                ? Colors.blue
+                                                : Colors.red,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
 
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              isStartPoint
-                                                  ? Icons.trip_origin
-                                                  : Icons.pin_drop,
-                                              color: isStartPoint
-                                                  ? Colors.blue
-                                                  : Colors.red,
-                                              size: 20,
+                                          // Campo de busca expandido
+                                          Expanded(
+                                            child: PlaceSearchField(
+                                              destination: destination,
+                                              index: i,
+                                              hint: isStartPoint
+                                                  ? loc.travelAddStartintPoint
+                                                  : '${loc.travelAddFinalPoint} $i',
                                             ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              child: PlaceSearchField(
-                                                destination: destination,
-                                                index: i,
-                                                hint: isStartPoint
-                                                    ? loc.travelAddStartintPoint
-                                                    : '${loc.travelAddFinalPoint} $i',
-                                              ),
+                                          ),
+
+                                          const SizedBox(width: 8),
+
+                                          // Botão de deletar (mostrado sempre)
+                                          IconButton(
+                                            onPressed: () {
+                                              providerTravel
+                                                  .removeDestinationById(
+                                                    destination.id,
+                                                  );
+                                            },
+                                            icon: const Icon(
+                                              Icons.delete,
+                                              color: Colors.grey,
                                             ),
-                                          ],
-                                        ),
-                                      ],
+                                            iconSize: 20,
+                                            tooltip: 'Remover destino',
+                                          ),
+                                        ],
+                                      ),
                                     );
                                   },
                                 ),
