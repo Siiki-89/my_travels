@@ -82,10 +82,10 @@ class PlaceSearchField extends StatelessWidget {
             provider.updateDestinationLocation(detail);
             context.read<MapProvider>().setStop(index, detail);
             provider.concludeEditing();
+            FocusScope.of(context).unfocus();
           }
         },
         fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-          FocusScope.of(ctx).requestFocus(focus);
           return TextFormField(
             controller: controller,
             focusNode: focus,
@@ -117,13 +117,13 @@ class PlaceSearchField extends StatelessWidget {
                 prediction.locationId,
                 prediction.description,
               );
-              if (detail != null) {
+              if (detail != null && context.mounted) {
                 provider.updateDestinationLocation(detail);
                 context.read<MapProvider>().setStop(index, detail);
+                FocusScope.of(context).unfocus();
               }
             },
             fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-              FocusScope.of(ctx).requestFocus(focus);
               return TextFormField(
                 controller: controller,
                 focusNode: focus,
@@ -138,7 +138,6 @@ class PlaceSearchField extends StatelessWidget {
               );
             },
           ),
-
           const SizedBox(height: 16),
           Column(
             children: [
@@ -146,7 +145,7 @@ class PlaceSearchField extends StatelessWidget {
                 controller: provider.descriptionController,
                 decoration: InputDecoration(
                   labelText: loc.travelAddDecriptionText,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
               ),
@@ -169,14 +168,14 @@ class PlaceSearchField extends StatelessWidget {
                             provider.arrivalDateString,
                             style: TextStyle(
                               color: Color(0xff666666),
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,7 +193,7 @@ class PlaceSearchField extends StatelessWidget {
                             provider.departureDateString,
                             style: TextStyle(
                               color: Color(0xff666666),
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                         ),
@@ -204,19 +203,16 @@ class PlaceSearchField extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => provider.concludeEditing(),
-                      child: Text(
-                        loc.saveButton,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: AppButtonStyles.saveButtonStyle,
-                    ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => provider.concludeEditing(),
+                  style: AppButtonStyles.saveButtonStyle,
+                  child: Text(
+                    loc.travelAddPointButton,
+                    style: const TextStyle(color: Colors.white),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -230,12 +226,41 @@ class PlaceSearchField extends StatelessWidget {
     bool isArrival,
     TravelProvider provider,
   ) async {
+    DateTime initialPickerDate;
+    DateTime firstSelectableDate;
+
+    if (isArrival) {
+      if (index == 0) {
+        firstSelectableDate = provider.startData;
+      } else {
+        final previousDestinationDeparture =
+            provider.destinations[index - 1].departureDate;
+        firstSelectableDate =
+            previousDestinationDeparture ?? provider.startData;
+      }
+      initialPickerDate = provider.tempArrivalDate ?? firstSelectableDate;
+    } else {
+      firstSelectableDate = provider.tempArrivalDate ?? provider.startData;
+      initialPickerDate = provider.tempDepartureDate ?? firstSelectableDate;
+    }
+
+    if (initialPickerDate.isBefore(firstSelectableDate)) {
+      initialPickerDate = firstSelectableDate;
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
+      initialDate: initialPickerDate,
+      firstDate: firstSelectableDate,
       lastDate: DateTime(2101),
     );
-    if (picked != null) {}
+
+    if (picked != null) {
+      if (isArrival) {
+        provider.updateArrivalDate(picked);
+      } else {
+        provider.updateDepartureDate(picked);
+      }
+    }
   }
 }

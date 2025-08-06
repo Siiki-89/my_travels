@@ -271,6 +271,12 @@ abstract class AppLocalizations {
   /// **'Trip title'**
   String get travelAddTitle;
 
+  /// No description provided for @travelAddStartJourneyDateText.
+  ///
+  /// In en, this message translates to:
+  /// **'Start of the journey'**
+  String get travelAddStartJourneyDateText;
+
   /// No description provided for @travelAddStart.
   ///
   /// In en, this message translates to:
@@ -342,6 +348,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What will you do here?'**
   String get travelAddDecriptionText;
+
+  /// No description provided for @travelAddPointButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save destination'**
+  String get travelAddPointButton;
 
   /// No description provided for @travelAddTypeInterest.
   ///

@@ -1,12 +1,13 @@
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:intl/intl.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
+import 'package:my_travels/presentation/provider/traveler_provider.dart';
 
 class TravelProvider with ChangeNotifier {
   //Data
@@ -27,7 +28,6 @@ class TravelProvider with ChangeNotifier {
     _coverImage = newImage;
     notifyListeners();
   }
-
 
   void updateDate(DateTime newDate, bool isStartDate) {
     if (isStartDate) {
@@ -162,6 +162,10 @@ class TravelProvider with ChangeNotifier {
   DateTime? _tempArrivalDate;
   DateTime? _tempDepartureDate;
 
+  DateTime? get tempArrivalDate => _tempArrivalDate;
+
+  DateTime? get tempDepartureDate => _tempDepartureDate;
+
   String get arrivalDateString => _tempArrivalDate != null
       ? DateFormat('dd/MM/yyyy').format(_tempArrivalDate!)
       : 'Selecione';
@@ -174,10 +178,22 @@ class TravelProvider with ChangeNotifier {
     final destination = _destinations[index];
 
     descriptionController.text = destination.description ?? '';
-    _tempArrivalDate = destination.arrivalDate ?? DateTime.now();
-    _tempDepartureDate =
-        destination.departureDate ??
-        DateTime.now().add(const Duration(days: 1));
+
+    if (destination.arrivalDate != null) {
+      _tempArrivalDate = destination.arrivalDate;
+      _tempDepartureDate = destination.departureDate;
+    } else {
+      if (index > 0) {
+        final previousDepartureDate = _destinations[index - 1].departureDate;
+        _tempArrivalDate = previousDepartureDate;
+        _tempDepartureDate = previousDepartureDate?.add(
+          const Duration(days: 1),
+        );
+      } else {
+        _tempArrivalDate = _startData;
+        _tempDepartureDate = _startData.add(const Duration(days: 1));
+      }
+    }
 
     notifyListeners();
   }
@@ -209,7 +225,10 @@ class TravelProvider with ChangeNotifier {
   void updateDestinationLocation(LocationMapModel location) {
     if (_editingIndex != null) {
       final destination = _destinations[_editingIndex!];
-      _destinations[_editingIndex!] = destination.copyWith(location: location);
+      _destinations[_editingIndex!] = destination.copyWith(
+        location: location,
+        description: location.description,
+      );
       notifyListeners();
     }
   }
@@ -237,5 +256,115 @@ class TravelProvider with ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  bool validateImage = false;
+  bool validateVehicle = false;
+  bool validadeTravelers = false;
+  bool validadeRoute = false;
+
+  Future<void> saveTravel(
+    BuildContext context,
+    TravelerProvider travelerProvider,
+  ) async {
+    final loc = AppLocalizations.of(context)!;
+
+    concludeEditing();
+
+    if (_coverImage == null) {
+      _showErrorSnackBar(context, 'Por favor, selecione uma imagem de capa.');
+      validateImage = true;
+      notifyListeners();
+      return;
+    }
+
+    validateImage = false;
+    notifyListeners();
+
+    if (_transportSelect.label.isEmpty) {
+      _showErrorSnackBar(context, 'Por favor, escolha um tipo de transporte.');
+      validateVehicle = true;
+      notifyListeners();
+      return;
+    }
+
+    validateVehicle = false;
+    notifyListeners();
+
+    if (travelerProvider.selectedTravelers.isEmpty) {
+      _showErrorSnackBar(context, 'Adicione pelo menos um viajante.');
+      validadeTravelers = true;
+      notifyListeners();
+      return;
+    }
+
+    validadeTravelers = false;
+    notifyListeners();
+
+    if (_destinations.isEmpty) {
+      _showErrorSnackBar(context, 'A viagem precisa de pelo menos um destino.');
+      validadeRoute = true;
+      notifyListeners();
+      return;
+    }
+    validadeRoute = false;
+    notifyListeners();
+
+    if (_destinations.any((d) => d.location == null)) {
+      _showErrorSnackBar(
+        context,
+        'Todos os destinos devem ter um local preenchido.',
+      );
+      validadeRoute = true;
+      notifyListeners();
+      return;
+    }
+    validadeRoute = false;
+    notifyListeners();
+
+    for (int i = 1; i < _destinations.length; i++) {
+      final prevDest = _destinations[i - 1];
+      final currentDest = _destinations[i];
+
+      if (prevDest.departureDate == null || currentDest.arrivalDate == null) {
+        _showErrorSnackBar(
+          context,
+          'Por favor, preencha as datas de todos os destinos.',
+        );
+        return;
+      }
+
+      final isSameDay =
+          prevDest.departureDate!.year == currentDest.arrivalDate!.year &&
+          prevDest.departureDate!.month == currentDest.arrivalDate!.month &&
+          prevDest.departureDate!.day == currentDest.arrivalDate!.day;
+
+      if (!isSameDay) {
+        final prevIndex = i;
+        final currentIndex = i + 1;
+        _showErrorSnackBar(
+          context,
+          'A data de início do destino $currentIndex deve ser a mesma da data de fim do destino $prevIndex.',
+        );
+        return;
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tudo certo! Salvando sua viagem...'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }

@@ -98,6 +98,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get travelAddTitle => 'Trip title';
 
   @override
+  String get travelAddStartJourneyDateText => 'Start of the journey';
+
+  @override
   String get travelAddStart => 'Start';
 
   @override
@@ -132,6 +135,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get travelAddDecriptionText => 'What will you do here?';
+
+  @override
+  String get travelAddPointButton => 'Save destination';
 
   @override
   String get travelAddTypeInterest => 'Group\'s points of interest';

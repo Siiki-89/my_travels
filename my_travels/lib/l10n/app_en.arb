@@ -34,8 +34,10 @@
   "darkModeTitle": "Dark Mode",
   "darkModeSubtitle": "Activate or deactivate dark theme",
   "home": "Home",
+
   "add" : "Add",
   "travelAddTitle": "Trip title",
+  "travelAddStartJourneyDateText" : "Start of the journey",
   "travelAddStart": "Start",
   "travelAddFinal": "End",
   "travelAddTypeLocomotion": "Type of vehicle",
@@ -48,6 +50,7 @@
   "travelAddStartintPoint": "Choose starting point...",
   "travelAddFinalPoint": "Inform the destination ",
   "travelAddDecriptionText" : "What will you do here?",
+  "travelAddPointButton" : "Save destination",
   "travelAddTypeInterest": "Group's points of interest",
   "experienceTitle" : "Choose interests",
   "experiencePark": "Park",
