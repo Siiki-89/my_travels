@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_travels/data/entities/traveler.dart';
+import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/widgets/traveler_create_dialog.dart';

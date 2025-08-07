@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:my_travels/data/entities/traveler.dart';
+import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 

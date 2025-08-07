@@ -61,7 +61,7 @@ class CreateTravelPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(loc.travelAddStartJourneyDateText),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           ElevatedButton(
                             onPressed: () => _selectDate(context, true),
                             style: ElevatedButton.styleFrom(
@@ -205,94 +205,10 @@ class CreateTravelPage extends StatelessWidget {
                           SizedBox(height: 16),
 
                           //Local
-                          Consumer<MapProvider>(
-                            builder: (context, provider, child) {
-                              final providerTravel = context
-                                  .watch<TravelProvider>();
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...List.generate(
-                                    providerTravel.destinations.length,
-                                    (i) {
-                                      final destination =
-                                          providerTravel.destinations[i];
-                                      final bool isStartPoint = (i == 0);
-
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 4,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            // Ícone de origem ou parada
-                                            Icon(
-                                              isStartPoint
-                                                  ? Icons.trip_origin
-                                                  : Icons.pin_drop,
-                                              color: isStartPoint
-                                                  ? Colors.blue
-                                                  : Colors.red,
-                                              size: 20,
-                                            ),
-                                            const SizedBox(width: 8),
-
-                                            // Campo de busca expandido
-                                            Expanded(
-                                              child: PlaceSearchField(
-                                                destination: destination,
-                                                index: i,
-                                                hint: isStartPoint
-                                                    ? loc.travelAddStartintPoint
-                                                    : '${loc.travelAddFinalPoint} $i',
-                                              ),
-                                            ),
-
-                                            // Botão de deletar (mostrado sempre)
-                                            IconButton(
-                                              onPressed: () {
-                                                providerTravel
-                                                    .removeDestinationById(
-                                                      destination.id,
-                                                    );
-                                              },
-                                              icon: const Icon(
-                                                Icons.delete,
-                                                color: Colors.grey,
-                                              ),
-                                              iconSize: 20,
-                                              tooltip: 'Remover destino',
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-
-                                  const SizedBox(height: 16),
-                                  if (providerTravel.editingIndex == null)
-                                    Center(
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          provider.addEmptyStop();
-                                          providerTravel.addDestination();
-                                        },
-                                        icon: const Icon(Icons.add),
-                                        label: const Text(
-                                          'Adicionar destino',
-                                          style: TextStyle(
-                                            color: Color(0xFF666666),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
+                          _buildTravelRoute(loc),
 
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('Mostrar mapa'),
                               SizedBox(width: 80),
@@ -344,6 +260,85 @@ class CreateTravelPage extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  Consumer<MapProvider> _buildTravelRoute(AppLocalizations loc) {
+    return Consumer<MapProvider>(
+      builder: (context, provider, child) {
+        final providerTravel = context.watch<TravelProvider>();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...List.generate(providerTravel.destinations.length, (i) {
+              final destination = providerTravel.destinations[i];
+              final bool isStartPoint = (i == 0);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // Ícone de origem ou parada
+                        Icon(
+                          isStartPoint ? Icons.trip_origin : Icons.pin_drop,
+                          color: isStartPoint ? Colors.blue : Colors.red,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Campo de busca expandido
+                        Expanded(
+                          child: PlaceSearchField(
+                            destination: destination,
+                            index: i,
+                            hint: isStartPoint
+                                ? loc.travelAddStartintPoint
+                                : '${loc.travelAddFinalPoint} $i',
+                          ),
+                        ),
+
+                        // Botão de deletar (mostrado sempre)
+                        IconButton(
+                          onPressed: () {
+                            providerTravel.removeDestinationById(
+                              destination.id,
+                            );
+                          },
+                          icon: const Icon(Icons.delete, color: Colors.grey),
+                          iconSize: 20,
+                          tooltip: 'Remover destino',
+                        ),
+                      ],
+                    ),
+                    if (i < providerTravel.destinations.length - 1)
+                      const Icon(Icons.more_vert, size: 16),
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(height: 10),
+            if (providerTravel.editingIndex == null)
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    provider.addEmptyStop();
+                    providerTravel.addDestination();
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text(
+                    'Adicionar destino',
+                    style: TextStyle(color: Color(0xFF666666)),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -406,24 +401,6 @@ class CreateTravelPage extends StatelessWidget {
             : null,
       ),
     );
-  }
-
-  Future<CroppedFile?> _croppedImage(File image) async {
-    CroppedFile? croppedFile = await ImageCropper().cropImage(
-      sourcePath: image.path,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.deepOrange,
-          toolbarWidgetColor: Colors.white,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-          ],
-        ),
-      ],
-    );
-    return croppedFile;
   }
 
   Future<void> _cropImage(BuildContext context, TravelProvider provider) async {

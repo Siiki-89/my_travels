@@ -22,52 +22,61 @@ class PlaceSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
     final provider = context.watch<TravelProvider>();
+    final loc = AppLocalizations.of(context)!;
+    final bool isStartPoint = (index == 0);
 
-    if (provider.editingIndex == index) {
-      return _buildEditingView(context, provider, loc);
+    // --- LÓGICA PRINCIPAL ALTERADA ---
+    // Se for o ponto de partida, mostre apenas o campo de busca, sem animação.
+    if (isStartPoint) {
+      return _buildAutocompleteField(context, provider);
     } else {
-      return _buildDisplayView(context, provider);
+      // Para os outros pontos, mantenha o container animado que expande e recolhe.
+      return _buildAnimatedCard(context, provider, loc);
     }
   }
 
-  Widget _buildDisplayView(BuildContext context, TravelProvider provider) {
-    return InkWell(
-      onTap: () => provider.startEditing(index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey),
-        ),
-        child: Text(
-          destination.location?.description ?? hint,
-          style: TextStyle(
-            color: destination.location == null
-                ? Colors.grey.shade600
-                : Colors.black,
-            fontSize: 16,
-          ),
+  /// Constrói o card animado para os pontos de destino (não para o ponto de partida).
+  Widget _buildAnimatedCard(
+    BuildContext context,
+    TravelProvider provider,
+    AppLocalizations loc,
+  ) {
+    final bool isEditing = provider.editingIndex == index;
+    final double containerHeight = isEditing ? 310.0 : 60.0;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+      height: containerHeight,
+      width: double.infinity,
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            // Campo de busca sempre visível, mesmo quando fechado
+            _buildAutocompleteField(context, provider),
+            // Campos adicionais só aparecem se estiver expandido
+            if (isEditing) _buildAdditionalFields(context, provider, loc),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEditingView(
+  /// O campo de busca com Autocomplete.
+  Widget _buildAutocompleteField(
     BuildContext context,
     TravelProvider provider,
-    AppLocalizations loc,
   ) {
-    final bool isStartPoint = (index == 0);
-
-    if (isStartPoint) {
-      return Autocomplete<LocationMapModel>(
+    return SizedBox(
+      width: double.infinity,
+      child: Autocomplete<LocationMapModel>(
         initialValue: TextEditingValue(
           text: destination.location?.description ?? '',
         ),
         optionsBuilder: (textEditingValue) async {
-          if (textEditingValue.text.isEmpty) return [];
+          if (textEditingValue.text.length < 2) return [];
           final service = GoogleMapsService();
           return await service.searchLocation(textEditingValue.text);
         },
@@ -79,146 +88,137 @@ class PlaceSearchField extends StatelessWidget {
             prediction.description,
           );
           if (detail != null && context.mounted) {
+            FocusScope.of(context).unfocus();
             provider.updateDestinationLocation(detail);
             context.read<MapProvider>().setStop(index, detail);
-            provider.concludeEditing();
-            FocusScope.of(context).unfocus();
+            if (index == 0) {
+              provider.concludeEditing();
+            }
           }
         },
         fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-          return TextFormField(
-            controller: controller,
-            focusNode: focus,
-            decoration: InputDecoration(
-              labelText: hint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      return Column(
-        children: [
-          Autocomplete<LocationMapModel>(
-            initialValue: TextEditingValue(
-              text: destination.location?.description ?? '',
-            ),
-            optionsBuilder: (textEditingValue) async {
-              if (textEditingValue.text.isEmpty) return [];
-              final service = GoogleMapsService();
-              return await service.searchLocation(textEditingValue.text);
-            },
-            displayStringForOption: (place) => place.description,
-            onSelected: (prediction) async {
-              final service = GoogleMapsService();
-              final detail = await service.placeDetail(
-                prediction.locationId,
-                prediction.description,
-              );
-              if (detail != null && context.mounted) {
-                provider.updateDestinationLocation(detail);
-                context.read<MapProvider>().setStop(index, detail);
-                FocusScope.of(context).unfocus();
+          final hasTapped = provider.hasTappedOnce(index);
+
+          return GestureDetector(
+            onTap: () {
+              if (!hasTapped) {
+                provider.registerFirstTap(index);
+                provider.startEditing(index);
+                FocusScope.of(
+                  context,
+                ).unfocus(); // Impede teclado no primeiro clique
               }
             },
-            fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-              return TextFormField(
+            child: AbsorbPointer(
+              absorbing: !hasTapped, // Bloqueia foco até o segundo clique
+              child: TextFormField(
                 controller: controller,
                 focusNode: focus,
                 decoration: InputDecoration(
-                  fillColor: Colors.transparent,
                   labelText: hint,
-                  filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Campos adicionais para descrição e datas.
+  Widget _buildAdditionalFields(
+    BuildContext context,
+    TravelProvider provider,
+    AppLocalizations loc,
+  ) {
+    // Adicionamos um Padding aqui para manter o espaçamento.
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Column(
+        children: [
+          TextFormField(
+            key: ValueKey('description_$index'),
+            controller: provider.descriptionController,
+            decoration: InputDecoration(
+              labelText: loc.travelAddDecriptionText,
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 2,
           ),
           const SizedBox(height: 16),
-          Column(
+          Row(
             children: [
-              TextFormField(
-                controller: provider.descriptionController,
-                decoration: InputDecoration(
-                  labelText: loc.travelAddDecriptionText,
-                  border: const OutlineInputBorder(),
-                ),
-                maxLines: 2,
+              _buildDateField(
+                context,
+                loc.travelAddStart,
+                provider.arrivalDateString,
+                () => _selectDate(context, true, provider),
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.travelAddStart),
-                        ElevatedButton(
-                          onPressed: () => _selectDate(context, true, provider),
-                          style: ElevatedButton.styleFrom(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          child: Text(
-                            provider.arrivalDateString,
-                            style: TextStyle(
-                              color: Color(0xff666666),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(loc.travelAddFinal),
-                        ElevatedButton(
-                          onPressed: () =>
-                              _selectDate(context, false, provider),
-                          style: ElevatedButton.styleFrom(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          child: Text(
-                            provider.departureDateString,
-                            style: TextStyle(
-                              color: Color(0xff666666),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => provider.concludeEditing(),
-                  style: AppButtonStyles.saveButtonStyle,
-                  child: Text(
-                    loc.travelAddPointButton,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
+              const SizedBox(width: 8),
+              _buildDateField(
+                context,
+                loc.travelAddFinal,
+                provider.departureDateString,
+                () => _selectDate(context, false, provider),
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                provider.resetFirstTap(index); // <-- isso aqui!
+                provider.concludeEditing();
+              },
+              style: AppButtonStyles.saveButtonStyle,
+              child: Text(
+                loc.travelAddPointButton,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
         ],
-      );
-    }
+      ),
+    );
+  }
+
+  /// Widget para um campo de data.
+  Widget _buildDateField(
+    BuildContext context,
+    String label,
+    String value,
+    VoidCallback onPressed,
+  ) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label),
+          const SizedBox(height: 4),
+          ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: Container(
+              height: 48,
+              alignment: Alignment.center,
+              child: Text(
+                value,
+                style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _selectDate(

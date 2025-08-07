@@ -1,34 +1,19 @@
-import 'package:my_travels/data/entities/traveler.dart';
+import 'package:my_travels/data/entities/traveler_entity.dart';
+import 'package:my_travels/data/local/database_service.dart';
+import 'package:my_travels/data/tables/traveler_table.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import '../tables/traveler_table.dart';
 
 class TravelerRepository {
-  static Database? _database;
-  static const String _tableName = 'Traveler';
+  // 1. O repositório agora depende do DatabaseService para obter a conexão.
+  final DatabaseService _dbService = DatabaseService.instance;
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDB();
-    return _database!;
-  }
-
-  Future<Database> _initDB() async {
-    String path = join(await getDatabasesPath(), 'my_travels.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute(TravelerTable.createTable);
-      },
-    );
-  }
-
-  // CRUD
+  // 2. O nome da tabela é pego da classe de constantes para segurança.
+  static const String _tableName = TravelerTable.tableName;
 
   // CREATE
   Future<int> insertTraveler(Traveler traveler) async {
-    final db = await database;
+    // 3. Pede a conexão ao DatabaseService a cada operação.
+    final db = await _dbService.database;
     return await db.insert(
       _tableName,
       traveler.toMap(),
@@ -38,7 +23,7 @@ class TravelerRepository {
 
   // READ ALL TRAVELERS
   Future<List<Traveler>> getTravelers() async {
-    final db = await database;
+    final db = await _dbService.database;
     final List<Map<String, dynamic>> maps = await db.query(_tableName);
     return List.generate(maps.length, (i) {
       return Traveler.fromMap(maps[i]);
@@ -46,12 +31,11 @@ class TravelerRepository {
   }
 
   // READ TRAVELER BY ID
-
   Future<Traveler?> getTravelerById(int id) async {
-    final db = await database;
+    final db = await _dbService.database;
     final List<Map<String, dynamic>> maps = await db.query(
       _tableName,
-      where: 'id = ?',
+      where: '${TravelerTable.id} = ?',
       whereArgs: [id],
     );
     if (maps.isNotEmpty) {
@@ -61,9 +45,8 @@ class TravelerRepository {
   }
 
   // DELETE TRAVELER
-
   Future<int> deleteTraveler(int id) async {
-    final db = await database;
+    final db = await _dbService.database;
     return await db.delete(
       _tableName,
       where: '${TravelerTable.id} = ?',
@@ -72,21 +55,13 @@ class TravelerRepository {
   }
 
   // UPDATE TRAVELER
-
   Future<int> updateTraveler(Traveler traveler) async {
-    final db = await database;
+    final db = await _dbService.database;
     return await db.update(
       _tableName,
       traveler.toMap(),
       where: '${TravelerTable.id} = ?',
       whereArgs: [traveler.id],
     );
-  }
-
-  // CLOSE DB
-  Future<void> close() async {
-    final db = await database;
-    await db.close();
-    _database = null;
   }
 }
