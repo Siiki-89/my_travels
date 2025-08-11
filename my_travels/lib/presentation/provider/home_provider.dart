@@ -9,7 +9,38 @@ class HomeProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   List<Travel> _travels = [];
-  List<Travel> get travels => _travels;
+  List<Travel> get travels => _searchVisible ? _filterTravels : _travels;
+
+  List<Travel> _filterTravels = [];
+  List<Travel> get filterTravels => _filterTravels;
+
+  bool _searchVisible = false;
+  bool get searchVisible => _searchVisible;
+
+  void initSearch() {
+    _searchVisible = true;
+    _filterTravels = _travels;
+    notifyListeners();
+  }
+
+  void search(String input) {
+    _filterTravels = _travels
+        .where(
+          (travel) => travel.title.toLowerCase().contains(input.toLowerCase()),
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void cancelSearch() {
+    _searchVisible = false;
+    _filterTravels = [];
+    notifyListeners();
+  }
+
+  HomeProvider() {
+    fetchTravels();
+  }
 
   Future<void> fetchTravels() async {
     _isLoading = true;
@@ -17,9 +48,9 @@ class HomeProvider with ChangeNotifier {
 
     try {
       _travels = await _travelRepository.getTravels();
+      debugPrint('Viagens carregadas: ${_travels.length}');
     } catch (e) {
       print("Erro ao buscar viagens: $e");
-      // Opcional: você pode adicionar uma variável de erro para mostrar na UI
     } finally {
       _isLoading = false;
       notifyListeners();

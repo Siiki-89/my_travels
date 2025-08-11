@@ -3,6 +3,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/theme_provider.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -35,33 +36,35 @@ class SettingsPage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 36),
             child: ListTile(
               title: Text(appLocalizations.language),
-              trailing: DropdownButton<Locale>(
-                value: localeProvider.locale,
-                onChanged: (Locale? newLocale) {
-                  if (newLocale != null) {
-                    localeProvider.setLocale(newLocale);
-                  }
-                },
-                items: AppLocalizations.supportedLocales.map((Locale locale) {
-                  String languageName;
-                  switch (locale.languageCode) {
-                    case 'en':
-                      languageName = 'English';
-                      break;
-                    case 'pt_BR':
-                      languageName = 'Português';
-                      break;
-                    case 'es':
-                      languageName = 'Español';
-                      break;
-                    default:
-                      languageName = locale.languageCode;
-                  }
-                  return DropdownMenuItem<Locale>(
-                    value: locale,
-                    child: Text(languageName),
-                  );
-                }).toList(),
+              trailing: DropdownButtonHideUnderline(
+                child: DropdownButton2<Locale>(
+                  value: localeProvider.locale,
+                  onChanged: (Locale? newLocale) {
+                    if (newLocale != null) {
+                      localeProvider.setLocale(newLocale);
+                    }
+                  },
+                  items: AppLocalizations.supportedLocales.map((Locale locale) {
+                    String languageName;
+                    switch (locale.languageCode) {
+                      case 'en':
+                        languageName = 'English';
+                        break;
+                      case 'pt':
+                        languageName = 'Português';
+                        break;
+                      case 'es':
+                        languageName = 'Español';
+                        break;
+                      default:
+                        languageName = locale.languageCode;
+                    }
+                    return DropdownMenuItem<Locale>(
+                      value: locale,
+                      child: Text(languageName),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           ),
