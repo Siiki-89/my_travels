@@ -112,7 +112,7 @@ class TravelProvider with ChangeNotifier {
   }
 
   //Tipo de veiculo
-  TransportModel _transportSelect = TransportModel(label: '', image: '');
+  TransportModel _transportSelect = TransportModel(label: '', lottieAsset: '');
   TransportModel get transportSelect => _transportSelect;
 
   final List<TransportModel> _availableTransport = [];
@@ -133,26 +133,29 @@ class TravelProvider with ChangeNotifier {
 
     _availableTransport.clear();
 
+    // Supondo que seus arquivos Lottie estejam nesta pasta
+    const String lottiePath = 'assets/images/lottie/';
+
     _availableTransport.addAll([
       TransportModel(
         label: appLocalizations.vehicleCar,
-        image: 'assets/images/typelocomotion/car.png',
+        lottieAsset: '${lottiePath}car.json',
       ),
       TransportModel(
         label: appLocalizations.vehicleMotorcycle,
-        image: 'assets/images/typelocomotion/motorcycle.png',
+        lottieAsset: '${lottiePath}motorcycle.json',
       ),
       TransportModel(
         label: appLocalizations.vehicleBus,
-        image: 'assets/images/typelocomotion/bus.png',
+        lottieAsset: '${lottiePath}bus.json',
       ),
       TransportModel(
         label: appLocalizations.vehicleAirplane,
-        image: 'assets/images/typelocomotion/airplane.png',
+        lottieAsset: '${lottiePath}airplane.json',
       ),
       TransportModel(
         label: appLocalizations.vehicleCruise,
-        image: 'assets/images/typelocomotion/cruise.png',
+        lottieAsset: '${lottiePath}cruise.json',
       ),
     ]);
   }

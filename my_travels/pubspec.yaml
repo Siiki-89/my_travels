@@ -49,6 +49,7 @@ dev_dependencies:
   google_maps_flutter: ^2.12.3 
   geolocator: ^11.0.0
   flutter_dotenv: ^5.2.1
+  lottie: ^3.3.1
   http: ^1.4.0
   provider: ^6.1.5
   sqflite: ^2.4.2
@@ -80,6 +81,7 @@ flutter:
     - .env
     - assets/images/experience/
     - assets/images/typelocomotion/
+    - assets/images/lottie/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

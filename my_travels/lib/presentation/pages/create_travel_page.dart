@@ -14,6 +14,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lottie/lottie.dart';
 
 final _formKey = GlobalKey<FormState>();
 
@@ -72,7 +73,7 @@ class CreateTravelPage extends StatelessWidget {
                             child: Text(
                               providerTravel.startDateString,
                               style: TextStyle(
-                                color: Color(0xff666666),
+                                color: Colors.blue,
                                 fontSize: 16,
                               ),
                             ),
@@ -80,19 +81,11 @@ class CreateTravelPage extends StatelessWidget {
 
                           //Veiculo de locomoção
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              _buildAnimatedText(
-                                providerTravel.validateVehicle,
-                                loc.travelAddTypeLocomotion,
-                              ),
-                              SizedBox(width: 76),
-                              Text(
-                                providerTravel.transportSelect.label,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          _buildAnimatedText(
+                            providerTravel.validateVehicle,
+                            loc.travelAddTypeLocomotion,
                           ),
+
                           const SizedBox(height: 16),
                           SelectTransport(),
                           const SizedBox(height: 10),
@@ -117,10 +110,7 @@ class CreateTravelPage extends StatelessWidget {
                                     },
                                   );
                                 },
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: Color(0xFF176FF2),
-                                ),
+                                icon: const Icon(Icons.add, color: Colors.blue),
                               ),
                             ],
                           ), //Listagem dos viajantes
@@ -166,10 +156,7 @@ class CreateTravelPage extends StatelessWidget {
                                     },
                                   );
                                 },
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: Color(0xFF176FF2),
-                                ),
+                                icon: const Icon(Icons.add, color: Colors.blue),
                               ),
                             ],
                           ), //Listar interesses
@@ -218,7 +205,7 @@ class CreateTravelPage extends StatelessWidget {
                                 },
                                 icon: const Icon(
                                   Icons.arrow_drop_down_outlined,
-                                  color: Color(0xFF176FF2),
+                                  color: Colors.blue,
                                 ),
                               ),
                             ],
@@ -332,7 +319,7 @@ class CreateTravelPage extends StatelessWidget {
                   icon: const Icon(Icons.add),
                   label: const Text(
                     'Adicionar destino',
-                    style: TextStyle(color: Color(0xFF666666)),
+                    style: TextStyle(color: Colors.blue),
                   ),
                 ),
               ),
@@ -429,6 +416,65 @@ class CreateTravelPage extends StatelessWidget {
       ],
     );
     provider.setImage(File(croppedFile?.path ?? ''));
+  }
+
+  // Coloque este novo método na sua classe de Widget (Page)
+  Widget _buildVehicleSelector(TravelProvider provider) {
+    return Container(
+      height: 100, // Altura fixa para a área de seleção
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: provider.availableTransport.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final transport = provider.availableTransport[index];
+          final bool isSelected = provider.isSelectedVehicle(transport);
+
+          return GestureDetector(
+            onTap: () => provider.selectVehicle(transport),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.blue.withOpacity(0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  // Destaque visual para o item selecionado
+                  color: isSelected ? Colors.blue : Colors.transparent,
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Lottie.asset(
+                      transport.lottieAsset,
+                      // 'animate: false' previne que todas as animações toquem ao mesmo tempo.
+                      // Elas ficarão estáticas, como ícones.
+                      animate: false,
+                      width: 60,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    transport.label,
+                    style: TextStyle(
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {

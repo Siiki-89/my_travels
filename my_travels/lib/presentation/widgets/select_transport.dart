@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:provider/provider.dart';
 
+// Importe seu provider
+
 class SelectTransport extends StatelessWidget {
-  const SelectTransport({super.key});
+  const SelectTransport({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,53 +14,51 @@ class SelectTransport extends StatelessWidget {
       builder: (context, provider, _) {
         provider.loadAvailableVehicles(context);
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: provider.availableTransport.map((vehicle) {
-              final bool isSelected = provider.isSelectedVehicle(vehicle);
+        return Container(
+          // Ajustamos a altura para se adequar ao novo tamanho dos círculos
+          height: 100,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: provider.availableTransport.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final transport = provider.availableTransport[index];
+              final bool isSelected = provider.isSelectedVehicle(transport);
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: GestureDetector(
-                  onTap: () => provider.selectVehicle(vehicle),
-                  child: Column(
-                    children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          AnimatedContainer(
-                            width: 60,
-                            height: 60,
-                            duration: const Duration(milliseconds: 200),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.black
-                                    : Colors.white10,
-                                width: isSelected ? 1.5 : 1.0,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 40,
-                            height: 40,
-                            child: CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              child: Image.asset(
-                                vehicle.image,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ],
+              return GestureDetector(
+                onTap: () => provider.selectVehicle(transport),
+
+                // 2. O TEXTO FOI REMOVIDO
+                // O Lottie agora é o filho direto, com um padding para respirar
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Lottie.asset(
+                        transport.lottieAsset,
+                        key: ValueKey(
+                          isSelected,
+                        ), // 1. A chave muda com a seleção
+                        animate: isSelected,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      transport.label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? Colors.blue : Colors.transparent,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               );
-            }).toList(),
+            },
           ),
         );
       },
