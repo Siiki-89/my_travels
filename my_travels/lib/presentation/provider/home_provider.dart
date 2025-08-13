@@ -8,6 +8,14 @@ class HomeProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _onPressed = false;
+  bool get onPressed => _onPressed;
+
+  void changeOnPressed() {
+    _onPressed = !_onPressed;
+    notifyListeners();
+  }
+
   List<Travel> _travels = [];
   List<Travel> get travels => _searchVisible ? _filterTravels : _travels;
 

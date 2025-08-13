@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:provider/provider.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -51,17 +52,41 @@ class HomePage extends StatelessWidget {
       ),
 
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/addTravel');
-        },
 
-        backgroundColor: Colors.blue,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: const Icon(Icons.add, color: Colors.white, size: 20),
-      ),
       body: SafeArea(
-        child: _buildList(provider: provider, travels: travels),
+        child: Stack(
+          children: [
+            _buildList(provider: provider, travels: travels),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: _buildButton(provider, context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  InkWell _buildButton(HomeProvider provider, BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        if (provider.onPressed) return;
+
+        provider.changeOnPressed();
+        await Future.delayed(const Duration(milliseconds: 1200));
+
+        Navigator.pushNamed(context, '/addTravel');
+
+        await Future.delayed(const Duration(milliseconds: 200));
+        provider.changeOnPressed();
+      },
+      child: Lottie.asset(
+        'assets/images/lottie/buttons/add_button.json',
+        key: ValueKey(provider.onPressed),
+        animate: provider.onPressed,
+        width: 70,
+        height: 70,
       ),
     );
   }
