@@ -1,152 +1,200 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:my_travels/presentation/widgets/traveler_create_dialog.dart';
-import 'package:my_travels/presentation/widgets/traveler_form_input.dart';
-import 'package:my_travels/presentation/widgets/traveler_list_item.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 
 class TravelersPage extends StatelessWidget {
+  const TravelersPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final travelerProvider = context.watch<TravelerProvider>();
     final appLocalizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(appLocalizations.users),
-        centerTitle: true,
-        actions: [
-          _buildAppBarAction(
-            context,
-            option: 'delete',
-            activeIcon: Icons.cancel,
-            inactiveIcon: Icons.delete,
-          ),
-          _buildAppBarAction(
-            context,
-            option: 'edit',
-            activeIcon: Icons.cancel,
-            inactiveIcon: Icons.mode_edit_outline_outlined,
-          ),
-          _buildAppBarAction(
-            context,
-            option: 'add',
-            activeIcon: Icons.cancel,
-            inactiveIcon: Icons.add_circle_outline,
-          ),
-        ],
-      ),
-      body: Padding(
+      appBar: AppBar(title: Text(appLocalizations.users), centerTitle: true),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return CreateAddTrevelerDialog();
-                  },
-                );
-              },
-              child: Text(appLocalizations.addTraveler),
-            ),
-            if (travelerProvider.optionNow == 'add' ||
-                travelerProvider.editingId != null)
-              const TravelerFormInput(),
+        child: travelerProvider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : travelerProvider.travelers.isEmpty
+            ? _buildEmptyState(context, appLocalizations)
+            : _buildTravelerList(travelerProvider, appLocalizations, context),
+      ),
+      floatingActionButton: _buildLottieButton(travelerProvider, context),
+    );
+  }
 
-            if (travelerProvider.errorMessage != null &&
-                travelerProvider.errorMessage!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  travelerProvider.errorMessage!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+  Widget _buildTravelerList(
+    TravelerProvider travelerProvider,
+    AppLocalizations appLocalizations,
+    BuildContext context,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 8),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: travelerProvider.travelers.length,
+            separatorBuilder: (context, index) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final traveler = travelerProvider.travelers[index];
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
                 ),
-              ),
-            Expanded(
-              child: travelerProvider.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : travelerProvider.travelers.isEmpty
-                  ? Center(child: Text(appLocalizations.noTravelersRegistered))
-                  : ListView.builder(
-                      itemCount: travelerProvider.travelers.length,
-                      itemBuilder: (context, index) {
-                        final traveler = travelerProvider.travelers[index];
-                        return TravelerListItem(traveler: traveler);
+                leading: CircleAvatar(
+                  radius: 30,
+                  backgroundImage:
+                      traveler.photoPath != null &&
+                          traveler.photoPath!.isNotEmpty
+                      ? FileImage(File(traveler.photoPath!))
+                      : null,
+                  child:
+                      traveler.photoPath == null || traveler.photoPath!.isEmpty
+                      ? const Icon(Icons.person, size: 34)
+                      : null,
+                ),
+                title: Text(
+                  traveler.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('${appLocalizations.ageHint}: ${traveler.age}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        context.read<TravelerProvider>().prepareForEdit(
+                          traveler,
+                        );
+                        showSmoothDialog(
+                          context,
+                          const CreateAddTravelerDialog(),
+                        );
                       },
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: Text(
+                                appLocalizations.confirmDeletion,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: Text(
+                                '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: Text(appLocalizations.cancel),
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                  child: Text(appLocalizations.delete),
+                                  onPressed: () async {
+                                    await context
+                                        .read<TravelerProvider>()
+                                        .deleteTraveler(traveler.id, context);
+
+                                    if (!dialogContext.mounted) return;
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(
+    BuildContext context,
+    AppLocalizations appLocalizations,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset(
+              'assets/images/lottie/general/man_with_map.json',
+              width: 200,
+              height: 200,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              appLocalizations.noTravelersTitle,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              appLocalizations.noTravelersSubtitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 56),
+            Text(
+              appLocalizations.travelerManagementHint,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
       ),
-      floatingActionButton:
-          (travelerProvider.optionNow == 'add' ||
-              travelerProvider.editingId != null)
-          ? FloatingActionButton(
-              backgroundColor: const Color(0xFF176FF2),
-              child: Icon(
-                travelerProvider.editingId != null ? Icons.save : Icons.add,
-                color: Colors.white,
-              ),
-              onPressed: () async {
-                final name = TravelerFormInput.nameController.text;
-                final age = TravelerFormInput.ageController.text;
-
-                travelerProvider.setName(name);
-                travelerProvider.setAge(age);
-
-                if (travelerProvider.editingId != null) {
-                  final updatedTraveler = Traveler(
-                    id: travelerProvider.editingId,
-                    name: travelerProvider.name,
-                    age: travelerProvider.age,
-                    photoPath: travelerProvider.selectedImage?.path,
-                  );
-                  await travelerProvider.editTraveler(updatedTraveler);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(appLocalizations.travelerUpdatedSuccess),
-                    ),
-                  );
-                } else {
-                  await travelerProvider.addTraveler();
-                  if (travelerProvider.errorMessage != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(travelerProvider.errorMessage!)),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(appLocalizations.travelerAddedSuccess),
-                      ),
-                    );
-                  }
-                }
-              },
-            )
-          : null,
     );
   }
 
-  Widget _buildAppBarAction(
-    BuildContext context, {
-    required String option,
-    required IconData activeIcon,
-    required IconData inactiveIcon,
-  }) {
-    final travelerProvider = context.read<TravelerProvider>();
-    final bool isActive = travelerProvider.optionNow == option;
+  InkWell _buildLottieButton(TravelerProvider provider, BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        if (provider.onPressed) return;
 
-    return IconButton(
-      onPressed: () {
-        travelerProvider.changeOptionNow(option);
-        travelerProvider.setEditingId(null);
+        provider.changeOnPressed();
+        await Future.delayed(const Duration(milliseconds: 1200));
+
+        showSmoothDialog(context, const CreateAddTravelerDialog());
+
+        await Future.delayed(const Duration(milliseconds: 200));
+        provider.changeOnPressed();
       },
-      icon: Icon(isActive ? activeIcon : inactiveIcon),
+      child: Lottie.asset(
+        'assets/images/lottie/buttons/add_button.json',
+        key: ValueKey(provider.onPressed),
+        animate: provider.onPressed,
+        width: 70,
+        height: 70,
+      ),
     );
   }
 }

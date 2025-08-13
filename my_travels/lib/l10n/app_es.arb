@@ -60,5 +60,12 @@
   "experienceCulture": "Cultural",
   "experienceShow": "Espectáculo",
   "travelerToTravelTitle" : "Elige viajeros",
-  "mapAppBarTitle" : "Ruta"
+  "mapAppBarTitle" : "Ruta",
+  "noTravelersTitle" : "Tu catálogo del viajero",
+  "noTravelersSubtitle" : "Añade amigos y familiares aquí...",
+  "travelerManagementHint" : "Gestiona viajeros aquí. Puedes añadir fácilmente a tus futuros viajes a las personas guardadas.",
+  "confirmDeletion": "Confirmar Eliminación",
+  "areYouSureYouWantToDelete": "¿Estás seguro de que deseas eliminar?",
+  "cancel": "Cancelar",
+  "delete": "Eliminar"
 }

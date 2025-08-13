@@ -6,9 +6,16 @@ import 'package:my_travels/l10n/app_localizations.dart';
 
 class TravelerProvider with ChangeNotifier {
   final TravelerRepository _repository = TravelerRepository();
-  final TextEditingController titleController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
+
+  bool _onPressed = false;
+  bool get onPressed => _onPressed;
+
+  void changeOnPressed() {
+    _onPressed = !_onPressed;
+    notifyListeners();
+  }
 
   String _name = '';
   int? _age;
@@ -98,28 +105,30 @@ class TravelerProvider with ChangeNotifier {
     final t = context != null ? AppLocalizations.of(context) : null;
     _errorMessage = null;
 
-    if (_name.trim().isEmpty) {
+    // Lendo diretamente dos controllers
+    final name = nameController.text;
+    final age = int.tryParse(ageController.text);
+
+    if (name.trim().isEmpty) {
       _errorMessage = t?.nameRequiredError;
       notifyListeners();
       return;
     }
-    if (_age == null || _age! <= 0) {
+    if (age == null || age <= 0) {
       _errorMessage = t?.ageRequiredError;
       notifyListeners();
       return;
     }
 
     final newTraveler = Traveler(
-      name: _name,
-      age: _age,
+      name: name,
+      age: age,
       photoPath: _selectedImage?.path,
     );
 
     try {
       await _repository.insertTraveler(newTraveler);
-      debugPrint('Viajante salvo: ${newTraveler.name}');
       resetFields();
-      setOptionNow('');
       await loadTravelers(context);
     } catch (e) {
       _errorMessage = '${t?.errorAddingTraveler} $e';
@@ -146,45 +155,42 @@ class TravelerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> editTraveler(Traveler traveler, [BuildContext? context]) async {
+  Future<void> editTraveler([BuildContext? context]) async {
     final t = context != null ? AppLocalizations.of(context) : null;
-    _errorMessage = null;
+    if (_editingId == null) return;
 
-    if (traveler.id == null ||
-        traveler.name.trim().isEmpty ||
-        traveler.age == null ||
-        traveler.age! <= 0) {
-      _errorMessage = t?.errorUpdatingTraveler;
-      notifyListeners();
-      return;
-    }
+    // Lendo diretamente dos controllers
+    final name = nameController.text;
+    final age = int.tryParse(ageController.text);
+
+    final updatedTraveler = Traveler(
+      id: _editingId, // Usar o ID que está sendo editado
+      name: name,
+      age: age,
+      photoPath: _selectedImage?.path,
+    );
 
     try {
-      await _repository.updateTraveler(traveler);
-      debugPrint('Viajante atualizado: ${traveler.name}');
+      await _repository.updateTraveler(updatedTraveler);
       resetFields();
-      setOptionNow('');
       await loadTravelers(context);
     } catch (e) {
       _errorMessage = '${t?.errorUpdatingTraveler} $e';
-    } finally {
-      notifyListeners();
     }
   }
 
   void resetFields() {
-    _name = '';
-    _age = null;
+    nameController.clear();
+    ageController.clear();
     _selectedImage = null;
     _errorMessage = null;
     _editingId = null;
-    titleController.clear();
     notifyListeners();
   }
 
   void prepareForEdit(Traveler traveler) {
-    _name = traveler.name;
-    _age = traveler.age;
+    nameController.text = traveler.name;
+    ageController.text = traveler.age.toString();
     _selectedImage = traveler.photoPath != null
         ? File(traveler.photoPath!)
         : null;

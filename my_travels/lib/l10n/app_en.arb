@@ -61,6 +61,13 @@
   "experienceCulture": "Cultural",
   "experienceShow": "Show",
   "travelerToTravelTitle" : "Choose travels",
-  "mapAppBarTitle" : "Route"
+  "mapAppBarTitle" : "Route",
+  "noTravelersTitle" : "Your Traveler's Catalog",
+  "noTravelersSubtitle" : "Add friends and family here...",
+  "travelerManagementHint" : "Manage travelers here. Saved people can be easily added to your future trips.",
+  "confirmDeletion": "Confirm Deletion",
+  "areYouSureYouWantToDelete": "Are you sure you want to delete",
+  "cancel": "Cancel",
+  "delete": "Delete"
 
 }

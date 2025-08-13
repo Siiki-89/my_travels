@@ -171,4 +171,25 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get mapAppBarTitle => 'Percurso';
+
+  @override
+  String get noTravelersTitle => 'Seu Catálogo de Viajantes';
+
+  @override
+  String get noTravelersSubtitle => 'Adicione amigos e familiares aqui...';
+
+  @override
+  String get travelerManagementHint => 'Faça o gerenciamento dos viajantes aqui. As pessoas salvas podem ser facilmente adicionadas às suas viagens futuras.';
+
+  @override
+  String get confirmDeletion => 'Confirmar Exclusão';
+
+  @override
+  String get areYouSureYouWantToDelete => 'Tem certeza que deseja excluir';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get delete => 'Deletar';
 }

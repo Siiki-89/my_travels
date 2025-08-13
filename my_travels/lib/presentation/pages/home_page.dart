@@ -50,20 +50,12 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: _buildButton(provider, context),
 
       backgroundColor: Colors.white,
 
       body: SafeArea(
-        child: Stack(
-          children: [
-            _buildList(provider: provider, travels: travels),
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: _buildButton(provider, context),
-            ),
-          ],
-        ),
+        child: _buildList(provider: provider, travels: travels),
       ),
     );
   }

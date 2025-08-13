@@ -171,4 +171,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapAppBarTitle => 'Route';
+
+  @override
+  String get noTravelersTitle => 'Your Traveler\'s Catalog';
+
+  @override
+  String get noTravelersSubtitle => 'Add friends and family here...';
+
+  @override
+  String get travelerManagementHint => 'Manage travelers here. Saved people can be easily added to your future trips.';
+
+  @override
+  String get confirmDeletion => 'Confirm Deletion';
+
+  @override
+  String get areYouSureYouWantToDelete => 'Are you sure you want to delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get delete => 'Delete';
 }

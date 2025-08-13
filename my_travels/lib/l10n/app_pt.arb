@@ -60,5 +60,12 @@
   "experienceCulture" : "Cultural",
   "experienceShow" : "Show",
   "travelerToTravelTitle" : "Escolha os viajantes",
-  "mapAppBarTitle" : "Percurso"
+  "mapAppBarTitle" : "Percurso",
+  "noTravelersTitle" : "Seu Catálogo de Viajantes",
+  "noTravelersSubtitle" : "Adicione amigos e familiares aqui...",
+  "travelerManagementHint" : "Faça o gerenciamento dos viajantes aqui. As pessoas salvas podem ser facilmente adicionadas às suas viagens futuras.",
+  "confirmDeletion": "Confirmar Exclusão",
+  "areYouSureYouWantToDelete": "Tem certeza que deseja excluir",
+  "cancel": "Cancelar",
+  "delete": "Deletar"
 }

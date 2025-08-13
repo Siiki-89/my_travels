@@ -6,11 +6,13 @@ import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 import 'package:my_travels/presentation/widgets/place_search_field.dart';
 import 'package:my_travels/presentation/widgets/select_experience_dialog.dart';
 import 'package:my_travels/presentation/widgets/select_transport.dart';
 import 'package:my_travels/presentation/widgets/select_traveler_dialog.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,17 +50,13 @@ class CreateTravelPage extends StatelessWidget {
                         children: [
                           //Titulo da viagem
                           const SizedBox(height: 16),
-                          TextFormField(
-                            controller: travelerProvider.titleController,
+                          CustomTextFormField(
+                            labelText: loc.travelAddTitle,
+                            controller: providerTravel.titleController,
                             validator: (title) => title!.length < 3
                                 ? 'pelo menos 3 caracteres'
                                 : null,
-                            decoration: InputDecoration(
-                              labelText: loc.travelAddTitle,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
+                            isWhite: true,
                           ),
                           const SizedBox(height: 16),
                           Text(loc.travelAddStartJourneyDateText),
@@ -102,12 +100,9 @@ class CreateTravelPage extends StatelessWidget {
                                   context
                                       .read<TravelerProvider>()
                                       .loadTravelers(context);
-
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext dialogContext) {
-                                      return const CreateSelectTravelerDialog();
-                                    },
+                                  showSmoothDialog(
+                                    context,
+                                    CreateSelectTravelerDialog(),
                                   );
                                 },
                                 icon: const Icon(Icons.add, color: Colors.blue),
@@ -148,12 +143,9 @@ class CreateTravelPage extends StatelessWidget {
                                   context
                                       .read<TravelProvider>()
                                       .loadAvailableExperiences(context);
-
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext dialogContext) {
-                                      return CreateTravelDialog();
-                                    },
+                                  showSmoothDialog(
+                                    context,
+                                    CreateTravelDialog(),
                                   );
                                 },
                                 icon: const Icon(Icons.add, color: Colors.blue),

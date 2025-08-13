@@ -420,6 +420,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Route'**
   String get mapAppBarTitle;
+
+  /// No description provided for @noTravelersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Traveler\'s Catalog'**
+  String get noTravelersTitle;
+
+  /// No description provided for @noTravelersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add friends and family here...'**
+  String get noTravelersSubtitle;
+
+  /// No description provided for @travelerManagementHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage travelers here. Saved people can be easily added to your future trips.'**
+  String get travelerManagementHint;
+
+  /// No description provided for @confirmDeletion.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Deletion'**
+  String get confirmDeletion;
+
+  /// No description provided for @areYouSureYouWantToDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get areYouSureYouWantToDelete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

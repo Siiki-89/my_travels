@@ -13,6 +13,7 @@ import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
+import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 
 class TravelProvider with ChangeNotifier {
@@ -169,6 +170,8 @@ class TravelProvider with ChangeNotifier {
   int? get editingIndex => _editingIndex;
 
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+
   DateTime? _tempArrivalDate;
   DateTime? _tempDepartureDate;
 
@@ -339,7 +342,7 @@ class TravelProvider with ChangeNotifier {
 
     // 4. MONTANDO O OBJETO DA VIAGEM PARA ENVIAR AO BANCO
     final travelToSave = entity.Travel(
-      title: travelerProvider.titleController.text,
+      title: titleController.text,
       startDate: _startData,
       endDate: _finalData,
       vehicle: _transportSelect.label,
@@ -370,6 +373,7 @@ class TravelProvider with ChangeNotifier {
     // 5. CHAMANDO O REPOSITÓRIO PARA SALVAR NO BANCO DE DADOS
     try {
       await _travelRepository.insertTravel(travelToSave);
+      resetTravelForm(travelerProvider);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -378,12 +382,36 @@ class TravelProvider with ChangeNotifier {
           behavior: SnackBarBehavior.floating,
         ),
       );
+
       // Opcional: navegar para outra tela após salvar
       // Navigator.of(context).pop();
     } catch (e) {
       _showErrorSnackBar(context, 'Ocorreu um erro ao salvar a viagem.');
       print("Erro no Provider ao chamar o repositório: $e");
     }
+  }
+
+  void resetTravelForm(TravelerProvider travelerProvider) {
+    travelerProvider.selectedTravelers.clear();
+    titleController.clear();
+    _coverImage = null;
+    _startData = DateTime.now();
+    _finalData = DateTime.now();
+    _selectedExperiences.clear();
+    _transportSelect = TransportModel(label: '', lottieAsset: '');
+    _destinations.clear();
+    _destinations.add(DestinationModel(id: 0)); // Começa com um destino vazio
+    _nextId = 1;
+
+    descriptionController.clear();
+    // Limpa validações
+    validateImage = false;
+    validateVehicle = false;
+    validadeTravelers = false;
+    validadeRoute = false;
+
+    // Notifica os ouvintes para limpar a UI
+    notifyListeners();
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
