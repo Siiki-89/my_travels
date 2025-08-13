@@ -81,7 +81,8 @@ flutter:
     - .env
     - assets/images/experience/
     - assets/images/typelocomotion/
-    - assets/images/lottie/
+    - assets/images/lottie/navigation/
+    - assets/images/lottie/typelocomotion/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

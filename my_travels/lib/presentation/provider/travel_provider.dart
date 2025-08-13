@@ -134,7 +134,7 @@ class TravelProvider with ChangeNotifier {
     _availableTransport.clear();
 
     // Supondo que seus arquivos Lottie estejam nesta pasta
-    const String lottiePath = 'assets/images/lottie/';
+    const String lottiePath = 'assets/images/lottie/typelocomotion/';
 
     _availableTransport.addAll([
       TransportModel(
