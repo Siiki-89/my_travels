@@ -192,4 +192,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get delete => 'Delete';
+
+  @override
+  String get noTravelsTitle => 'No trips recorded';
+
+  @override
+  String get noTravelsSubtitle => 'Start by adding a destination and build your travel catalog.';
+
+  @override
+  String get travelManagementHint => 'Manage all your trips here. They will be saved and can be viewed or edited anytime.';
 }

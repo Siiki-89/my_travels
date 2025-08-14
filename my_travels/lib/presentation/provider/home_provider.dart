@@ -11,40 +11,16 @@ class HomeProvider with ChangeNotifier {
   bool _onPressed = false;
   bool get onPressed => _onPressed;
 
-  void changeOnPressed() {
-    _onPressed = !_onPressed;
-    notifyListeners();
-  }
+  // --- LÓGICA DE DADOS SIMPLIFICADA ---
 
-  List<Travel> _travels = [];
-  List<Travel> get travels => _searchVisible ? _filterTravels : _travels;
+  // Lista que guarda uma cópia mestre de TODAS as viagens
+  List<Travel> _allTravels = [];
 
-  List<Travel> _filterTravels = [];
-  List<Travel> get filterTravels => _filterTravels;
+  // Lista que será efetivamente exibida na tela (pode ser a completa ou a filtrada)
+  List<Travel> _filteredTravels = [];
 
-  bool _searchVisible = false;
-  bool get searchVisible => _searchVisible;
-
-  void initSearch() {
-    _searchVisible = true;
-    _filterTravels = _travels;
-    notifyListeners();
-  }
-
-  void search(String input) {
-    _filterTravels = _travels
-        .where(
-          (travel) => travel.title.toLowerCase().contains(input.toLowerCase()),
-        )
-        .toList();
-    notifyListeners();
-  }
-
-  void cancelSearch() {
-    _searchVisible = false;
-    _filterTravels = [];
-    notifyListeners();
-  }
+  // A UI sempre vai ler desta lista.
+  List<Travel> get travels => _filteredTravels;
 
   HomeProvider() {
     fetchTravels();
@@ -55,13 +31,40 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      _travels = await _travelRepository.getTravels();
-      debugPrint('Viagens carregadas: ${_travels.length}');
+      _allTravels = await _travelRepository.getTravels();
+      // Ao carregar, a lista a ser exibida é a lista completa.
+      _filteredTravels = _allTravels;
+      debugPrint('Viagens carregadas: ${_allTravels.length}');
     } catch (e) {
       print("Erro ao buscar viagens: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // --- LÓGICA DE BUSCA CORRIGIDA E SIMPLIFICADA ---
+  void search(String input) {
+    if (input.isEmpty) {
+      // Se o campo de busca estiver vazio, mostramos todas as viagens.
+      _filteredTravels = _allTravels;
+    } else {
+      // Caso contrário, filtramos a lista MESTRE (`_allTravels`)
+      // e atualizamos a lista que a tela está vendo (`_filteredTravels`).
+      _filteredTravels = _allTravels
+          .where(
+            (travel) =>
+                travel.title.toLowerCase().contains(input.toLowerCase()),
+          )
+          .toList();
+    }
+    // Notifica a UI para se redesenhar com a lista atualizada.
+    notifyListeners();
+  }
+
+  // Ação do botão animado (mantida)
+  void changeOnPressed() {
+    _onPressed = !_onPressed;
+    notifyListeners();
   }
 }

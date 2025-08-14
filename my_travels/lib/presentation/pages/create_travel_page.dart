@@ -365,17 +365,7 @@ class CreateTravelPage extends StatelessWidget {
             : BoxDecoration(color: Colors.transparent),
         child: providerTravel.coverImage == null
             ? Center(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: Icon(
-                    Icons.add_a_photo,
-                    key: ValueKey(providerTravel.validateImage),
-                    size: 48,
-                    color: providerTravel.validateImage
-                        ? Colors.red
-                        : Colors.black,
-                  ),
-                ),
+                child: Lottie.asset('assets/images/lottie/general/camera.json'),
               )
             : null,
       ),
@@ -407,66 +397,11 @@ class CreateTravelPage extends StatelessWidget {
         ),
       ],
     );
+
+    if (croppedFile == null) {
+      return;
+    }
     provider.setImage(File(croppedFile?.path ?? ''));
-  }
-
-  // Coloque este novo método na sua classe de Widget (Page)
-  Widget _buildVehicleSelector(TravelProvider provider) {
-    return Container(
-      height: 100, // Altura fixa para a área de seleção
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: provider.availableTransport.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final transport = provider.availableTransport[index];
-          final bool isSelected = provider.isSelectedVehicle(transport);
-
-          return GestureDetector(
-            onTap: () => provider.selectVehicle(transport),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Colors.blue.withOpacity(0.1)
-                    : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  // Destaque visual para o item selecionado
-                  color: isSelected ? Colors.blue : Colors.transparent,
-                  width: 2,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Lottie.asset(
-                      transport.lottieAsset,
-                      // 'animate: false' previne que todas as animações toquem ao mesmo tempo.
-                      // Elas ficarão estáticas, como ícones.
-                      animate: false,
-                      width: 60,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    transport.label,
-                    style: TextStyle(
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {

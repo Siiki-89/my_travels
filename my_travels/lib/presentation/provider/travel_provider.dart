@@ -7,7 +7,7 @@ import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/data/entities/travel_entity.dart' as entity;
 import 'package:my_travels/data/entities/stop_point_entity.dart' as entity;
 import 'package:my_travels/data/entities/traveler_entity.dart' as entity;
-
+import 'package:provider/provider.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
@@ -374,7 +374,7 @@ class TravelProvider with ChangeNotifier {
     try {
       await _travelRepository.insertTravel(travelToSave);
       resetTravelForm(travelerProvider);
-
+      await context.read<HomeProvider>().fetchTravels();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Viagem salva com sucesso no seu dispositivo!'),
@@ -402,6 +402,7 @@ class TravelProvider with ChangeNotifier {
     _destinations.clear();
     _destinations.add(DestinationModel(id: 0)); // Começa com um destino vazio
     _nextId = 1;
+    _editingIndex = 0;
 
     descriptionController.clear();
     // Limpa validações

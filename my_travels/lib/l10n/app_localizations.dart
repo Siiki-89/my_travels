@@ -462,6 +462,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  /// No description provided for @noTravelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips recorded'**
+  String get noTravelsTitle;
+
+  /// No description provided for @noTravelsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by adding a destination and build your travel catalog.'**
+  String get noTravelsSubtitle;
+
+  /// No description provided for @travelManagementHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage all your trips here. They will be saved and can be viewed or edited anytime.'**
+  String get travelManagementHint;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/presentation/widgets/build_empty_state.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:my_travels/presentation/widgets/traveler_create_dialog.dart';
 import 'package:provider/provider.dart';
@@ -18,12 +19,17 @@ class TravelersPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(appLocalizations.users), centerTitle: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(8.0),
+      body: SafeArea(
         child: travelerProvider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : travelerProvider.travelers.isEmpty
-            ? _buildEmptyState(context, appLocalizations)
+            ? buildEmptyState(
+                context,
+                'assets/images/lottie/general/man_with_map.json',
+                appLocalizations.noTravelersTitle,
+                appLocalizations.noTravelersSubtitle,
+                appLocalizations.travelerManagementHint,
+              )
             : _buildTravelerList(travelerProvider, appLocalizations, context),
       ),
       floatingActionButton: _buildLottieButton(travelerProvider, context),
@@ -48,6 +54,10 @@ class TravelersPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final traveler = travelerProvider.travelers[index];
               return ListTile(
+                onTap: () {
+                  context.read<TravelerProvider>().prepareForEdit(traveler);
+                  showSmoothDialog(context, const CreateAddTravelerDialog());
+                },
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 4,
@@ -72,18 +82,6 @@ class TravelersPage extends StatelessWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        context.read<TravelerProvider>().prepareForEdit(
-                          traveler,
-                        );
-                        showSmoothDialog(
-                          context,
-                          const CreateAddTravelerDialog(),
-                        );
-                      },
-                    ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
                       onPressed: () {
@@ -132,45 +130,6 @@ class TravelersPage extends StatelessWidget {
           ),
           const SizedBox(height: 80),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(
-    BuildContext context,
-    AppLocalizations appLocalizations,
-  ) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Lottie.asset(
-              'assets/images/lottie/general/man_with_map.json',
-              width: 200,
-              height: 200,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              appLocalizations.noTravelersTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              appLocalizations.noTravelersSubtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 56),
-            Text(
-              appLocalizations.travelerManagementHint,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
       ),
     );
   }

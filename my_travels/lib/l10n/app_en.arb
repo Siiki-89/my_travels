@@ -68,6 +68,9 @@
   "confirmDeletion": "Confirm Deletion",
   "areYouSureYouWantToDelete": "Are you sure you want to delete",
   "cancel": "Cancel",
-  "delete": "Delete"
+  "delete": "Delete",
+  "noTravelsTitle" : "No trips recorded",
+  "noTravelsSubtitle" : "Start by adding a destination and build your travel catalog.",
+  "travelManagementHint" : "Manage all your trips here. They will be saved and can be viewed or edited anytime."
 
 }

@@ -16,7 +16,7 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(appLocalizations.settings), centerTitle: true),
-      body: ListView(
+      body: Column(
         children: [
           SizedBox(height: 20),
           SwitchListTile(

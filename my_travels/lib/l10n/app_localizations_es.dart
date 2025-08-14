@@ -192,4 +192,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get delete => 'Eliminar';
+
+  @override
+  String get noTravelsTitle => 'No hay viajes registrados';
+
+  @override
+  String get noTravelsSubtitle => 'Comienza agregando un destino y crea tu catálogo de experiencias.';
+
+  @override
+  String get travelManagementHint => 'Administra todos tus viajes aquí. Quedarán guardados y podrás revisarlos o editarlos cuando quieras.';
 }

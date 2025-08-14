@@ -67,5 +67,8 @@
   "confirmDeletion": "Confirmar Eliminación",
   "areYouSureYouWantToDelete": "¿Estás seguro de que deseas eliminar?",
   "cancel": "Cancelar",
-  "delete": "Eliminar"
+  "delete": "Eliminar",
+  "noTravelsTitle" : "No hay viajes registrados",
+  "noTravelsSubtitle" : "Comienza agregando un destino y crea tu catálogo de experiencias.",
+  "travelManagementHint" : "Administra todos tus viajes aquí. Quedarán guardados y podrás revisarlos o editarlos cuando quieras."
 }
