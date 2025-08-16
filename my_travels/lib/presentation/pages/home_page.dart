@@ -20,16 +20,14 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        scrolledUnderElevation: 0.0, // <-- Adicione esta linha
+        scrolledUnderElevation: 0.0,
         title: const Text('Viagens'),
       ),
       floatingActionButton: _buildButton(provider, context),
-      // MUDANÇA PRINCIPAL: De Column para Stack
+
       body: SafeArea(
         child: Stack(
           children: [
-            // 1. A LISTA (CAMADA INFERIOR)
-            // A lista agora ocupa todo o espaço, começando do topo
             provider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : provider.travels.isEmpty
@@ -42,7 +40,6 @@ class HomePage extends StatelessWidget {
                   )
                 : _TravelsList(travels: provider.travels),
 
-            // 2. A BARRA DE PESQUISA FLUTUANTE (CAMADA SUPERIOR)
             if (provider.travels.isNotEmpty)
               Positioned(
                 top: 8.0,
@@ -58,8 +55,8 @@ class HomePage extends StatelessWidget {
 
   Widget _buildSearchBar(HomeProvider provider) {
     return Material(
-      elevation: 5.0, // Controla a intensidade da sombra
-      borderRadius: BorderRadius.circular(30.0), // Borda arredondada
+      elevation: 5.0,
+      borderRadius: BorderRadius.circular(30.0),
       child: TextField(
         onChanged: provider.search,
         decoration: InputDecoration(
@@ -69,7 +66,7 @@ class HomePage extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30.0),
-            borderSide: BorderSide.none, // Sem borda visível
+            borderSide: BorderSide.none,
           ),
         ),
       ),
@@ -97,7 +94,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// WIDGET ATUALIZADO com mais padding no topo
 class _TravelsList extends StatelessWidget {
   const _TravelsList({required this.travels});
   final List<Travel> travels;
@@ -105,7 +101,6 @@ class _TravelsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      // AUMENTANDO O PADDING SUPERIOR para a lista começar abaixo da busca
       padding: const EdgeInsets.fromLTRB(16.0, 80.0, 16.0, 16.0),
       itemCount: travels.length,
       separatorBuilder: (context, index) => const SizedBox(height: 0),
@@ -131,13 +126,10 @@ class _TravelCard extends StatelessWidget {
         ? travel.stopPoints.last.locationName.split(',').first
         : 'Destino';
 
-    // AQUI ESTÁ A CORREÇÃO
     return SizedBox(
-      height: 240, // Dando uma altura fixa para o card
+      height: 240,
       child: Card(
-        margin: const EdgeInsets.only(
-          bottom: 24.0,
-        ), // Espaçamento entre os cards
+        margin: const EdgeInsets.only(bottom: 24.0),
         elevation: 6,
         shadowColor: Colors.black.withOpacity(0.3),
         shape: RoundedRectangleBorder(
@@ -227,6 +219,11 @@ class _TravelCard extends StatelessWidget {
                           OutlinedButton(
                             onPressed: () {
                               print("Explorar: ${travel.title}");
+                              Navigator.pushNamed(
+                                context,
+                                '/infoTravel',
+                                arguments: travel,
+                              );
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.white,

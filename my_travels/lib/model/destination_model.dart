@@ -29,4 +29,5 @@ class DestinationModel {
       departureDate: departureDate ?? this.departureDate,
     );
   }
+  
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
+import 'package:my_travels/presentation/pages/info_travel_page.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
             '/settings': (_) => const SettingsPage(),
             '/addTravel': (_) => const CreateTravelPage(),
             '/mappage': (_) => const MapPage(),
+            '/infoTravel': (_) => const InfoTravelPage(),
           },
         );
       },
