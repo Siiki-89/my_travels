@@ -134,7 +134,6 @@ class TravelProvider with ChangeNotifier {
 
     _availableTransport.clear();
 
-    // Supondo que seus arquivos Lottie estejam nesta pasta
     const String lottiePath = 'assets/images/lottie/typelocomotion/';
 
     _availableTransport.addAll([
@@ -298,7 +297,6 @@ class TravelProvider with ChangeNotifier {
   bool validadeTravelers = false;
   bool validadeRoute = false;
 
-  // 3. MÉTODO SAVETRAVEL COMPLETAMENTE REFEITO E INTEGRADO
   Future<void> saveTravel(
     BuildContext context,
     TravelerProvider travelerProvider,
@@ -306,7 +304,6 @@ class TravelProvider with ChangeNotifier {
     final loc = AppLocalizations.of(context)!;
     concludeEditing();
 
-    // --- Bloco de Validações (mantido como estava) ---
     if (_coverImage == null) {
       _showErrorSnackBar(context, 'Por favor, selecione uma imagem de capa.');
       validateImage = true;
@@ -325,7 +322,6 @@ class TravelProvider with ChangeNotifier {
     validateVehicle = false;
     notifyListeners();
 
-    // ... continue com todas as suas outras validações ...
     if (_destinations.any((d) => d.location == null)) {
       _showErrorSnackBar(
         context,
@@ -338,9 +334,6 @@ class TravelProvider with ChangeNotifier {
     validadeRoute = false;
     notifyListeners();
 
-    // --- Se todas as validações passaram, continue para salvar ---
-
-    // 4. MONTANDO O OBJETO DA VIAGEM PARA ENVIAR AO BANCO
     final travelToSave = entity.Travel(
       title: titleController.text,
       startDate: _startData,
@@ -351,7 +344,7 @@ class TravelProvider with ChangeNotifier {
           .where((d) => d.location != null)
           .map(
             (destinationModel) => entity.StopPoint(
-              travelId: 0, // ID temporário, o banco vai gerar o correto
+              travelId: 0,
               stopOrder: _destinations.indexOf(destinationModel),
               locationName: destinationModel.location!.description,
               latitude: destinationModel.location!.lat,
@@ -370,7 +363,6 @@ class TravelProvider with ChangeNotifier {
           .toList(),
     );
 
-    // 5. CHAMANDO O REPOSITÓRIO PARA SALVAR NO BANCO DE DADOS
     try {
       await _travelRepository.insertTravel(travelToSave);
       resetTravelForm(travelerProvider);
@@ -382,9 +374,6 @@ class TravelProvider with ChangeNotifier {
           behavior: SnackBarBehavior.floating,
         ),
       );
-
-      // Opcional: navegar para outra tela após salvar
-      // Navigator.of(context).pop();
     } catch (e) {
       _showErrorSnackBar(context, 'Ocorreu um erro ao salvar a viagem.');
       print("Erro no Provider ao chamar o repositório: $e");
@@ -400,18 +389,17 @@ class TravelProvider with ChangeNotifier {
     _selectedExperiences.clear();
     _transportSelect = TransportModel(label: '', lottieAsset: '');
     _destinations.clear();
-    _destinations.add(DestinationModel(id: 0)); // Começa com um destino vazio
+    _destinations.add(DestinationModel(id: 0));
     _nextId = 1;
     _editingIndex = 0;
 
     descriptionController.clear();
-    // Limpa validações
+
     validateImage = false;
     validateVehicle = false;
     validadeTravelers = false;
     validadeRoute = false;
 
-    // Notifica os ouvintes para limpar a UI
     notifyListeners();
   }
 

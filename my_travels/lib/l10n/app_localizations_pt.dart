@@ -201,4 +201,22 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get travelManagementHint => 'Gerencie todas as suas viagens aqui. Elas ficarão salvas e poderão ser consultadas ou editadas sempre que precisar.';
+
+  @override
+  String get updateHint => 'Atualizar';
+
+  @override
+  String get enterName => 'Por favor, insira um nome.';
+
+  @override
+  String get enterValidNumber => 'Por favor, insira um número válido.';
+
+  @override
+  String get enterAge => 'Por favor, insira uma idade.';
+
+  @override
+  String get homeSearchHint => 'Buscar por título...';
+
+  @override
+  String get homeButtonExplore => 'Explorar';
 }

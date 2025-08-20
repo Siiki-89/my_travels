@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         scrolledUnderElevation: 0.0,
-        title: const Text('Viagens'),
+        title: Text(loc.appName),
       ),
       floatingActionButton: _buildButton(provider, context),
 
@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
                 top: 8.0,
                 left: 16.0,
                 right: 16.0,
-                child: _buildSearchBar(provider),
+                child: _buildSearchBar(provider, loc),
               ),
           ],
         ),
@@ -53,14 +53,14 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar(HomeProvider provider) {
+  Widget _buildSearchBar(HomeProvider provider, AppLocalizations loc) {
     return Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
       child: TextField(
         onChanged: provider.search,
         decoration: InputDecoration(
-          hintText: 'Buscar por título...',
+          hintText: loc.homeSearchHint,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
           filled: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
@@ -83,6 +83,7 @@ class HomePage extends StatelessWidget {
         await Future.delayed(const Duration(milliseconds: 200));
         provider.changeOnPressed();
       },
+      splashColor: Colors.transparent,
       child: Lottie.asset(
         'assets/images/lottie/buttons/add_button.json',
         key: ValueKey(provider.onPressed),
@@ -118,6 +119,7 @@ class _TravelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final startDestination = travel.stopPoints.isNotEmpty
         ? travel.stopPoints.first.locationName.split(',').first
@@ -218,7 +220,6 @@ class _TravelCard extends StatelessWidget {
                           ),
                           OutlinedButton(
                             onPressed: () {
-                              print("Explorar: ${travel.title}");
                               Navigator.pushNamed(
                                 context,
                                 '/infoTravel',
@@ -239,7 +240,7 @@ class _TravelCard extends StatelessWidget {
                                 vertical: 8,
                               ),
                             ),
-                            child: const Text('Explorar'),
+                            child: Text(loc.homeButtonExplore),
                           ),
                         ],
                       ),

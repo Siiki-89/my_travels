@@ -261,7 +261,6 @@ class CreateTravelPage extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        // Ícone de origem ou parada
                         Icon(
                           isStartPoint ? Icons.trip_origin : Icons.pin_drop,
                           color: isStartPoint ? Colors.blue : Colors.red,
@@ -269,7 +268,6 @@ class CreateTravelPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
 
-                        // Campo de busca expandido
                         Expanded(
                           child: PlaceSearchField(
                             destination: destination,
@@ -280,7 +278,6 @@ class CreateTravelPage extends StatelessWidget {
                           ),
                         ),
 
-                        // Botão de deletar (mostrado sempre)
                         IconButton(
                           onPressed: () {
                             providerTravel.removeDestinationById(

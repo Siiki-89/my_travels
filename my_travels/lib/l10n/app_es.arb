@@ -70,5 +70,11 @@
   "delete": "Eliminar",
   "noTravelsTitle" : "No hay viajes registrados",
   "noTravelsSubtitle" : "Comienza agregando un destino y crea tu catálogo de experiencias.",
-  "travelManagementHint" : "Administra todos tus viajes aquí. Quedarán guardados y podrás revisarlos o editarlos cuando quieras."
+  "travelManagementHint" : "Administra todos tus viajes aquí. Quedarán guardados y podrás revisarlos o editarlos cuando quieras.",
+  "updateHint" : "actualizar",
+  "enterName": "Por favor, ingrese un nombre.",
+  "enterValidNumber": "Por favor, ingrese un número válido.",
+  "enterAge": "Por favor, ingrese una edad.",
+  "homeSearchHint" : "buscar por título...",
+  "homeButtonExplore" : "Explorar"
 }

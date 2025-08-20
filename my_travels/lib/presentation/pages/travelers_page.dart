@@ -147,6 +147,7 @@ class TravelersPage extends StatelessWidget {
         await Future.delayed(const Duration(milliseconds: 200));
         provider.changeOnPressed();
       },
+      splashColor: Colors.transparent,
       child: Lottie.asset(
         'assets/images/lottie/buttons/add_button.json',
         key: ValueKey(provider.onPressed),
