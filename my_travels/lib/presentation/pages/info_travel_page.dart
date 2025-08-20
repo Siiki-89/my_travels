@@ -1,19 +1,49 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 // Importe suas classes de entidade aqui
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
-import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:lottie/lottie.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/pages/map_page.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/services/google_maps_service.dart';
+import 'package:my_travels/utils/map_utils.dart';
+import 'package:provider/provider.dart';
 
 class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({Key? key}) : super(key: key);
 
+  Future<void> _dummyFuture() async => Future.value();
+
   @override
   Widget build(BuildContext context) {
-    // Agora `travel` é do tipo Travel, com a lista de travelers.
-    final travel = ModalRoute.of(context)?.settings.arguments as Travel;
+    final travel = ModalRoute.of(context)!.settings.arguments as Travel;
+    final mapProvider = Provider.of<MapProvider>(context, listen: false);
+
+    // Adia a atualização do provider para depois do build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mapProvider.stops.every((s) => s == null)) {
+        for (int i = 0; i < travel.stopPoints.length; i++) {
+          final stop = travel.stopPoints[i];
+          if (stop.latitude != null && stop.longitude != null) {
+            mapProvider.setStop(
+              i,
+              LocationMapModel(
+                locationId: stop.id?.toString() ?? stop.locationName,
+                description: stop.locationName,
+                lat: stop.latitude!,
+                long: stop.longitude!,
+              ),
+            );
+          }
+        }
+      }
+    });
+    final Completer<gmaps.GoogleMapController> _controller = Completer();
     return Scaffold(
       appBar: AppBar(title: Text('Detalhes da Viagem')),
       body: SingleChildScrollView(
@@ -147,6 +177,87 @@ class InfoTravelPage extends StatelessWidget {
                   Text(
                     'Trajeto da viagem',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Mini preview do mapa
+                  // Dentro do seu SizedBox de mapa
+                  // MINI PREVIEW DO MAPA
+                  SizedBox(
+                    height: 200,
+                    child: FutureBuilder<void>(
+                      future: _dummyFuture(),
+                      builder: (context, snapshot) {
+                        return Consumer<MapProvider>(
+                          builder: (context, mapProvider, _) {
+                            final stops = mapProvider.stops
+                                .whereType<LocationMapModel>()
+                                .toList();
+                            if (stops.isEmpty) {
+                              return const Center(
+                                child: Text('Não há trajeto para mostrar'),
+                              );
+                            }
+
+                            // Calcula bounds automaticamente
+                            final bounds = calculateBounds(stops);
+
+                            return gmaps.GoogleMap(
+                              initialCameraPosition: gmaps.CameraPosition(
+                                target: gmaps.LatLng(
+                                  stops.first.lat,
+                                  stops.first.long,
+                                ),
+                                zoom: 10,
+                              ),
+                              markers: stops
+                                  .map(
+                                    (s) => gmaps.Marker(
+                                      markerId: gmaps.MarkerId(s.locationId),
+                                      position: gmaps.LatLng(s.lat, s.long),
+                                    ),
+                                  )
+                                  .toSet(),
+                              polylines: {
+                                gmaps.Polyline(
+                                  polylineId: const gmaps.PolylineId(
+                                    'preview_route',
+                                  ),
+                                  color: Colors.red,
+                                  width: 3,
+                                  points: mapProvider.polylinePoints,
+                                ),
+                              },
+                              onMapCreated: (controller) {
+                                // Centraliza todos os markers após criar o mapa
+                                controller.animateCamera(
+                                  gmaps.CameraUpdate.newLatLngBounds(
+                                    bounds,
+                                    50,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Botão para abrir mapa completo
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MapPage()),
+                        );
+                      },
+                      icon: const Icon(Icons.map),
+                      label: const Text("Ver mapa completo"),
+                    ),
                   ),
                 ],
               ),

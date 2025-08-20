@@ -1,76 +1,77 @@
 import 'dart:async';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/model/location_map_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/presentation/widgets/place_search_field.dart';
-import 'package:my_travels/services/geolocator_service.dart';
+import 'package:my_travels/utils/map_utils.dart'; // <- utilitário
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
 
-  Future<LocationService> _getLocation() async {
-    final location = LocationService();
-    await location.getDeviceLocation();
-    return location;
-  }
-
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final Completer<GoogleMapController> _controller = Completer();
+    final Completer<gmaps.GoogleMapController> _controller = Completer();
 
     return Scaffold(
       appBar: AppBar(title: Text(loc.mapAppBarTitle), centerTitle: true),
-      body: Stack(
-        children: [
-          FutureBuilder<LocationService>(
-            future: _getLocation(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      body: Consumer<MapProvider>(
+        builder: (context, mapProvider, _) {
+          final stopsWithLocation = mapProvider.stops
+              .whereType<LocationMapModel>()
+              .toList();
 
-              final location = snapshot.data!;
-              final CameraPosition _initialPosition = CameraPosition(
-                target: LatLng(location.latitude, location.longitude),
-                zoom: 14,
-              );
+          if (stopsWithLocation.isEmpty) {
+            return const Center(child: Text('Não há trajeto para mostrar'));
+          }
 
-              return Consumer<MapProvider>(
-                builder: (context, mapProvider, _) {
-                  final markers = mapProvider.stops
-                      .where((stop) => stop != null)
-                      .map(
-                        (stop) => Marker(
-                          markerId: MarkerId(stop!.locationId),
-                          position: LatLng(stop.lat, stop.long),
-                          infoWindow: InfoWindow(title: stop.description),
-                        ),
-                      )
-                      .toSet();
+          final initialLatLng = gmaps.LatLng(
+            stopsWithLocation.first.lat,
+            stopsWithLocation.first.long,
+          );
 
-                  return GoogleMap(
-                    initialCameraPosition: _initialPosition,
-                    onMapCreated: (controller) {
-                      _controller.complete(controller);
-                    },
-                    markers: markers,
-                    polylines: {
-                      Polyline(
-                        polylineId: const PolylineId('rota'),
-                        color: Colors.red,
-                        width: 4,
-                        points: mapProvider.polylinePoints,
-                      ),
-                    },
-                  );
-                },
-              );
+          return gmaps.GoogleMap(
+            initialCameraPosition: gmaps.CameraPosition(
+              target: initialLatLng,
+              zoom: 12,
+            ),
+            markers: stopsWithLocation
+                .map(
+                  (s) => gmaps.Marker(
+                    markerId: gmaps.MarkerId(s.locationId),
+                    position: gmaps.LatLng(s.lat, s.long),
+                    infoWindow: gmaps.InfoWindow(title: s.description),
+                  ),
+                )
+                .toSet(),
+            polylines: {
+              gmaps.Polyline(
+                polylineId: const gmaps.PolylineId('rota_completa'),
+                color: Colors.red,
+                width: 4,
+                points: mapProvider.polylinePoints,
+              ),
             },
-          ),
-        ],
+            zoomControlsEnabled: true,
+            zoomGesturesEnabled: true,
+            scrollGesturesEnabled: true,
+            rotateGesturesEnabled: true,
+            tiltGesturesEnabled: true,
+            myLocationButtonEnabled: true,
+            onMapCreated: (gmaps.GoogleMapController controller) async {
+              _controller.complete(controller);
+
+              if (stopsWithLocation.length > 1) {
+                final bounds = calculateBounds(stopsWithLocation);
+                controller.animateCamera(
+                  gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+                );
+              }
+            },
+          );
+        },
       ),
     );
   }
