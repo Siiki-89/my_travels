@@ -10,14 +10,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/services/google_maps_service.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
 
 class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({Key? key}) : super(key: key);
-
-  Future<void> _dummyFuture() async => Future.value();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +42,6 @@ class InfoTravelPage extends StatelessWidget {
         }
       }
     });
-    final Completer<gmaps.GoogleMapController> _controller = Completer();
     return Scaffold(
       appBar: AppBar(title: Text('Detalhes da Viagem')),
       body: SingleChildScrollView(
@@ -78,7 +76,7 @@ class InfoTravelPage extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -101,28 +99,7 @@ class InfoTravelPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Mostrar rota',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Marcar como concluído',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
+
                   Container(
                     width: double.infinity,
                     height: 2,
@@ -173,97 +150,136 @@ class InfoTravelPage extends StatelessWidget {
                     height: 2,
                     color: Colors.grey[300],
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Trajeto da viagem',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Trajeto da viagem',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const MapPage()),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.map,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 8),
 
                   // Mini preview do mapa
                   // Dentro do seu SizedBox de mapa
                   // MINI PREVIEW DO MAPA
-                  SizedBox(
-                    height: 200,
-                    child: FutureBuilder<void>(
-                      future: _dummyFuture(),
-                      builder: (context, snapshot) {
-                        return Consumer<MapProvider>(
-                          builder: (context, mapProvider, _) {
-                            final stops = mapProvider.stops
-                                .whereType<LocationMapModel>()
-                                .toList();
-                            if (stops.isEmpty) {
-                              return const Center(
-                                child: Text('Não há trajeto para mostrar'),
-                              );
-                            }
-
-                            // Calcula bounds automaticamente
-                            final bounds = calculateBounds(stops);
-
-                            return gmaps.GoogleMap(
-                              initialCameraPosition: gmaps.CameraPosition(
-                                target: gmaps.LatLng(
-                                  stops.first.lat,
-                                  stops.first.long,
-                                ),
-                                zoom: 10,
-                              ),
-                              markers: stops
-                                  .map(
-                                    (s) => gmaps.Marker(
-                                      markerId: gmaps.MarkerId(s.locationId),
-                                      position: gmaps.LatLng(s.lat, s.long),
-                                    ),
-                                  )
-                                  .toSet(),
-                              polylines: {
-                                gmaps.Polyline(
-                                  polylineId: const gmaps.PolylineId(
-                                    'preview_route',
-                                  ),
-                                  color: Colors.red,
-                                  width: 3,
-                                  points: mapProvider.polylinePoints,
-                                ),
-                              },
-                              onMapCreated: (controller) {
-                                // Centraliza todos os markers após criar o mapa
-                                controller.animateCamera(
-                                  gmaps.CameraUpdate.newLatLngBounds(
-                                    bounds,
-                                    50,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                  _buildPreviewMap(context),
                   const SizedBox(height: 12),
 
-                  // Botão para abrir mapa completo
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const MapPage()),
-                        );
-                      },
-                      icon: const Icon(Icons.map),
-                      label: const Text("Ver mapa completo"),
-                    ),
+                    height: 2,
+                    color: Colors.grey[300],
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    '0 Comentarios',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  SizedBox _buildPreviewMap(BuildContext context) {
+    final Completer<gmaps.GoogleMapController> _mapController = Completer();
+
+    return SizedBox(
+      height: 200,
+      child: Stack(
+        children: [
+          Consumer<MapProvider>(
+            builder: (context, mapProvider, _) {
+              final stops = mapProvider.stops
+                  .whereType<LocationMapModel>()
+                  .toList();
+              if (stops.isEmpty) {
+                return const Center(child: Text('Não há trajeto para mostrar'));
+              }
+
+              final bounds = calculateBounds(stops);
+
+              return gmaps.GoogleMap(
+                initialCameraPosition: gmaps.CameraPosition(
+                  target: gmaps.LatLng(stops.first.lat, stops.first.long),
+                  zoom: 10,
+                ),
+                markers: stops
+                    .map(
+                      (s) => gmaps.Marker(
+                        markerId: gmaps.MarkerId(s.locationId),
+                        position: gmaps.LatLng(s.lat, s.long),
+                      ),
+                    )
+                    .toSet(),
+                polylines: {
+                  gmaps.Polyline(
+                    polylineId: const gmaps.PolylineId('preview_route'),
+                    color: Colors.red,
+                    width: 3,
+                    points: mapProvider.polylinePoints,
+                  ),
+                },
+                onMapCreated: (controller) {
+                  _mapController.complete(controller);
+                  // Centraliza na primeira vez
+                  controller.animateCamera(
+                    gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+                  );
+                },
+                zoomControlsEnabled: false,
+                scrollGesturesEnabled: false,
+                rotateGesturesEnabled: false,
+                tiltGesturesEnabled: false,
+              );
+            },
+          ),
+          // Botão flutuante para centralizar markers
+          Positioned(
+            bottom: 8,
+            right: 8,
+            child: FloatingActionButton(
+              mini: true,
+              backgroundColor: Colors.white,
+              onPressed: () async {
+                final controller = await _mapController.future;
+                final stops = context
+                    .read<MapProvider>()
+                    .stops
+                    .whereType<LocationMapModel>()
+                    .toList();
+                if (stops.isEmpty) return;
+                final bounds = calculateBounds(stops);
+                controller.animateCamera(
+                  gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+                );
+              },
+              child: const Icon(Icons.center_focus_strong, color: Colors.blue),
+            ),
+          ),
+        ],
       ),
     );
   }
