@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-// Importe suas classes de entidade aqui
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:lottie/lottie.dart';
@@ -10,8 +9,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/presentation/styles/app_button_styles.dart';
-import 'package:my_travels/services/google_maps_service.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +20,6 @@ class InfoTravelPage extends StatelessWidget {
     final travel = ModalRoute.of(context)!.settings.arguments as Travel;
     final mapProvider = Provider.of<MapProvider>(context, listen: false);
 
-    // Adia a atualização do provider para depois do build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mapProvider.stops.every((s) => s == null)) {
         for (int i = 0; i < travel.stopPoints.length; i++) {
@@ -47,7 +43,6 @@ class InfoTravelPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ... (toda a parte superior da tela continua igual)
             Stack(
               children: [
                 if (travel.coverImagePath != null &&
@@ -80,7 +75,6 @@ class InfoTravelPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ... (informações da viagem, datas, etc.)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -178,9 +172,6 @@ class InfoTravelPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
 
-                  // Mini preview do mapa
-                  // Dentro do seu SizedBox de mapa
-                  // MINI PREVIEW DO MAPA
                   _buildPreviewMap(context),
                   const SizedBox(height: 12),
 
@@ -244,7 +235,6 @@ class InfoTravelPage extends StatelessWidget {
                 },
                 onMapCreated: (controller) {
                   _mapController.complete(controller);
-                  // Centraliza na primeira vez
                   controller.animateCamera(
                     gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
                   );
@@ -256,7 +246,7 @@ class InfoTravelPage extends StatelessWidget {
               );
             },
           ),
-          // Botão flutuante para centralizar markers
+
           Positioned(
             bottom: 8,
             right: 8,
@@ -284,7 +274,6 @@ class InfoTravelPage extends StatelessWidget {
     );
   }
 
-  // ALTERAÇÃO 1: O método agora recebe a lista de viajantes.
   Column _buildParticipantsList(List<Traveler> travelers) {
     return Column(
       children: List.generate(travelers.length, (index) {
@@ -338,7 +327,6 @@ class InfoTravelPage extends StatelessWidget {
     );
   }
 
-  // ... (os outros métodos buildStopPoint e _buildContainerData permanecem iguais)
   Column _buildStopPoint(Travel travel) {
     return Column(
       children: List.generate(travel.stopPoints.length, (index) {

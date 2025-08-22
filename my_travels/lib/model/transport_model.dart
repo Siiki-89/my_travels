@@ -1,6 +1,6 @@
 class TransportModel {
   final String label;
-  final String lottieAsset; // Renomeado de 'image' para 'lottieAsset'
+  final String lottieAsset;
 
   TransportModel({required this.label, required this.lottieAsset});
 }

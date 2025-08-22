@@ -4,15 +4,12 @@ import 'package:my_travels/data/tables/traveler_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TravelerRepository {
-  // 1. O repositório agora depende do DatabaseService para obter a conexão.
   final DatabaseService _dbService = DatabaseService.instance;
 
-  // 2. O nome da tabela é pego da classe de constantes para segurança.
   static const String _tableName = TravelerTable.tableName;
 
   // CREATE
   Future<int> insertTraveler(Traveler traveler) async {
-    // 3. Pede a conexão ao DatabaseService a cada operação.
     final db = await _dbService.database;
     return await db.insert(
       _tableName,

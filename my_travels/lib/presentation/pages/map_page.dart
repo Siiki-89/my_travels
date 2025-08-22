@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/utils/map_utils.dart'; // <- utilitário
+import 'package:my_travels/utils/map_utils.dart';
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});

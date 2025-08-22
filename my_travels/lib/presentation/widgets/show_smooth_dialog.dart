@@ -10,7 +10,7 @@ Future<void> showSmoothDialog(
     barrierDismissible: true,
     barrierLabel: "Dialog",
     pageBuilder: (context, animation, secondaryAnimation) {
-      return const SizedBox.shrink(); // O conteúdo será no transitionBuilder
+      return const SizedBox.shrink();
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(

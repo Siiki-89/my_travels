@@ -3,8 +3,6 @@ import 'package:lottie/lottie.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:provider/provider.dart';
 
-// Importe seu provider
-
 class SelectTransport extends StatelessWidget {
   const SelectTransport({Key? key}) : super(key: key);
 
@@ -15,7 +13,6 @@ class SelectTransport extends StatelessWidget {
         provider.loadAvailableVehicles(context);
 
         return Container(
-          // Ajustamos a altura para se adequar ao novo tamanho dos círculos
           height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
@@ -29,17 +26,13 @@ class SelectTransport extends StatelessWidget {
               return GestureDetector(
                 onTap: () => provider.selectVehicle(transport),
 
-                // 2. O TEXTO FOI REMOVIDO
-                // O Lottie agora é o filho direto, com um padding para respirar
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Lottie.asset(
                         transport.lottieAsset,
-                        key: ValueKey(
-                          isSelected,
-                        ), // 1. A chave muda com a seleção
+                        key: ValueKey(isSelected),
                         animate: isSelected,
                       ),
                     ),

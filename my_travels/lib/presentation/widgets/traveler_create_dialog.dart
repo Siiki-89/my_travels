@@ -7,7 +7,6 @@ import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 import 'package:provider/provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 
-// 1. Nome da classe corrigido
 class CreateAddTravelerDialog extends StatefulWidget {
   const CreateAddTravelerDialog({super.key});
 
@@ -17,20 +16,16 @@ class CreateAddTravelerDialog extends StatefulWidget {
 }
 
 class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
-  // 2. Chave para o formulário
   final _formKey = GlobalKey<FormState>();
-  final _picker = ImagePicker(); // Instância única do ImagePicker
+  final _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Se estiver editando, os controllers já foram populados pelo prepareForEdit
-    // Não precisamos fazer nada aqui, mas o initState é um bom lugar para lógicas iniciais
   }
 
   @override
   Widget build(BuildContext context) {
-    // Usamos 'read' para ações e 'watch' para UI
     final travelerProvider = context.watch<TravelerProvider>();
     final travelerProviderReader = context.read<TravelerProvider>();
     final size = MediaQuery.of(context).size;
@@ -38,7 +33,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: SizedBox(
-        height: size.height * 0.45, // Aumentei um pouco para caber o scroll
+        height: size.height * 0.45,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -54,7 +49,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                 ),
               ),
             ),
-            // 3. Adicionado SingleChildScrollView e Form
+
             Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -68,7 +63,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 35), // Espaço para o avatar
+                      const SizedBox(height: 35),
                       CustomTextFormField(
                         labelText: 'Nome do viajante',
                         controller: travelerProvider.nameController,
@@ -100,13 +95,11 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                // 1. LIMPE O ESTADO ANTES DE SAIR
                                 context.read<TravelerProvider>().resetFields();
 
-                                // 2. AGORA FECHE O DIÁLOGO
                                 Navigator.of(context).pop();
                               },
-                              // ... o resto do seu botão de cancelar
+
                               style: AppButtonStyles.primaryButtonStyle,
                               child: const Text(
                                 'Cancel',
@@ -115,27 +108,23 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // Dentro da Row, substitua o segundo ElevatedButton por este:
+
                           Expanded(
                             child: ElevatedButton(
-                              // 1. TRANSFORME O onPressed EM 'async'
                               onPressed: () async {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
                                   final provider = context
                                       .read<TravelerProvider>();
 
-                                  // 2. USE 'await' PARA ESPERAR A OPERAÇÃO TERMINAR
                                   if (provider.editingId != null) {
                                     await provider.editTraveler(context);
                                   } else {
                                     await provider.addTraveler(context);
                                   }
 
-                                  // 3. ADICIONE A VERIFICAÇÃO DE SEGURANÇA 'mounted'
                                   if (!mounted) return;
 
-                                  // 4. AGORA, COM TUDO CONCLUÍDO, FECHE O DIÁLOGO COM SEGURANÇA
                                   Navigator.of(context).pop();
                                 }
                               },
@@ -159,7 +148,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                 ),
               ),
             ),
-            // Avatar
+
             Align(
               alignment: Alignment.topCenter,
               child: InkWell(
@@ -196,8 +185,6 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
   Future<void> _pickImageFromGallery(TravelerProvider provider) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
-    // 5. Verificação de 'mounted' não é estritamente necessária aqui porque não estamos usando o context
-    // mas o provider.setImage() irá notificar os listeners, então é uma boa prática geral.
     if (pickedFile != null) {
       provider.setImage(File(pickedFile.path));
     } else {

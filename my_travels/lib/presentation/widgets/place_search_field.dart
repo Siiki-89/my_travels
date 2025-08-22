@@ -26,17 +26,13 @@ class PlaceSearchField extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
     final bool isStartPoint = (index == 0);
 
-    // --- LÓGICA PRINCIPAL ALTERADA ---
-    // Se for o ponto de partida, mostre apenas o campo de busca, sem animação.
     if (isStartPoint) {
       return _buildAutocompleteField(context, provider);
     } else {
-      // Para os outros pontos, mantenha o container animado que expande e recolhe.
       return _buildAnimatedCard(context, provider, loc);
     }
   }
 
-  /// Constrói o card animado para os pontos de destino (não para o ponto de partida).
   Widget _buildAnimatedCard(
     BuildContext context,
     TravelProvider provider,
@@ -54,9 +50,8 @@ class PlaceSearchField extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
-            // Campo de busca sempre visível, mesmo quando fechado
             _buildAutocompleteField(context, provider),
-            // Campos adicionais só aparecem se estiver expandido
+
             if (isEditing) _buildAdditionalFields(context, provider, loc),
           ],
         ),
@@ -64,7 +59,6 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
-  /// O campo de busca com Autocomplete.
   Widget _buildAutocompleteField(
     BuildContext context,
     TravelProvider provider,
@@ -104,13 +98,11 @@ class PlaceSearchField extends StatelessWidget {
               if (!hasTapped) {
                 provider.registerFirstTap(index);
                 provider.startEditing(index);
-                FocusScope.of(
-                  context,
-                ).unfocus(); // Impede teclado no primeiro clique
+                FocusScope.of(context).unfocus();
               }
             },
             child: AbsorbPointer(
-              absorbing: !hasTapped, // Bloqueia foco até o segundo clique
+              absorbing: !hasTapped,
               child: TextFormField(
                 controller: controller,
                 focusNode: focus,
@@ -128,13 +120,11 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
-  /// Campos adicionais para descrição e datas.
   Widget _buildAdditionalFields(
     BuildContext context,
     TravelProvider provider,
     AppLocalizations loc,
   ) {
-    // Adicionamos um Padding aqui para manter o espaçamento.
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: Column(
@@ -172,7 +162,7 @@ class PlaceSearchField extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 FocusScope.of(context).unfocus();
-                provider.resetFirstTap(index); // <-- isso aqui!
+                provider.resetFirstTap(index);
                 provider.concludeEditing();
               },
               style: AppButtonStyles.saveButtonStyle,
@@ -187,7 +177,6 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
-  /// Widget para um campo de data.
   Widget _buildDateField(
     BuildContext context,
     String label,

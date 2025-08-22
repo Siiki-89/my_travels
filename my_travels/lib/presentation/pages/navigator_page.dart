@@ -23,15 +23,12 @@ class NavigatorPage extends StatelessWidget {
         currentIndex: navigatorProvider.current,
         onTap: (value) => navigatorProvider.selectTab(value),
 
-        selectedItemColor: Colors.blue, // Cor do ícone e label ativos
-        unselectedItemColor: Colors.grey.shade400, // Cor dos itens inativos
-        type: BottomNavigationBarType.fixed, // Garante que o layout não "pule"
-        selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-        ), // Label ativa em negrito
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey.shade400,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
 
         items: [
-          // Seus BottomNavigationBarItems continuam iguais...
           BottomNavigationBarItem(
             icon: Lottie.asset(
               navigatorProvider.current == 0

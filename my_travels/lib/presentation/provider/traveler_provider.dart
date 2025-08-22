@@ -105,7 +105,6 @@ class TravelerProvider with ChangeNotifier {
     final t = context != null ? AppLocalizations.of(context) : null;
     _errorMessage = null;
 
-    // Lendo diretamente dos controllers
     final name = nameController.text;
     final age = int.tryParse(ageController.text);
 
@@ -159,12 +158,11 @@ class TravelerProvider with ChangeNotifier {
     final t = context != null ? AppLocalizations.of(context) : null;
     if (_editingId == null) return;
 
-    // Lendo diretamente dos controllers
     final name = nameController.text;
     final age = int.tryParse(ageController.text);
 
     final updatedTraveler = Traveler(
-      id: _editingId, // Usar o ID que está sendo editado
+      id: _editingId,
       name: name,
       age: age,
       photoPath: _selectedImage?.path,

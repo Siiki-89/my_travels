@@ -23,12 +23,10 @@ class DatabaseService {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  // Este método irá criar TODAS as suas tabelas de uma vez.
   Future<void> _createDB(Database db, int version) async {
     await db.execute(TravelerTable.createTable);
     await db.execute(TravelTable.createTable);
     await db.execute(StopPointTable.createTable);
     await db.execute(TravelTravelerTable.createTable);
-    // Adicione aqui outras tabelas como Comment, etc., no futuro.
   }
 }

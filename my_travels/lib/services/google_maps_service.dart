@@ -119,7 +119,6 @@ class GoogleMapsService {
   }
 
   List<LatLng> _decodePolyline(String encoded) {
-    PolylinePoints polylinePoints = PolylinePoints(apiKey: _apiKey);
     List<PointLatLng> result = PolylinePoints.decodePolyline(encoded);
 
     return result

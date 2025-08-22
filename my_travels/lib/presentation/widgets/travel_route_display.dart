@@ -4,27 +4,21 @@ import 'package:my_travels/model/destination_model.dart'; // Importe seu modelo
 class TravelRouteDisplay extends StatelessWidget {
   final List<DestinationModel> destinations;
 
-  const TravelRouteDisplay({
-    super.key,
-    required this.destinations,
-  });
+  const TravelRouteDisplay({super.key, required this.destinations});
 
   @override
   Widget build(BuildContext context) {
-    // Usamos ListView.separated para construir a lista com os "pontinhos" entre os itens.
     return ListView.separated(
-      shrinkWrap: true, // Para usar dentro de uma Column
-      physics: const NeverScrollableScrollPhysics(), // Para não ter scroll próprio
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: destinations.length,
       itemBuilder: (context, index) {
         final destination = destinations[index];
         final bool isLastItem = index == destinations.length - 1;
 
-        // Cada item da lista é uma linha (Row) com o ícone e o card.
         return _buildDestinationTile(destination, isLastItem);
       },
       separatorBuilder: (context, index) {
-        // O separador são os três pontinhos verticais.
         return Align(
           alignment: Alignment.centerLeft,
           child: Padding(
@@ -36,12 +30,10 @@ class TravelRouteDisplay extends StatelessWidget {
     );
   }
 
-  // Widget auxiliar para construir cada linha da rota
   Widget _buildDestinationTile(DestinationModel destination, bool isLastItem) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // 1. O ÍCONE (Círculo cinza ou Pino vermelho)
         Icon(
           isLastItem ? Icons.location_pin : Icons.circle_outlined,
           color: isLastItem ? Colors.red : Colors.grey.shade600,
@@ -49,7 +41,6 @@ class TravelRouteDisplay extends StatelessWidget {
         ),
         const SizedBox(width: 16),
 
-        // 2. O CARD COM O NOME DO LOCAL
         Expanded(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
