@@ -390,10 +390,6 @@ class TravelProvider with ChangeNotifier {
     _editingIndex = 0;
 
     descriptionController.clear();
-<<<<<<< HEAD
-=======
-
->>>>>>> f8481637a2fcd724617e851112ef1152a4e5933c
     validateImage = false;
     validateVehicle = false;
     validadeTravelers = false;

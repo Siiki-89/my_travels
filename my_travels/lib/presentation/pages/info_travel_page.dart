@@ -246,10 +246,6 @@ class InfoTravelPage extends StatelessWidget {
               );
             },
           ),
-<<<<<<< HEAD
-
-=======
->>>>>>> f8481637a2fcd724617e851112ef1152a4e5933c
           Positioned(
             bottom: 8,
             right: 8,
