@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
     final travelerProvider = context.watch<TravelerProvider>();
     final travelerProviderReader = context.read<TravelerProvider>();
     final size = MediaQuery.of(context).size;
+    final loc = AppLocalizations.of(context)!;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -65,11 +67,11 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                     children: [
                       const SizedBox(height: 35),
                       CustomTextFormField(
-                        labelText: 'Nome do viajante',
+                        labelText: loc.travelerNameHint,
                         controller: travelerProvider.nameController,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a name.';
+                            return loc.enterName;
                           }
                           return null;
                         },
@@ -77,14 +79,14 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                       const SizedBox(height: 16),
                       CustomTextFormField(
                         controller: travelerProvider.ageController,
-                        labelText: 'Age',
+                        labelText: loc.ageHint,
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter an age.';
+                            return loc.enterAge;
                           }
                           if (int.tryParse(value) == null) {
-                            return 'Please enter a valid number.';
+                            return loc.enterValidNumber;
                           }
                           return null;
                         },
@@ -101,8 +103,8 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                               },
 
                               style: AppButtonStyles.primaryButtonStyle,
-                              child: const Text(
-                                'Cancel',
+                              child: Text(
+                                loc.cancelButton,
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
@@ -133,8 +135,8 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                                 builder: (context, provider, child) {
                                   return Text(
                                     provider.editingId != null
-                                        ? 'Update'
-                                        : 'Save',
+                                        ? loc.updateHint
+                                        : loc.saveButton,
                                     style: const TextStyle(color: Colors.white),
                                   );
                                 },
@@ -161,17 +163,30 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                   backgroundImage: travelerProvider.selectedImage != null
                       ? FileImage(travelerProvider.selectedImage!)
                       : null,
-                  child: const Align(
-                    alignment: Alignment.bottomRight,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.black,
-                      radius: 20.0,
-                      child: Icon(
-                        Icons.camera_alt,
-                        size: 20.0,
-                        color: Colors.white,
+                  child: Stack(
+                    children: [
+                      if (travelerProvider.selectedImage == null)
+                        Center(
+                          child: Icon(
+                            Icons.person,
+                            size: size.height * 0.075,
+                            color: Colors.white,
+                          ),
+                        ),
+                      const Align(
+                        alignment: Alignment.bottomRight,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.black,
+
+                          radius: 20.0,
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 20.0,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),

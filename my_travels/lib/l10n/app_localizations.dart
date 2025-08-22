@@ -480,6 +480,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage all your trips here. They will be saved and can be viewed or edited anytime.'**
   String get travelManagementHint;
+
+  /// No description provided for @updateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateHint;
+
+  /// No description provided for @enterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a name.'**
+  String get enterName;
+
+  /// No description provided for @enterValidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number.'**
+  String get enterValidNumber;
+
+  /// No description provided for @enterAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an age.'**
+  String get enterAge;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by title...'**
+  String get homeSearchHint;
+
+  /// No description provided for @homeButtonExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get homeButtonExplore;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -71,6 +71,11 @@
   "delete": "Delete",
   "noTravelsTitle" : "No trips recorded",
   "noTravelsSubtitle" : "Start by adding a destination and build your travel catalog.",
-  "travelManagementHint" : "Manage all your trips here. They will be saved and can be viewed or edited anytime."
-
+  "travelManagementHint" : "Manage all your trips here. They will be saved and can be viewed or edited anytime.",
+  "updateHint" : "Update",
+  "enterName": "Please enter a name.",
+  "enterValidNumber": "Please enter a valid number.",
+  "enterAge": "Please enter an age.",
+  "homeSearchHint" : "Search by title...",
+  "homeButtonExplore" : "Explore"
 }
