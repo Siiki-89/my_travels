@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
 
@@ -184,6 +185,20 @@ class InfoTravelPage extends StatelessWidget {
                   Text(
                     '0 Comentarios',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/newcomment');
+                      },
+                      style: AppButtonStyles.primaryButtonStyle,
+                      child: Text(
+                        'Adicionar comentario',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ],
               ),

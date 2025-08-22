@@ -3,6 +3,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/pages/info_travel_page.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
+import 'package:my_travels/presentation/pages/new_comment_page.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(
               foregroundColor: Colors.black,
-              scrolledUnderElevation: 0.0, // <-- Adicione esta linha
+              scrolledUnderElevation: 0.0,
             ),
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0xFF176FF2),
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
             '/addTravel': (_) => const CreateTravelPage(),
             '/mappage': (_) => const MapPage(),
             '/infoTravel': (_) => const InfoTravelPage(),
+            '/newcomment': (_) => const NewCommentPage(),
           },
         );
       },
