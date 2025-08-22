@@ -1,3 +1,5 @@
+import 'package:my_travels/data/tables/comment_photo_table.dart';
+import 'package:my_travels/data/tables/comment_table.dart';
 import 'package:my_travels/data/tables/stop_point_table.dart';
 import 'package:my_travels/data/tables/travel_table.dart';
 import 'package:my_travels/data/tables/travel_traveler_table.dart';
@@ -28,5 +30,7 @@ class DatabaseService {
     await db.execute(TravelTable.createTable);
     await db.execute(StopPointTable.createTable);
     await db.execute(TravelTravelerTable.createTable);
+    await db.execute(CommentTable.createTable);
+    await db.execute(CommentPhotoTable.createTable);
   }
 }

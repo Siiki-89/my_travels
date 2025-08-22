@@ -12,6 +12,7 @@ import 'package:my_travels/presentation/pages/travelers_page.dart';
 import 'package:my_travels/presentation/pages/home_page.dart';
 import 'package:my_travels/presentation/pages/navigator_page.dart';
 import 'package:my_travels/presentation/pages/settings_page.dart';
+import 'package:my_travels/presentation/provider/new_comment_provider.dart';
 import 'package:my_travels/presentation/provider/travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';

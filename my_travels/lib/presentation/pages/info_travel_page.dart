@@ -191,7 +191,11 @@ class InfoTravelPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/newcomment');
+                        Navigator.pushNamed(
+                          context,
+                          '/newcomment',
+                          arguments: travel,
+                        );
                       },
                       style: AppButtonStyles.primaryButtonStyle,
                       child: Text(
