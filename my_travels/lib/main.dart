@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/pages/info_travel_page.dart';
@@ -105,7 +106,8 @@ class MyApp extends StatelessWidget {
             '/addTravel': (_) => const CreateTravelPage(),
             '/mappage': (_) => const MapPage(),
             '/infoTravel': (_) => const InfoTravelPage(),
-            '/newcomment': (_) => const NewCommentPage(),
+        '/newcomment': (_) => const NewCommentPage(),
+
           },
         );
       },

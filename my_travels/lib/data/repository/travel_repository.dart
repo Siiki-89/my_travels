@@ -31,6 +31,7 @@ class TravelRepository {
     });
   }
 
+
   Future<List<Travel>> getTravels() async {
     final db = await _dbService.database;
 

@@ -8,10 +8,11 @@ import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/data/repository/comment_repository.dart';
+import 'package:my_travels/data/repository/travel_repository.dart';
 
 class NewCommentProvider extends ChangeNotifier {
   final CommentRepository _commentRepository = CommentRepository();
-  final Travel travel;
+  late final Travel travel;
   final TextEditingController contentController = TextEditingController();
 
   Traveler? selectedTraveler;
@@ -50,7 +51,6 @@ class NewCommentProvider extends ChangeNotifier {
     if (selectedTraveler == null ||
         selectedStopPoint == null ||
         contentController.text.isEmpty) {
-      // Retorne ou mostre um erro se os campos obrigatórios não estiverem preenchidos
       return;
     }
 
@@ -64,15 +64,21 @@ class NewCommentProvider extends ChangeNotifier {
       photos: selectedImagePaths
           .map(
             (path) => CommentPhoto(
-              commentId: 0, // Será atualizado pelo repositório
+              commentId: 0,
               imagePath: path,
             ),
           )
           .toList(),
     );
+    try{
+      await _commentRepository.insertComment(comment);
+      isLoading = false;
+      print('Salvo com sucesso');
 
-    await _commentRepository.insertComment(comment);
-    isLoading = false;
+    } catch (e){
+       print(e);
+    }
+
     notifyListeners();
   }
 

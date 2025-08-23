@@ -16,7 +16,6 @@ class NewCommentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final travel = ModalRoute.of(context)!.settings.arguments as Travel;
-
     return ChangeNotifierProvider(
       create: (_) => NewCommentProvider(travel: travel),
       child: Scaffold(
@@ -87,36 +86,52 @@ class NewCommentPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Divider(),
+                    Divider(),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Fotos',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: provider.pickImages,
-                      style: AppButtonStyles.primaryButtonStyle,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Selecione',
-                            style: TextStyle(color: Colors.blue),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Fotos',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.image, color: Colors.blue),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
+
                     if (provider.selectedImagePaths.isNotEmpty)
                       _buildPhotoPreview(provider.selectedImagePaths, provider),
-                    const Divider(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 250,
+                          child: ElevatedButton(
+
+                            onPressed: provider.pickImages,
+                            style: AppButtonStyles.primaryButtonStyle,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Text(
+                                  'Selecione',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                SizedBox(width: 8),
+                                Icon(Icons.image, color: Colors.white),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16,),
+                    Divider(),
+                    SizedBox(height: 16,),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -125,7 +140,7 @@ class NewCommentPage extends StatelessWidget {
                             ? null
                             : () async {
                                 await provider.saveComment();
-                                // Mostrar mensagem de sucesso ou navegar para a tela anterior
+
                               },
                         style: AppButtonStyles.primaryButtonStyle,
                         child: provider.isLoading
@@ -147,7 +162,6 @@ class NewCommentPage extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildDropdownButton<T>(
     BuildContext context, {
     required List<DropdownMenuItem<T>> items,

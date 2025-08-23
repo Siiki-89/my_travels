@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
@@ -23,11 +24,12 @@ final _formKey = GlobalKey<FormState>();
 class CreateTravelPage extends StatelessWidget {
   const CreateTravelPage({super.key});
 
+
   @override
   Widget build(BuildContext context) {
+
     final loc = AppLocalizations.of(context)!;
     final providerTravel = context.watch<TravelProvider>();
-    final travelerProvider = context.read<TravelerProvider>();
 
     return Scaffold(
       appBar: AppBar(title: Text(loc.add), centerTitle: true),
@@ -336,6 +338,8 @@ class CreateTravelPage extends StatelessWidget {
     return InkWell(
       onTap: () async {
         await _cropImage(context, providerTravel);
+
+
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -370,6 +374,8 @@ class CreateTravelPage extends StatelessWidget {
   }
 
   Future<void> _cropImage(BuildContext context, TravelProvider provider) async {
+
+
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );
@@ -383,16 +389,17 @@ class CreateTravelPage extends StatelessWidget {
       compressFormat: ImageCompressFormat.jpg,
       compressQuality: 100,
       uiSettings: [
-        AndroidUiSettings(
-          showCropGrid: false,
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: false,
-          hideBottomControls: true,
-        ),
-      ],
+      AndroidUiSettings(
+        showCropGrid: false,
+        toolbarTitle: 'Cropper',
+        toolbarColor: Colors.black,
+        toolbarWidgetColor: Colors.white,
+        initAspectRatio: CropAspectRatioPreset.square,
+        lockAspectRatio: false,
+        hideBottomControls: true,
+
+      ),
+    ],
     );
 
     if (croppedFile == null) {
@@ -418,6 +425,8 @@ class CreateTravelPage extends StatelessWidget {
 }
 
 class CropAspectRatioPresetCustom implements CropAspectRatioPresetData {
+
+
   @override
   (int, int)? get data => (2, 3);
 

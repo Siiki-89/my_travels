@@ -6,12 +6,15 @@ import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/pages/map_page.dart';
+import 'package:my_travels/presentation/provider/info_travel_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({Key? key}) : super(key: key);
@@ -39,6 +42,8 @@ class InfoTravelPage extends StatelessWidget {
         }
       }
     });
+    final infoProvider = context.watch<InfoTravelProvider>();
+
     return Scaffold(
       appBar: AppBar(title: Text('Detalhes da Viagem')),
       body: SingleChildScrollView(
@@ -48,6 +53,19 @@ class InfoTravelPage extends StatelessWidget {
               children: [
                 if (travel.coverImagePath != null &&
                     travel.coverImagePath!.isNotEmpty)
+                  CarouselSlider.builder(
+                      itemCount: infoProvider.imagePaths.length,
+
+                      options: CarouselOptions(
+                        height: 300,
+                        autoPlay: true,
+                        reverse: true
+                      ),
+                      itemBuilder: (context, index, realIndex) {
+                        final pathImage = infoProvider.imagePaths[index];
+                        return buildImage();
+                      },
+                  ),
                   Image.file(
                     File(travel.coverImagePath!),
                     fit: BoxFit.cover,
