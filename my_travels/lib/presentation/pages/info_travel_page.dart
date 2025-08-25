@@ -42,192 +42,304 @@ class InfoTravelPage extends StatelessWidget {
         }
       }
     });
-    final infoProvider = context.watch<InfoTravelProvider>();
 
-    return Scaffold(
-      appBar: AppBar(title: Text('Detalhes da Viagem')),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                if (travel.coverImagePath != null &&
-                    travel.coverImagePath!.isNotEmpty)
-                  CarouselSlider.builder(
-                      itemCount: infoProvider.imagePaths.length,
+    return ChangeNotifierProvider(
+      create: (context) => InfoTravelProvider(travel: travel),
+      child: Scaffold(
+        appBar: AppBar(title: Text('Detalhes da Viagem')),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildCarousel(),
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          travel.title,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(Icons.check_circle),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
 
-                      options: CarouselOptions(
-                        height: 300,
-                        autoPlay: true,
-                        reverse: true
-                      ),
-                      itemBuilder: (context, index, realIndex) {
-                        final pathImage = infoProvider.imagePaths[index];
-                        return buildImage();
-                      },
-                  ),
-                  Image.file(
-                    File(travel.coverImagePath!),
-                    fit: BoxFit.cover,
-                    height: 300,
-                    width: double.infinity,
-                  ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  child: Container(
-                    height: 20,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
+                    Container(
+                      width: double.infinity,
+                      height: 2,
+                      color: Colors.grey[300],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildContainerData(travel.startDate),
+                        Lottie.asset(
+                          'assets/images/lottie/typelocomotion/airplane.json',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.fill,
+                        ),
+                        _buildContainerData(travel.endDate),
+                      ],
+                    ),
+                    _buildStopPoint(travel),
+                    Container(
+                      width: double.infinity,
+                      height: 2,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Participantes',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [Text('Adicionar'), Text('imagem')],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+
+                    _buildParticipantsList(travel.travelers),
+                    SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      height: 2,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Trajeto da viagem',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MapPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.map,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+
+                    _buildPreviewMap(context),
+                    const SizedBox(height: 12),
+
+                    Container(
+                      width: double.infinity,
+                      height: 2,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(height: 12),
+                    Text(
+                      '0 Comentarios',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        travel.title,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.check_circle),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-
-                  Container(
-                    width: double.infinity,
-                    height: 2,
-                    color: Colors.grey[300],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildContainerData(travel.startDate),
-                      Lottie.asset(
-                        'assets/images/lottie/typelocomotion/airplane.json',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.fill,
-                      ),
-                      _buildContainerData(travel.endDate),
-                    ],
-                  ),
-                  _buildStopPoint(travel),
-                  Container(
-                    width: double.infinity,
-                    height: 2,
-                    color: Colors.grey[300],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Participantes',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [Text('Adicionar'), Text('imagem')],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-
-                  _buildParticipantsList(travel.travelers),
-                  SizedBox(height: 6),
-                  Container(
-                    width: double.infinity,
-                    height: 2,
-                    color: Colors.grey[300],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Trajeto da viagem',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                      IconButton(
+                    SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(builder: (_) => const MapPage()),
+                            '/newcomment',
+                            arguments: travel,
                           );
                         },
-                        icon: const Icon(
-                          Icons.map,
-                          color: Colors.blue,
-                          size: 20,
+                        style: AppButtonStyles.primaryButtonStyle,
+                        child: Text(
+                          'Adicionar comentario',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-
-                  _buildPreviewMap(context),
-                  const SizedBox(height: 12),
-
-                  Container(
-                    width: double.infinity,
-                    height: 2,
-                    color: Colors.grey[300],
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    '0 Comentarios',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  SizedBox(
-                    height: 50,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/newcomment',
-                          arguments: travel,
-                        );
-                      },
-                      style: AppButtonStyles.primaryButtonStyle,
-                      child: Text(
-                        'Adicionar comentario',
-                        style: TextStyle(color: Colors.white),
-                      ),
                     ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Consumer<InfoTravelProvider> _buildCarousel() {
+    return Consumer<InfoTravelProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading) {
+          return const SizedBox(
+            height: 300,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (provider.allImagePaths.isEmpty) {
+          // Placeholder for when there are no images
+          return Container(
+            height: 300,
+            width: double.infinity,
+            color: Colors.grey[300],
+            child: const Center(
+              child: Icon(
+                Icons.image_not_supported,
+                size: 50,
+                color: Colors.grey,
+              ),
+            ),
+          );
+        }
+
+        // This Stack now contains the Carousel and its indicator
+        return Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            CarouselSlider(
+              options: CarouselOptions(
+                height: 300.0,
+                viewportFraction: 1.0, // Each image takes the full width
+                autoPlay: true,
+                onPageChanged: (index, reason) {
+                  // Update the current index in the provider
+                  provider.setCurrentImageIndex(index);
+                },
+              ),
+              items: provider.allImagePaths.map((imagePath) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return Image.file(
+                      File(imagePath),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+            // Carousel Indicator Dots
+            Positioned(
+              bottom:
+                  25.0, // Positioned just above the rounded corner container
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: provider.allImagePaths.asMap().entries.map((entry) {
+                  return Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 4.0,
+                    ),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          (Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black)
+                              .withOpacity(
+                                provider.currentImageIndex == entry.key
+                                    ? 0.9
+                                    : 0.4,
+                              ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            // This container creates the rounded top corners effect
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Container(
+                height: 20,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
-                ],
+                ),
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildImageCarousel(List<String> imagePaths, BuildContext context) {
+    return Stack(
+      children: [
+        CarouselSlider.builder(
+          options: CarouselOptions(
+            height: 300,
+            viewportFraction: 1.0,
+            enableInfiniteScroll: true,
+            autoPlay: imagePaths.length > 1,
+            autoPlayInterval: const Duration(seconds: 5),
+          ),
+          itemCount: imagePaths.length,
+          itemBuilder: (BuildContext context, int index, int realIndex) {
+            final imagePath = imagePaths[index];
+            return Image.file(
+              File(imagePath),
+              fit: BoxFit.cover,
+              width: double.infinity,
+            );
+          },
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          child: Container(
+            height: 20,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
