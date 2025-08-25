@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:my_travels/data/entities/comment_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:lottie/lottie.dart';
@@ -164,13 +165,8 @@ class InfoTravelPage extends StatelessWidget {
                       color: Colors.grey[300],
                     ),
                     SizedBox(height: 12),
-                    Text(
-                      '0 Comentarios',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
+                    _buildComments(),
+                    SizedBox(height: 12),
                     SizedBox(
                       height: 50,
                       width: double.infinity,
@@ -199,6 +195,104 @@ class InfoTravelPage extends StatelessWidget {
     );
   }
 
+  Consumer<InfoTravelProvider> _buildComments() {
+    return Consumer<InfoTravelProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${provider.comments.length} Comentários',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 140,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: provider.comments.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final comment = provider.comments[index];
+
+                  return Container(
+                    padding: EdgeInsets.only(left: index == 0 ? 0 : 16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          width: 1,
+                          color: index == 0 ? Colors.transparent : Colors.grey,
+                        ),
+                      ),
+                    ),
+                    width: 220,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          comment.content,
+                          style: const TextStyle(fontSize: 13),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Spacer(),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey[400],
+                              backgroundImage:
+                                  (comment.traveler?.photoPath != null &&
+                                      comment.traveler!.photoPath!.isNotEmpty)
+                                  ? FileImage(
+                                      File(comment.traveler!.photoPath!),
+                                    )
+                                  : null,
+                              child:
+                                  (comment.traveler?.photoPath == null ||
+                                      comment.traveler!.photoPath!.isEmpty)
+                                  ? const Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                comment.traveler?.name ?? 'Anônimo',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Consumer<InfoTravelProvider> _buildCarousel() {
     return Consumer<InfoTravelProvider>(
       builder: (context, provider, _) {
@@ -208,79 +302,37 @@ class InfoTravelPage extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()),
           );
         }
-
-        if (provider.allImagePaths.isEmpty) {
-          // Placeholder for when there are no images
-          return Container(
-            height: 300,
-            width: double.infinity,
-            color: Colors.grey[300],
-            child: const Center(
-              child: Icon(
-                Icons.image_not_supported,
-                size: 50,
-                color: Colors.grey,
-              ),
-            ),
-          );
-        }
-
-        // This Stack now contains the Carousel and its indicator
         return Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            CarouselSlider(
-              options: CarouselOptions(
-                height: 300.0,
-                viewportFraction: 1.0, // Each image takes the full width
-                autoPlay: true,
-                onPageChanged: (index, reason) {
-                  // Update the current index in the provider
-                  provider.setCurrentImageIndex(index);
-                },
-              ),
-              items: provider.allImagePaths.map((imagePath) {
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Image.file(
-                      File(imagePath),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    );
-                  },
-                );
-              }).toList(),
-            ),
-            // Carousel Indicator Dots
-            Positioned(
-              bottom:
-                  25.0, // Positioned just above the rounded corner container
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: provider.allImagePaths.asMap().entries.map((entry) {
-                  return Container(
-                    width: 8.0,
-                    height: 8.0,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 4.0,
+            provider.allImagePaths.length == 1
+                ? Image.file(
+                    File(provider.allImagePaths.first),
+                    fit: BoxFit.cover,
+                    height: 300,
+                    width: double.infinity,
+                  )
+                : CarouselSlider(
+                    options: CarouselOptions(
+                      height: 300.0,
+                      autoPlay: true,
+                      viewportFraction: 1,
+                      onPageChanged: (index, reason) {
+                        provider.setCurrentImageIndex(index);
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          (Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black)
-                              .withOpacity(
-                                provider.currentImageIndex == entry.key
-                                    ? 0.9
-                                    : 0.4,
-                              ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
+                    items: provider.allImagePaths.map((imagePath) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return Image.file(
+                            File(imagePath),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
             // This container creates the rounded top corners effect
             Positioned(
               bottom: 0,
@@ -300,46 +352,6 @@ class InfoTravelPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildImageCarousel(List<String> imagePaths, BuildContext context) {
-    return Stack(
-      children: [
-        CarouselSlider.builder(
-          options: CarouselOptions(
-            height: 300,
-            viewportFraction: 1.0,
-            enableInfiniteScroll: true,
-            autoPlay: imagePaths.length > 1,
-            autoPlayInterval: const Duration(seconds: 5),
-          ),
-          itemCount: imagePaths.length,
-          itemBuilder: (BuildContext context, int index, int realIndex) {
-            final imagePath = imagePaths[index];
-            return Image.file(
-              File(imagePath),
-              fit: BoxFit.cover,
-              width: double.infinity,
-            );
-          },
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          child: Container(
-            height: 20,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
