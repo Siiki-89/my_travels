@@ -7,7 +7,7 @@ Future<void> showSmoothDialog(
 }) {
   return showGeneralDialog(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: false,
     barrierLabel: "Dialog",
     pageBuilder: (context, animation, secondaryAnimation) {
       return const SizedBox.shrink();

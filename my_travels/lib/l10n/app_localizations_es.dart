@@ -219,4 +219,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeButtonExplore => 'Explorar';
+
+  @override
+  String get ageBelowZero => 'La edad debe ser mayor o igual a 0.';
+
+  @override
+  String get ageAboveNormal => 'Edad por encima de lo normal.';
 }

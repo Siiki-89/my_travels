@@ -16,7 +16,6 @@ LatLngBounds calculateBounds(List<LocationMapModel> stops) {
 }
 
 Future<List<LocationMapModel>> getTravelStops(Travel travel) async {
-  // Aqui você transforma os stopPoints do travel em LocationMapModel
   return travel.stopPoints
       .where((s) => s.latitude != null && s.longitude != null)
       .map(

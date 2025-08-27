@@ -77,6 +77,8 @@ class TravelersPage extends StatelessWidget {
                 title: Text(
                   traveler.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
                 subtitle: Text('${appLocalizations.ageHint}: ${traveler.age}'),
                 trailing: Row(
@@ -89,16 +91,24 @@ class TravelersPage extends StatelessWidget {
                           context: context,
                           builder: (BuildContext dialogContext) {
                             return AlertDialog(
+                              backgroundColor: Colors.black,
                               title: Text(
                                 appLocalizations.confirmDeletion,
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                               content: Text(
                                 '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
+                                style: TextStyle(color: Colors.white),
                               ),
                               actions: [
                                 TextButton(
-                                  child: Text(appLocalizations.cancel),
+                                  child: Text(
+                                    appLocalizations.cancel,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                   onPressed: () {
                                     Navigator.of(dialogContext).pop();
                                   },

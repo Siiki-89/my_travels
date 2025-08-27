@@ -88,6 +88,12 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                           if (int.tryParse(value) == null) {
                             return loc.enterValidNumber;
                           }
+                          if (int.tryParse(value)! < 0) {
+                            return loc.ageBelowZero;
+                          }
+                          if (int.tryParse(value)! > 120) {
+                            return loc.ageAboveNormal;
+                          }
                           return null;
                         },
                       ),

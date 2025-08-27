@@ -77,5 +77,7 @@
   "enterValidNumber": "Please enter a valid number.",
   "enterAge": "Please enter an age.",
   "homeSearchHint" : "Search by title...",
-  "homeButtonExplore" : "Explore"
+  "homeButtonExplore" : "Explore",
+  "ageBelowZero": "Age must be greater than or equal to 0.",
+  "ageAboveNormal": "Age above normal."
 }

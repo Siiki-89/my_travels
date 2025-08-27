@@ -516,6 +516,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explore'**
   String get homeButtonExplore;
+
+  /// No description provided for @ageBelowZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Age must be greater than or equal to 0.'**
+  String get ageBelowZero;
+
+  /// No description provided for @ageAboveNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Age above normal.'**
+  String get ageAboveNormal;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

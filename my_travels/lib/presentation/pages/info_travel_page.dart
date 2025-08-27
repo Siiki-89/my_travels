@@ -333,7 +333,6 @@ class InfoTravelPage extends StatelessWidget {
                       );
                     }).toList(),
                   ),
-            // This container creates the rounded top corners effect
             Positioned(
               bottom: 0,
               left: 0,
