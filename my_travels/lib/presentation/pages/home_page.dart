@@ -17,37 +17,59 @@ class HomePage extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        scrolledUnderElevation: 0.0,
-        title: Text(loc.appName),
-      ),
       floatingActionButton: _buildButton(provider, context),
-
       body: SafeArea(
-        child: Stack(
-          children: [
-            provider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : provider.travels.isEmpty
-                ? buildEmptyState(
-                    context,
-                    'assets/images/lottie/general/loading.json',
-                    loc.noTravelsTitle,
-                    loc.noTravelsSubtitle,
-                    loc.travelManagementHint,
-                  )
-                : _TravelsList(travels: provider.travels),
-
-            if (provider.travels.isNotEmpty)
-              Positioned(
-                top: 8.0,
-                left: 16.0,
-                right: 16.0,
-                child: _buildSearchBar(provider, loc),
+        child: provider.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : provider.allTravels.isEmpty
+            ? buildEmptyState(
+                context,
+                'assets/images/lottie/general/loading.json',
+                loc.noTravelsTitle,
+                loc.noTravelsSubtitle,
+                loc.travelManagementHint,
+              )
+            : CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    snap: true,
+                    centerTitle: true,
+                    backgroundColor: Colors.transparent, // deixa transparente
+                    elevation: 0, // remove a sombra do appbar
+                    title: Text(loc.appName),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(60),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: _buildSearchBar(provider, loc),
+                      ),
+                    ),
+                  ),
+                  provider.travels.isEmpty
+                      ? SliverFillRemaining(
+                          child: Center(
+                            child: Text(
+                              loc.noSearchResults,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        )
+                      : SliverList(
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
+                            final travel = provider.travels[index];
+                            return _TravelCard(travel: travel);
+                          }, childCount: provider.travels.length),
+                        ),
+                ],
               ),
-          ],
-        ),
       ),
     );
   }
@@ -55,16 +77,16 @@ class HomePage extends StatelessWidget {
   Widget _buildSearchBar(HomeProvider provider, AppLocalizations loc) {
     return Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(30),
       child: TextField(
         onChanged: provider.search,
         decoration: InputDecoration(
           hintText: loc.homeSearchHint,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
           filled: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30.0),
+            borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none,
           ),
         ),
@@ -94,24 +116,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class _TravelsList extends StatelessWidget {
-  const _TravelsList({required this.travels});
-  final List<Travel> travels;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16.0, 80.0, 16.0, 16.0),
-      itemCount: travels.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 0),
-      itemBuilder: (context, index) {
-        final travel = travels[index];
-        return _TravelCard(travel: travel);
-      },
-    );
-  }
-}
-
 class _TravelCard extends StatelessWidget {
   final Travel travel;
   const _TravelCard({required this.travel});
@@ -127,128 +131,132 @@ class _TravelCard extends StatelessWidget {
         ? travel.stopPoints.last.locationName.split(',').first
         : 'Destino';
 
-    return SizedBox(
-      height: 240,
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 24.0),
-        elevation: 6,
-        shadowColor: Colors.black.withOpacity(0.3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            print("Tocou na viagem: ${travel.title}");
-          },
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Image.file(
-                  File(travel.coverImagePath!),
-                  fit: BoxFit.cover,
-                  frameBuilder:
-                      (context, child, frame, wasSynchronouslyLoaded) {
-                        if (wasSynchronouslyLoaded) return child;
-                        return AnimatedOpacity(
-                          opacity: frame == null ? 0 : 1,
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeOut,
-                          child: child,
-                        );
-                      },
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+      child: SizedBox(
+        height: 220,
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 24.0),
+          elevation: 6,
+          shadowColor: Colors.black.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.file(
+                    File(travel.coverImagePath!),
+                    fit: BoxFit.cover,
+                    frameBuilder:
+                        (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOut,
+                            child: child,
+                          );
+                        },
+                  ),
                 ),
-              ),
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.black.withOpacity(0.8),
-                        Colors.black.withOpacity(0.6),
-                        Colors.transparent,
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      stops: const [0.0, 0.4, 1.0],
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0.6),
+                          Colors.black.withOpacity(0.5),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: const [0.0, 0.4, 1.0],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 16, left: 16),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            travel.title,
-                            style: textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                const Shadow(
-                                  blurRadius: 10,
-                                  color: Colors.black54,
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16, left: 16),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                travel.title,
+                                style: textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    const Shadow(
+                                      blurRadius: 10,
+                                      color: Colors.black54,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (travel.travelers.isNotEmpty)
-                            _TravelerAvatars(travelers: travel.travelers),
-                        ],
-                      ),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            '$startDestination → $endDestination',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
-                            ),
-                          ),
-                          OutlinedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/infoTravel',
-                                arguments: travel,
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30.0),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 8,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            child: Text(loc.homeButtonExplore),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                            if (travel.travelers.isNotEmpty)
+                              _TravelerAvatars(travelers: travel.travelers),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '$startDestination → $endDestination',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ),
+                            OutlinedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/infoTravel',
+                                  arguments: travel,
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 8,
+                                ),
+                              ),
+                              child: Text(loc.homeButtonExplore),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

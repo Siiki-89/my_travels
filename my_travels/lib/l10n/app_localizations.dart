@@ -528,6 +528,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Age above normal.'**
   String get ageAboveNormal;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips found with that name.'**
+  String get noSearchResults;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

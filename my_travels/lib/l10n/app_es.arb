@@ -78,5 +78,6 @@
   "homeSearchHint" : "buscar por título...",
   "homeButtonExplore" : "Explorar",
   "ageBelowZero": "La edad debe ser mayor o igual a 0.",
-  "ageAboveNormal": "Edad por encima de lo normal."
+  "ageAboveNormal": "Edad por encima de lo normal.",
+  "noSearchResults": "No se encontraron viajes con ese nombre."
 }

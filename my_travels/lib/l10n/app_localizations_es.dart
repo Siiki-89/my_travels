@@ -225,4 +225,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ageAboveNormal => 'Edad por encima de lo normal.';
+
+  @override
+  String get noSearchResults => 'No se encontraron viajes con ese nombre.';
 }

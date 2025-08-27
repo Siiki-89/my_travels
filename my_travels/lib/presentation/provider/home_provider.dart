@@ -7,6 +7,7 @@ class HomeProvider with ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  List<Travel> get allTravels => _allTravels;
 
   bool _onPressed = false;
   bool get onPressed => _onPressed;
