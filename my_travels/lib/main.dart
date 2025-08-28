@@ -60,6 +60,8 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             fontFamily: GoogleFonts.notoSans().fontFamily,
             brightness: Brightness.light,
+            primaryColor: Colors.blue,
+            textTheme: const TextTheme().apply(bodyColor: Colors.black),
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(
               foregroundColor: Colors.black,
@@ -75,11 +77,18 @@ class MyApp extends StatelessWidget {
           ),
           darkTheme: ThemeData(
             fontFamily: GoogleFonts.notoSans().fontFamily,
+            textTheme: const TextTheme().apply(bodyColor: Colors.white),
             brightness: Brightness.dark,
             primarySwatch: Colors.indigo,
+            primaryColor: Colors.blue,
             appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF2C3E50),
+              backgroundColor: Colors.black,
               foregroundColor: Colors.white,
+            ),
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: Colors.blue,
+              selectionColor: Colors.blue,
+              selectionHandleColor: Colors.blue,
             ),
             floatingActionButtonTheme: const FloatingActionButtonThemeData(
               backgroundColor: Color(0xFF34495E),
@@ -106,8 +115,7 @@ class MyApp extends StatelessWidget {
             '/addTravel': (_) => const CreateTravelPage(),
             '/mappage': (_) => const MapPage(),
             '/infoTravel': (_) => const InfoTravelPage(),
-        '/newcomment': (_) => const NewCommentPage(),
-
+            '/newcomment': (_) => const NewCommentPage(),
           },
         );
       },

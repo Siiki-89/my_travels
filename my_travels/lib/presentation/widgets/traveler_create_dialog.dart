@@ -45,7 +45,8 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                 filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black45,
+                    border: Border.all(color: Colors.white30),
+                    color: Colors.black12,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -108,7 +109,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                                 Navigator.of(context).pop();
                               },
 
-                              style: AppButtonStyles.primaryButtonStyle,
+                              style: AppButtonStyles.savePersonButtonStyle,
                               child: Text(
                                 loc.cancelButton,
                                 style: TextStyle(color: Colors.white),
@@ -136,7 +137,7 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                                   Navigator.of(context).pop();
                                 }
                               },
-                              style: AppButtonStyles.primaryButtonStyle,
+                              style: AppButtonStyles.savePersonButtonStyle,
                               child: Consumer<TravelerProvider>(
                                 builder: (context, provider, child) {
                                   return Text(

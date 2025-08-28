@@ -36,8 +36,8 @@ class HomePage extends StatelessWidget {
                     floating: true,
                     snap: true,
                     centerTitle: true,
-                    backgroundColor: Colors.transparent, // deixa transparente
-                    elevation: 0, // remove a sombra do appbar
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
                     title: Text(loc.appName),
                     bottom: PreferredSize(
                       preferredSize: const Size.fromHeight(60),

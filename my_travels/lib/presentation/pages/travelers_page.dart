@@ -18,7 +18,9 @@ class TravelersPage extends StatelessWidget {
     final appLocalizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(appLocalizations.users), centerTitle: true),
+      appBar: travelerProvider.travelers.isEmpty
+          ? null
+          : AppBar(title: Text(appLocalizations.users), centerTitle: true),
       body: SafeArea(
         child: travelerProvider.isLoading
             ? const Center(child: CircularProgressIndicator())

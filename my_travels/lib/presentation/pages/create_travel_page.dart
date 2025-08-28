@@ -24,10 +24,8 @@ final _formKey = GlobalKey<FormState>();
 class CreateTravelPage extends StatelessWidget {
   const CreateTravelPage({super.key});
 
-
   @override
   Widget build(BuildContext context) {
-
     final loc = AppLocalizations.of(context)!;
     final providerTravel = context.watch<TravelProvider>();
 
@@ -58,7 +56,7 @@ class CreateTravelPage extends StatelessWidget {
                             validator: (title) => title!.length < 3
                                 ? 'pelo menos 3 caracteres'
                                 : null,
-                            isWhite: true,
+                            isWhite: false,
                           ),
                           const SizedBox(height: 16),
                           Text(loc.travelAddStartJourneyDateText),
@@ -84,6 +82,7 @@ class CreateTravelPage extends StatelessWidget {
                           _buildAnimatedText(
                             providerTravel.validateVehicle,
                             loc.travelAddTypeLocomotion,
+                            context,
                           ),
 
                           const SizedBox(height: 16),
@@ -96,6 +95,7 @@ class CreateTravelPage extends StatelessWidget {
                               _buildAnimatedText(
                                 providerTravel.validadeTravelers,
                                 loc.users,
+                                context,
                               ),
                               IconButton(
                                 onPressed: () {
@@ -182,6 +182,7 @@ class CreateTravelPage extends StatelessWidget {
                           _buildAnimatedText(
                             providerTravel.validadeRoute,
                             loc.travelAddTrip,
+                            context,
                           ),
                           SizedBox(height: 16),
 
@@ -320,12 +321,18 @@ class CreateTravelPage extends StatelessWidget {
     );
   }
 
-  AnimatedDefaultTextStyle _buildAnimatedText(bool providerType, String loc) {
+  AnimatedDefaultTextStyle _buildAnimatedText(
+    bool providerType,
+    String loc,
+    BuildContext context,
+  ) {
     return AnimatedDefaultTextStyle(
       duration: const Duration(milliseconds: 300),
       style: TextStyle(
         fontSize: 16,
-        color: providerType ? Colors.red : Colors.black,
+        color: providerType
+            ? Colors.red
+            : Theme.of(context).textTheme.bodyMedium?.color,
       ),
       child: Text('${loc}: '),
     );
@@ -338,8 +345,6 @@ class CreateTravelPage extends StatelessWidget {
     return InkWell(
       onTap: () async {
         await _cropImage(context, providerTravel);
-
-
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -374,8 +379,6 @@ class CreateTravelPage extends StatelessWidget {
   }
 
   Future<void> _cropImage(BuildContext context, TravelProvider provider) async {
-
-
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );
@@ -389,17 +392,16 @@ class CreateTravelPage extends StatelessWidget {
       compressFormat: ImageCompressFormat.jpg,
       compressQuality: 100,
       uiSettings: [
-      AndroidUiSettings(
-        showCropGrid: false,
-        toolbarTitle: 'Cropper',
-        toolbarColor: Colors.black,
-        toolbarWidgetColor: Colors.white,
-        initAspectRatio: CropAspectRatioPreset.square,
-        lockAspectRatio: false,
-        hideBottomControls: true,
-
-      ),
-    ],
+        AndroidUiSettings(
+          showCropGrid: false,
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: false,
+          hideBottomControls: true,
+        ),
+      ],
     );
 
     if (croppedFile == null) {
@@ -425,8 +427,6 @@ class CreateTravelPage extends StatelessWidget {
 }
 
 class CropAspectRatioPresetCustom implements CropAspectRatioPresetData {
-
-
   @override
   (int, int)? get data => (2, 3);
 
