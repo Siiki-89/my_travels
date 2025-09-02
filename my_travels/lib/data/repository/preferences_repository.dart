@@ -1,8 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferencesRepository {
-  static const String _themeKey = 'app_theme';
-  static const String _languageKey = 'app_language';
+  static const _themeKey = 'app_theme';
+  static const _languageKey = 'app_language';
 
   Future<bool> getThemeMode() async {
     final preference = await SharedPreferences.getInstance();
@@ -16,7 +16,7 @@ class PreferencesRepository {
 
   Future<String> getLanguageCode() async {
     final preference = await SharedPreferences.getInstance();
-    return preference.getString(_languageKey) ?? 'en';
+    return preference.getString(_languageKey) ?? 'pt';
   }
 
   Future<void> saveLanguageCode(String languageCode) async {

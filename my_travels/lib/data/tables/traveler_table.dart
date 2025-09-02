@@ -1,17 +1,15 @@
-abstract class TravelerTable {
-  static const String tableName = 'Traveler';
-  static const String id = 'id';
-  static const String name = 'name';
-  static const String age = 'age';
-  static const String photoPath = 'photoPath';
+const travelerTableName = 'Traveler';
+const travelerTableId = 'id';
+const travelerTableNameColumn = 'name';
+const travelerTableAge = 'age';
+const travelerTablePhotoPath = 'photoPath';
 
-  static const String createTable =
-      '''
-        CREATE TABLE $tableName(
-            $id INTEGER PRIMARY KEY AUTOINCREMENT,
-            $name TEXT NOT NULL,
-            $age INTEGER,
-            $photoPath TEXT
-        );
-        ''';
-}
+const createTravelerTable =
+    '''
+  CREATE TABLE $travelerTableName(
+      $travelerTableId INTEGER PRIMARY KEY AUTOINCREMENT,
+      $travelerTableNameColumn TEXT NOT NULL,
+      $travelerTableAge INTEGER,
+      $travelerTablePhotoPath TEXT
+  );
+''';

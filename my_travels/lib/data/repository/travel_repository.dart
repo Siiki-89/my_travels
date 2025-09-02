@@ -8,75 +8,92 @@ import 'package:my_travels/data/tables/travel_traveler_table.dart';
 import 'package:my_travels/data/tables/traveler_table.dart';
 
 class TravelRepository {
-  final DatabaseService _dbService = DatabaseService.instance;
+  TravelRepository({required this.dbService});
+  final DatabaseService dbService;
 
   Future<void> insertTravel(Travel travel) async {
-    final db = await _dbService.database;
+    final db = await dbService.database;
 
     await db.transaction((txn) async {
-      final travelId = await txn.insert(TravelTable.tableName, travel.toMap());
+      final travelId = await txn.insert(travelTableName, travel.toMap());
 
       for (final stopPoint in travel.stopPoints) {
         final stopPointMap = stopPoint.toMap();
-        stopPointMap['travel_id'] = travelId;
-        await txn.insert(StopPointTable.tableName, stopPointMap);
+        stopPointMap[stopPointTableTravelId] = travelId;
+        await txn.insert(stopPointTableName, stopPointMap);
       }
 
       for (final traveler in travel.travelers) {
         if (traveler.id != null) {
-          final link = {'travel_id': travelId, 'traveler_id': traveler.id};
-          await txn.insert(TravelTravelerTable.tableName, link);
+          final link = {
+            travelTravelerTableTravelId: travelId,
+            travelTravelerTableTravelerId: traveler.id,
+          };
+          await txn.insert(travelTravelerTableName, link);
         }
       }
     });
   }
 
-
-  Future<List<Travel>> getTravels() async {
-    final db = await _dbService.database;
-
-    final List<Map<String, dynamic>> travelMaps = await db.query(
-      TravelTable.tableName,
+  Future<Travel?> getTravelById(int id) async {
+    final db = await dbService.database;
+    final travelMaps = await db.query(
+      travelTableName,
+      where: '$travelTableId = ?',
+      whereArgs: [id],
     );
 
-    final List<Travel> travels = [];
+    if (travelMaps.isEmpty) return null;
 
-    for (var travelMap in travelMaps) {
-      final travelId = travelMap[TravelTable.id] as int;
+    final travelMap = travelMaps.first;
+    final travelIdValue = travelMap[travelTableId] as int;
 
-      final List<Map<String, dynamic>> stopPointMaps = await db.query(
-        StopPointTable.tableName,
-        where: '${StopPointTable.travelId} = ?',
-        whereArgs: [travelId],
-        orderBy: '${StopPointTable.stopOrder} ASC',
+    final stopPointMaps = await db.query(
+      stopPointTableName,
+      where: '$stopPointTableTravelId = ?',
+      whereArgs: [travelIdValue],
+      orderBy: '$stopPointTableStopOrder ASC',
+    );
+    final stopPoints = stopPointMaps.map(StopPoint.fromMap).toList();
+
+    final linkMaps = await db.query(
+      travelTravelerTableName,
+      where: '$travelTravelerTableTravelId = ?',
+      whereArgs: [travelIdValue],
+    );
+    final travelerIds = linkMaps
+        .map((map) => map[travelTravelerTableTravelerId] as int)
+        .toList();
+
+    var travelers = <Traveler>[];
+    if (travelerIds.isNotEmpty) {
+      final travelersMaps = await db.query(
+        travelerTableName,
+        where: '$travelerTableId IN (${travelerIds.join(',')})',
       );
-      final stopPoints = stopPointMaps
-          .map((map) => StopPoint.fromMap(map))
-          .toList();
-
-      final List<Map<String, dynamic>> linkMaps = await db.query(
-        TravelTravelerTable.tableName,
-        where: '${TravelTravelerTable.travelId} = ?',
-        whereArgs: [travelId],
-      );
-      final travelerIds = linkMaps
-          .map((map) => map[TravelTravelerTable.travelerId] as int)
-          .toList();
-
-      List<Traveler> travelers = [];
-      if (travelerIds.isNotEmpty) {
-        final travelersMaps = await db.query(
-          TravelerTable.tableName,
-          where: '${TravelerTable.id} IN (${travelerIds.join(',')})',
-        );
-        travelers = travelersMaps.map((map) => Traveler.fromMap(map)).toList();
-      }
-
-      travels.add(
-        Travel.fromMap(travelMap, stopPoints: stopPoints, travelers: travelers),
-      );
+      travelers = travelersMaps.map(Traveler.fromMap).toList();
     }
 
+    return Travel.fromMap(
+      travelMap,
+      stopPoints: stopPoints,
+      travelers: travelers,
+    );
+  }
+
+  Future<List<Travel>> getTravels() async {
+    final db = await dbService.database;
+    final travelMaps = await db.query(travelTableName);
+    final travels = <Travel>[];
+
+    for (final travelMap in travelMaps) {
+      // Para a lista da home, buscamos a viagem completa.
+      // Uma otimização futura seria buscar uma versão resumida.
+      final travel = await getTravelById(travelMap[travelTableId] as int);
+      if (travel != null) {
+        travels.add(travel);
+      }
+    }
     return travels;
   }
 }

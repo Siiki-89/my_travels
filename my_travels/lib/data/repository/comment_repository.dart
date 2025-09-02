@@ -8,55 +8,52 @@ import 'package:my_travels/data/tables/traveler_table.dart';
 import 'package:sqflite/sqflite.dart';
 
 class CommentRepository {
-  final DatabaseService _dbService = DatabaseService.instance;
+  CommentRepository({required this.dbService});
+  final DatabaseService dbService;
 
-  // CREATE
   Future<void> insertComment(Comment comment) async {
-    final db = await _dbService.database;
+    final db = await dbService.database;
 
     await db.transaction((txn) async {
       final commentId = await txn.insert(
-        CommentTable.tableName,
+        commentTableName,
         comment.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
       for (final photo in comment.photos) {
         final photoMap = photo.toMap();
-        photoMap['comment_id'] = commentId;
-        await txn.insert(CommentPhotoTable.tableName, photoMap);
+        photoMap[commentPhotoTableCommentId] = commentId;
+        await txn.insert(commentPhotoTableName, photoMap);
       }
     });
   }
 
-  // READ ALL
   Future<List<Comment>> getCommentsByStopPointId(int stopPointId) async {
-    final db = await _dbService.database;
-    final List<Map<String, dynamic>> commentMaps = await db.query(
-      CommentTable.tableName,
-      where: '${CommentTable.stopPointId} = ?',
+    final db = await dbService.database;
+    final commentMaps = await db.query(
+      commentTableName,
+      where: '$commentTableStopPointId = ?',
       whereArgs: [stopPointId],
     );
 
-    final List<Comment> comments = [];
+    final comments = <Comment>[];
 
-    for (var commentMap in commentMaps) {
-      final int commentId = commentMap[CommentTable.id] as int;
+    for (final commentMap in commentMaps) {
+      final commentId = commentMap[commentTableId] as int;
 
-      // Buscar as fotos do comentário
-      final List<Map<String, dynamic>> photoMaps = await db.query(
-        CommentPhotoTable.tableName,
-        where: '${CommentPhotoTable.commentId} = ?',
+      final photoMaps = await db.query(
+        commentPhotoTableName,
+        where: '$commentPhotoTableCommentId = ?',
         whereArgs: [commentId],
       );
-      final photos = photoMaps.map((map) => CommentPhoto.fromMap(map)).toList();
+      final photos = photoMaps.map(CommentPhoto.fromMap).toList();
 
-      // Buscar o viajante do comentário
-      final int travelerId = commentMap[CommentTable.travelerId] as int;
+      final travelerIdValue = commentMap[commentTableTravelerId] as int;
       final travelerMap = await db.query(
-        TravelerTable.tableName,
-        where: '${TravelerTable.id} = ?',
-        whereArgs: [travelerId],
+        travelerTableName,
+        where: '$travelerTableId = ?',
+        whereArgs: [travelerIdValue],
       );
       final traveler = travelerMap.isNotEmpty
           ? Traveler.fromMap(travelerMap.first)
@@ -67,22 +64,5 @@ class CommentRepository {
       );
     }
     return comments;
-  }
-
-  // DELETE
-  Future<void> deleteComment(int id) async {
-    final db = await _dbService.database;
-    await db.transaction((txn) async {
-      await txn.delete(
-        CommentPhotoTable.tableName,
-        where: '${CommentPhotoTable.commentId} = ?',
-        whereArgs: [id],
-      );
-      await txn.delete(
-        CommentTable.tableName,
-        where: '${CommentTable.id} = ?',
-        whereArgs: [id],
-      );
-    });
   }
 }
