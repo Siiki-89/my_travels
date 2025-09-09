@@ -115,7 +115,7 @@ class _TravelerListItem extends StatelessWidget {
                 // A ação de deletar é passada aqui
                 // O `await` não é mais necessário aqui pois o pop acontece dentro da função
                 context.read<TravelerProvider>().deleteTraveler(
-                  traveler.id,
+                  traveler.id!,
                   context,
                 );
               },

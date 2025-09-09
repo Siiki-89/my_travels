@@ -21,11 +21,6 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
   final _picker = ImagePicker();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final travelerProvider = context.watch<TravelerProvider>();
     final travelerProviderReader = context.read<TravelerProvider>();
@@ -105,36 +100,36 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                             child: ElevatedButton(
                               onPressed: () {
                                 context.read<TravelerProvider>().resetFields();
-
                                 Navigator.of(context).pop();
                               },
-
                               style: AppButtonStyles.savePersonButtonStyle,
                               child: Text(
                                 loc.cancelButton,
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
-                                  final provider = context
-                                      .read<TravelerProvider>();
+                                  try {
+                                    await context
+                                        .read<TravelerProvider>()
+                                        .saveTraveler();
 
-                                  if (provider.editingId != null) {
-                                    await provider.editTraveler(context);
-                                  } else {
-                                    await provider.addTraveler(context);
+                                    if (!mounted) return;
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(e.toString()),
+                                        backgroundColor: Colors.redAccent,
+                                      ),
+                                    );
                                   }
-
-                                  if (!mounted) return;
-
-                                  Navigator.of(context).pop();
                                 }
                               },
                               style: AppButtonStyles.savePersonButtonStyle,
@@ -184,7 +179,6 @@ class _CreateAddTravelerDialogState extends State<CreateAddTravelerDialog> {
                         alignment: Alignment.bottomRight,
                         child: CircleAvatar(
                           backgroundColor: Colors.black,
-
                           radius: 20.0,
                           child: Icon(
                             Icons.camera_alt,

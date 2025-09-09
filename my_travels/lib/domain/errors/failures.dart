@@ -1,4 +1,8 @@
-// domain/errors/failures.dart
+// Em lib/domain/errors/failures.dart
+
+// ----------------------------------------------------
+// Exceções para a validação de uma VIAGEM (Travel)
+// ----------------------------------------------------
 
 abstract class TravelValidationException implements Exception {
   final String message;
@@ -19,4 +23,19 @@ class InvalidTravelersException extends TravelValidationException {
 
 class InvalidRouteException extends TravelValidationException {
   InvalidRouteException(String message) : super(message);
+}
+
+// ----------------------------------------------------
+// Exceções para a validação de um VIAJANTE (Traveler)
+// ----------------------------------------------------
+
+// Classe base abstrata, assim como a TravelValidationException.
+abstract class TravelerValidationException implements Exception {
+  final String message;
+  TravelerValidationException(this.message);
+}
+
+// Classe concreta que pode ser usada para lançar os erros.
+class InvalidTravelerDataException extends TravelerValidationException {
+  InvalidTravelerDataException(String message) : super(message);
 }

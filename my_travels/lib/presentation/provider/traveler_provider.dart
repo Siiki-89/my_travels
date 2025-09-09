@@ -2,64 +2,124 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/domain/errors/failures.dart';
+import 'package:my_travels/domain/use_cases/traveler/delete_traveler_use_case.dart';
+import 'package:my_travels/domain/use_cases/traveler/get_travelers_use_case.dart';
+import 'package:my_travels/domain/use_cases/traveler/save_traveler_use_case.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 
 class TravelerProvider with ChangeNotifier {
-  final TravelerRepository _repository = TravelerRepository();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController ageController = TextEditingController();
+  // --- DEPENDÊNCIAS (Use Cases) ---
+  final GetTravelersUseCase _getTravelersUseCase;
+  final SaveTravelerUseCase _saveTravelerUseCase;
+  final DeleteTravelerUseCase _deleteTravelerUseCase;
 
-  bool _onPressed = false;
-  bool get onPressed => _onPressed;
-
-  void changeOnPressed() {
-    _onPressed = !_onPressed;
-    notifyListeners();
-  }
-
-  String _name = '';
-  int? _age;
-  File? _selectedImage;
-  String? _errorMessage;
+  // --- ESTADO DA UI ---
+  bool _isLoading = true;
   List<Traveler> _travelers = [];
-  bool _isLoading = false;
+  String? _errorMessage;
+  List<Traveler> _selectedTravelers =
+      []; // Usado na tela de seleção de viajantes
+
+  // --- ESTADO DO FORMULÁRIO (Para o Dialog de Adicionar/Editar) ---
+  final nameController = TextEditingController();
+  final ageController = TextEditingController();
+  File? _selectedImage;
   int? _editingId;
-  String _optionNow = '';
-  final List<Traveler> _selectedTravelers = [];
 
-  int? get editingId => _editingId;
-  String get name => _name;
-  String? get errorMessage => _errorMessage;
-  int? get age => _age;
-  File? get selectedImage => _selectedImage;
-  List<Traveler> get travelers => _travelers;
+  // --- GETTERS (Para a UI acessar o estado) ---
   bool get isLoading => _isLoading;
-  String get optionNow => _optionNow;
+  List<Traveler> get travelers => _travelers;
+  String? get errorMessage => _errorMessage;
   List<Traveler> get selectedTravelers => _selectedTravelers;
+  File? get selectedImage => _selectedImage;
+  int? get editingId => _editingId;
 
-  TravelerProvider() {
+  // Construtor que recebe o repositório para criar os Use Cases.
+  // Isso é chamado de Injeção de Dependência.
+  TravelerProvider(TravelerRepository repository)
+    : _getTravelersUseCase = GetTravelersUseCase(repository),
+      _saveTravelerUseCase = SaveTravelerUseCase(repository),
+      _deleteTravelerUseCase = DeleteTravelerUseCase(repository) {
+    // Inicia o carregamento dos dados assim que o provider é criado.
     loadTravelers();
   }
 
-  void setName(String newName) => _name = newName;
+  // --- MÉTODOS QUE INTERAGEM COM OS USE CASES ---
 
-  void setAge(String newAge) => _age = int.tryParse(newAge);
+  Future<void> loadTravelers() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _travelers = await _getTravelersUseCase();
+    } catch (e) {
+      _errorMessage = 'Erro ao carregar viajantes.';
+      debugPrint("Erro em loadTravelers: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Salva (cria ou atualiza) um viajante.
+  /// Lança `TravelerValidationException` em caso de falha de validação,
+  /// que será tratada pela UI.
+  Future<void> saveTraveler() async {
+    final traveler = Traveler(
+      id: _editingId,
+      name: nameController.text,
+      age:
+          int.tryParse(ageController.text) ?? -1, // -1 para falhar na validação
+      photoPath: _selectedImage?.path,
+    );
+
+    // O UseCase agora lida com a validação e o salvamento.
+    // O try-catch será feito na UI para exibir o erro específico.
+    await _saveTravelerUseCase(traveler);
+
+    // Após o sucesso, limpa os campos e recarrega a lista.
+    resetFields();
+    await loadTravelers();
+  }
+
+  Future<void> deleteTraveler(int id, BuildContext context) async {
+    try {
+      await _deleteTravelerUseCase(id);
+      await loadTravelers();
+    } catch (e) {
+      _errorMessage = 'Erro ao deletar viajante.';
+      _showErrorSnackBar(context, _errorMessage!);
+      debugPrint("Erro em deleteTraveler: $e");
+    }
+  }
+
+  // --- MÉTODOS QUE GERENCIAM A UI E O ESTADO DO FORMULÁRIO ---
+
+  void prepareForEdit(Traveler traveler) {
+    _editingId = traveler.id;
+    nameController.text = traveler.name;
+    ageController.text = traveler.age.toString();
+    _selectedImage = traveler.photoPath != null
+        ? File(traveler.photoPath!)
+        : null;
+    notifyListeners();
+  }
+
+  void resetFields() {
+    _editingId = null;
+    nameController.clear();
+    ageController.clear();
+    _selectedImage = null;
+    notifyListeners();
+  }
 
   void setImage(File? newImage) {
     _selectedImage = newImage;
     notifyListeners();
   }
 
-  void setEditingId(int? id) {
-    _editingId = id;
-    notifyListeners();
-  }
-
-  void setOptionNow(String option) {
-    _optionNow = option;
-    notifyListeners();
-  }
-
+  // Lógica para a seleção de viajantes para uma viagem
   bool isSelected(Traveler traveler) {
     return _selectedTravelers.any((t) => t.id == traveler.id);
   }
@@ -74,126 +134,9 @@ class TravelerProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void changeOptionNow(String valor) {
-    if (_optionNow == valor) {
-      _optionNow = '';
-      resetFields();
-    } else {
-      _optionNow = valor;
-      resetFields();
-    }
-    notifyListeners();
-  }
-
-  Future<void> loadTravelers([BuildContext? context]) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-    try {
-      _travelers = await _repository.getTravelers();
-      debugPrint('Viajantes carregados: ${_travelers.length}');
-    } catch (e) {
-      final t = AppLocalizations.of(context!);
-      _errorMessage = '${t?.errorLoadingTravelers} $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> addTraveler([BuildContext? context]) async {
-    final t = context != null ? AppLocalizations.of(context) : null;
-    _errorMessage = null;
-
-    final name = nameController.text;
-    final age = int.tryParse(ageController.text);
-
-    if (name.trim().isEmpty) {
-      _errorMessage = t?.nameRequiredError;
-      notifyListeners();
-      return;
-    }
-    if (age == null || age <= 0) {
-      _errorMessage = t?.ageRequiredError;
-      notifyListeners();
-      return;
-    }
-
-    final newTraveler = Traveler(
-      name: name,
-      age: age,
-      photoPath: _selectedImage?.path,
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
     );
-
-    try {
-      await _repository.insertTraveler(newTraveler);
-      resetFields();
-      await loadTravelers(context);
-    } catch (e) {
-      _errorMessage = '${t?.errorAddingTraveler} $e';
-      notifyListeners();
-    }
-  }
-
-  Future<void> deleteTraveler(int? id, [BuildContext? context]) async {
-    final t = context != null ? AppLocalizations.of(context) : null;
-    if (id == null) {
-      _errorMessage = 'ID inválido';
-      notifyListeners();
-      return;
-    }
-    try {
-      await _repository.deleteTraveler(id);
-      debugPrint('Viajante deletado: $id');
-      await loadTravelers(context);
-      _errorMessage = null;
-    } catch (e) {
-      _errorMessage = '${t?.errorDeletingTraveler} $e';
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  Future<void> editTraveler([BuildContext? context]) async {
-    final t = context != null ? AppLocalizations.of(context) : null;
-    if (_editingId == null) return;
-
-    final name = nameController.text;
-    final age = int.tryParse(ageController.text);
-
-    final updatedTraveler = Traveler(
-      id: _editingId,
-      name: name,
-      age: age,
-      photoPath: _selectedImage?.path,
-    );
-
-    try {
-      await _repository.updateTraveler(updatedTraveler);
-      resetFields();
-      await loadTravelers(context);
-    } catch (e) {
-      _errorMessage = '${t?.errorUpdatingTraveler} $e';
-    }
-  }
-
-  void resetFields() {
-    nameController.clear();
-    ageController.clear();
-    _selectedImage = null;
-    _errorMessage = null;
-    _editingId = null;
-    notifyListeners();
-  }
-
-  void prepareForEdit(Traveler traveler) {
-    nameController.text = traveler.name;
-    ageController.text = traveler.age.toString();
-    _selectedImage = traveler.photoPath != null
-        ? File(traveler.photoPath!)
-        : null;
-    _editingId = traveler.id;
-    _errorMessage = null;
-    notifyListeners();
   }
 }

@@ -32,7 +32,7 @@ void main() async {
   await dotenv.load();
 
   // 1. Construir Dependências (Singletons)
-  final dbService = DatabaseService.instance;
+  // final dbService = DatabaseService.instance; // Não precisa ser uma variável local
   final preferencesRepository = PreferencesRepository();
   final googleMapsService = GoogleMapsService();
 
@@ -51,11 +51,19 @@ void main() async {
 
         // Providers de UI globais
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
-        ChangeNotifierProvider(create: (_) => TravelerProvider()),
+
+        // =======================================================
+        // ### AQUI ESTÁ A CORREÇÃO ###
+        // O TravelerProvider agora recebe o repositório que ele precisa.
+        ChangeNotifierProvider(
+          create: (context) =>
+              TravelerProvider(context.read<TravelerRepository>()),
+        ),
+
+        // =======================================================
         ChangeNotifierProvider(create: (_) => CreateTravelProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
 
-        // LINHA CORRIGIDA ABAIXO
         ChangeNotifierProvider(
           create: (context) =>
               MapProvider(googleMapsService: context.read<GoogleMapsService>()),
@@ -97,7 +105,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: const [Locale('en'), Locale('es'), Locale('pt')],
           initialRoute: '/navigator',
           routes: {
-            '/navigator': (_) => NavigatorPage(),
+            '/navigator': (_) => const NavigatorPage(),
             '/home': (_) => const HomePage(),
             '/travelers': (_) => const TravelersPage(),
             '/settings': (_) => const SettingsPage(),
@@ -119,11 +127,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,
         brightness: Brightness.light,
-
-        // Sobrescrevendo as cores de texto para o Modo Claro
-        // Cor primária do texto (ex: títulos, corpo do texto principal)
         onSurface: Colors.black,
-        // Cor secundária do texto (ex: subtítulos, textos de ajuda)
         onSurfaceVariant: Colors.grey.shade800,
       ),
     );
@@ -137,11 +141,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,
         brightness: Brightness.dark,
-
-        // Sobrescrevendo as cores de texto para o Modo Escuro
-        // Cor primária do texto (ex: títulos, corpo do texto principal)
         onSurface: Colors.white,
-        // Cor secundária do texto (ex: subtítulos, textos de ajuda)
         onSurfaceVariant: Colors.grey.shade300,
       ),
     );

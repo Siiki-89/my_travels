@@ -106,7 +106,7 @@ class CreateTravelPage extends StatelessWidget {
                                 onPressed: () {
                                   context
                                       .read<TravelerProvider>()
-                                      .loadTravelers(context);
+                                      .loadTravelers();
                                   showSmoothDialog(
                                     context,
                                     const _SelectTravelerDialog(),
