@@ -13,12 +13,9 @@ import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 import 'package:my_travels/presentation/widgets/place_search_field.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 final _formKey = GlobalKey<FormState>();
-
-// =======================================================
-// WIDGET DA PÁGINA PRINCIPAL
-// =======================================================
 
 class CreateTravelPage extends StatelessWidget {
   const CreateTravelPage({super.key});
@@ -42,12 +39,18 @@ class CreateTravelPage extends StatelessWidget {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Chamada ao novo widget privado para a imagem
                     Consumer<CreateTravelProvider>(
                       builder: (context, providerTravel, _) {
-                        return _TravelImagePicker(
-                          providerTravel: providerTravel,
-                          onTap: () => _cropImage(context, providerTravel),
+                        // Usamos o ImagePickerButton para dar a funcionalidade de clique...
+                        return ImagePickerButton(
+                          // 1. O que fazer quando a imagem for selecionada:
+                          onImageSelected: (file) {
+                            providerTravel.setImage(file);
+                          },
+                          // 2. O que será exibido e clicável:
+                          child: _TravelImagePicker(
+                            providerTravel: providerTravel,
+                          ),
                         );
                       },
                     ),
@@ -194,7 +197,6 @@ class CreateTravelPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
 
-                          // Chamada ao novo widget privado para a rota
                           _TravelRouteSection(loc: appLocalizations),
 
                           Row(
@@ -254,7 +256,7 @@ class CreateTravelPage extends StatelessWidget {
     AppLocalizations appLocalizations,
   ) {
     return IconButton(
-      icon: const Icon(Icons.refresh), // Um ícone mais apropriado que delete
+      icon: const Icon(Icons.refresh),
       onPressed: () {
         showSmoothDialog(
           context,
@@ -265,7 +267,6 @@ class CreateTravelPage extends StatelessWidget {
             cancel: appLocalizations.cancel,
 
             onConfirm: () {
-              // Sua lógica para limpar o formulário vai aqui
               final travelerProvider = context.read<TravelerProvider>();
               context.read<CreateTravelProvider>().resetTravelForm(
                 travelerProvider,
@@ -275,38 +276,6 @@ class CreateTravelPage extends StatelessWidget {
         );
       },
     );
-  }
-
-  // --- MÉTODOS DE LÓGICA MANTIDOS NA PÁGINA ---
-
-  Future<void> _cropImage(
-    BuildContext context,
-    CreateTravelProvider provider,
-  ) async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
-    if (pickedFile == null) return;
-
-    final croppedFile = await ImageCropper().cropImage(
-      sourcePath: pickedFile.path,
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-      uiSettings: [
-        AndroidUiSettings(
-          showCropGrid: false,
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.black,
-          toolbarWidgetColor: Colors.white,
-          initAspectRatio: CropAspectRatioPreset.square,
-          lockAspectRatio: false,
-          hideBottomControls: true,
-        ),
-      ],
-    );
-
-    if (croppedFile == null) return;
-    provider.setImage(File(croppedFile.path));
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
@@ -324,9 +293,56 @@ class CreateTravelPage extends StatelessWidget {
   }
 }
 
-// =======================================================
-// WIDGETS PRIVADOS (COMPONENTES INTERNOS DA PÁGINA)
-// =======================================================
+class ImagePickerButton extends StatelessWidget {
+  /// O widget que será exibido e clicável (ex: um Icon, um Card).
+  final Widget child;
+
+  /// Callback que será chamado com o arquivo de imagem resultante.
+  final ValueChanged<File> onImageSelected;
+
+  const ImagePickerButton({
+    super.key,
+    required this.child,
+    required this.onImageSelected,
+  });
+
+  // A lógica de _cropImage agora vive dentro deste widget.
+  Future<void> _pickAndCropImage() async {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.pink),
+    );
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile == null) return;
+
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: pickedFile.path,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 90,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Recortar Imagem',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.ratio16x9,
+          lockAspectRatio: true,
+          hideBottomControls: true,
+        ),
+        IOSUiSettings(title: 'Recortar Imagem'),
+      ],
+    );
+
+    if (croppedFile == null) return;
+
+    onImageSelected(File(croppedFile.path));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(onTap: _pickAndCropImage, child: child);
+  }
+}
 
 class _SelectExperienceDialog extends StatelessWidget {
   const _SelectExperienceDialog();
@@ -342,7 +358,6 @@ class _SelectExperienceDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        // A Column principal "encolhe" para se ajustar ao conteúdo.
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -352,16 +367,12 @@ class _SelectExperienceDialog extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // A Column interna organiza a lista rolável e o botão.
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Flexible permite que a lista cresça e se torne rolável sem erro.
                 Flexible(
                   child: Consumer<CreateTravelProvider>(
                     builder: (context, provider, child) {
-                      // Se não houver experiências, o Wrap simplesmente não renderiza filhos
-                      // e o Dialog ficará pequeno, o que está correto.
                       return SingleChildScrollView(
                         child: Wrap(
                           spacing: 12.0,
@@ -371,7 +382,6 @@ class _SelectExperienceDialog extends StatelessWidget {
                           ) {
                             final bool isSelected = provider
                                 .isSelectedExperience(experience);
-                            // --- CÓDIGO DO CARD IDÊNTICO AO SEU ORIGINAL ---
                             return GestureDetector(
                               onTap: () =>
                                   provider.toggleExperience(experience),
@@ -451,7 +461,6 @@ class _SelectExperienceDialog extends StatelessWidget {
                                 ),
                               ),
                             );
-                            // --- FIM DO CÓDIGO DO CARD ORIGINAL ---
                           }).toList(),
                         ),
                       );
@@ -570,7 +579,6 @@ class _SelectTravelerDialog extends StatelessWidget {
                             final bool isSelected = provider.isSelected(
                               traveler,
                             );
-                            // --- CÓDIGO DO CARD IDÊNTICO AO SEU ORIGINAL ---
                             return GestureDetector(
                               onTap: () => provider.toggleTraveler(traveler),
                               child: Container(
@@ -653,7 +661,6 @@ class _SelectTravelerDialog extends StatelessWidget {
                                 ),
                               ),
                             );
-                            // --- FIM DO CÓDIGO DO CARD ORIGINAL ---
                           }).toList(),
                         ),
                       ),
@@ -737,58 +744,46 @@ class _SelectTransport extends StatelessWidget {
   }
 }
 
-/// Componente para exibir e selecionar a imagem da capa da viagem.
 class _TravelImagePicker extends StatelessWidget {
   final CreateTravelProvider providerTravel;
-  final VoidCallback onTap;
+  // O parâmetro onTap foi removido.
 
-  const _TravelImagePicker({required this.providerTravel, required this.onTap});
+  const _TravelImagePicker({required this.providerTravel});
 
   @override
   Widget build(BuildContext context) {
-    // O widget agora "ouve" o estado de validação do provider.
     final bool hasError = providerTravel.validateImage;
 
+    // O InkWell foi removido daqui
     return Column(
       children: [
-        InkWell(
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: providerTravel.coverImage != null ? 300 : 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: providerTravel.coverImage != null
-                  ? const BorderRadius.vertical(bottom: Radius.circular(8))
-                  : null,
-
-              // =======================================================
-              // LÓGICA DA BORDA DE ERRO ADICIONADA AQUI
-              // =======================================================
-              border: Border.all(
-                color: hasError ? Colors.red : Colors.transparent,
-                width: hasError ? 3.0 : 1.0, // Borda mais grossa no erro
-              ),
-              image: providerTravel.coverImage != null
-                  ? DecorationImage(
-                      image: FileImage(providerTravel.coverImage!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: providerTravel.coverImage != null ? 300 : 150,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: providerTravel.coverImage != null
+                ? const BorderRadius.vertical(bottom: Radius.circular(8))
+                : null,
+            border: Border.all(
+              color: hasError ? Colors.red : Colors.transparent,
+              width: hasError ? 3.0 : 1.0,
             ),
-            child: providerTravel.coverImage == null
-                ? Center(
-                    child: Lottie.asset(
-                      'assets/images/lottie/general/camera.json',
-                    ),
+            image: providerTravel.coverImage != null
+                ? DecorationImage(
+                    image: FileImage(providerTravel.coverImage!),
+                    fit: BoxFit.cover,
                   )
                 : null,
           ),
+          child: providerTravel.coverImage == null
+              ? Center(
+                  child: Lottie.asset(
+                    'assets/images/lottie/general/camera.json',
+                  ),
+                )
+              : null,
         ),
-
-        // =======================================================
-        // MENSAGEM DE ERRO VISUAL ADICIONADA AQUI
-        // =======================================================
         if (hasError)
           Padding(
             padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),

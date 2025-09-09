@@ -24,7 +24,7 @@ class NavigatorPage extends StatelessWidget {
     return Scaffold(
       body: PageView(
         controller: navigatorProvider.pageController,
-        physics: const BouncingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         onPageChanged: navigatorProvider.selectTab,
         children: pages,
       ),
