@@ -1,30 +1,21 @@
 class Traveler {
+  const Traveler({this.id, required this.name, this.age, this.photoPath});
+
   final int? id;
   final String name;
   final int? age;
   final String? photoPath;
 
-  Traveler({this.id, required this.name, this.age, this.photoPath});
-
   Map<String, dynamic> toMap() {
-    final map = {'name': name, 'age': age, 'photoPath': photoPath};
-    if (id != null) {
-      map['id'] = id;
-    }
-    return map;
+    return {'id': id, 'name': name, 'age': age, 'photoPath': photoPath};
   }
 
   factory Traveler.fromMap(Map<String, dynamic> map) {
     return Traveler(
-      id: map['id'],
-      name: map['name'],
-      age: map['age'],
-      photoPath: map['photoPath'],
+      id: map['id'] as int?,
+      name: map['name'] as String,
+      age: map['age'] as int?,
+      photoPath: map['photoPath'] as String?,
     );
-  }
-
-  @override
-  String toString() {
-    return 'Traveler(id: $id, name: $name, age: $age, photoPath: $photoPath)';
   }
 }

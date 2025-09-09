@@ -534,6 +534,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No trips found with that name.'**
   String get noSearchResults;
+
+  /// No description provided for @ongoingTravels.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing travels:'**
+  String get ongoingTravels;
+
+  /// No description provided for @completedTravels.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed travels:'**
+  String get completedTravels;
+
+  /// No description provided for @noOngoingTravels.
+  ///
+  /// In en, this message translates to:
+  /// **'No ongoing travels.'**
+  String get noOngoingTravels;
+
+  /// No description provided for @noCompletedTravels.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t completed any travels yet.'**
+  String get noCompletedTravels;
+
+  /// No description provided for @clearFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Form'**
+  String get clearFormTitle;
+
+  /// No description provided for @clearFormContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you would like to clear all the data?'**
+  String get clearFormContent;
+
+  /// No description provided for @clearFormConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearFormConfirm;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

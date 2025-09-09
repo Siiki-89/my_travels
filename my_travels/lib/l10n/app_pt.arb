@@ -79,5 +79,12 @@
   "homeButtonExplore" : "Explorar",
   "ageBelowZero": "Idade deve ser maior ou igual a 0.",
   "ageAboveNormal": "Idade acima do normal.",
-  "noSearchResults": "Nenhuma viagem encontrada com esse nome."
+  "noSearchResults": "Nenhuma viagem encontrada com esse nome.",
+  "ongoingTravels": "Viagens em andamento:",
+  "completedTravels": "Viagens concluidas:",
+  "noOngoingTravels": "Nenhuma viagem em andamento.",
+  "noCompletedTravels": "Não completou nenhuma viagem.",
+  "clearFormTitle": "Limpar Formulário",
+  "clearFormContent": "Você tem certeza que gostaria de limpar todos os dados?",
+  "clearFormConfirm": "Limpar"
 }

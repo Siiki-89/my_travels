@@ -2,56 +2,105 @@ import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/comment_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/repository/comment_repository.dart';
+import 'package:my_travels/data/repository/travel_repository.dart';
+import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:provider/provider.dart';
 
 class InfoTravelProvider extends ChangeNotifier {
+  final TravelRepository _travelRepository = TravelRepository();
   final CommentRepository _commentRepository = CommentRepository();
-  final Travel travel;
-  List<Comment> comments = [];
-  List<String> allImagePaths = [];
-  bool isLoading = true;
 
-  // Add this to track the active carousel page
-  int currentImageIndex = 0;
+  Travel? _travel;
+  Travel? get travel => _travel;
 
-  InfoTravelProvider({required this.travel}) {
-    _loadAllContent();
-  }
+  // ... (resto das variáveis do provider)
+  List<Comment> _comments = [];
+  List<Comment> get comments => _comments;
+  List<String> _allImagePaths = [];
+  List<String> get allImagePaths => _allImagePaths;
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+  int _currentImageIndex = 0;
+  int get currentImageIndex => _currentImageIndex;
 
-  // Add this method to update the index
   void setCurrentImageIndex(int index) {
-    currentImageIndex = index;
+    _currentImageIndex = index;
     notifyListeners();
   }
 
-  Future<void> _loadAllContent() async {
-    isLoading = true;
+  // >> MÉTODO ATUALIZADO <<
+  Future<void> fetchTravelDetails(BuildContext context, int? travelId) async {
+    if (travelId == null) {
+      _errorMessage = 'ID da viagem inválido.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _travel = null;
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
-    // The logic to get comments...
-    final List<Comment> allComments = [];
-    for (final stopPoint in travel.stopPoints) {
+    try {
+      final fetchedTravel = await _travelRepository.getTravelById(travelId);
+      if (fetchedTravel == null) {
+        throw Exception('Viagem com ID $travelId não foi encontrada.');
+      }
+      _travel = fetchedTravel;
+
+      await _loadCommentsAndImages();
+
+      // >> LÓGICA MOVIDA PARA CÁ <<
+      // Após carregar tudo, atualizamos o mapa UMA ÚNICA VEZ.
+      if (context.mounted) {
+        final mapProvider = context.read<MapProvider>();
+        final stops = _travel!.stopPoints
+            .where((s) => s.latitude != null && s.longitude != null)
+            .map(
+              (s) => LocationMapModel(
+                locationId: s.id?.toString() ?? s.locationName,
+                description: s.locationName,
+                lat: s.latitude!,
+                long: s.longitude!,
+              ),
+            )
+            .toList();
+        await mapProvider.createRouteFromStops(stops);
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao carregar detalhes da viagem: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _loadCommentsAndImages() async {
+    if (_travel == null) return;
+
+    final allComments = <Comment>[];
+    for (final stopPoint in _travel!.stopPoints) {
       if (stopPoint.id != null) {
         final stopPointComments = await _commentRepository
             .getCommentsByStopPointId(stopPoint.id!);
         allComments.addAll(stopPointComments);
       }
     }
-    comments = allComments;
+    _comments = allComments;
 
-    // Combines the cover image with photos from comments
-    final List<String> paths = [];
-    if (travel.coverImagePath != null && travel.coverImagePath!.isNotEmpty) {
-      // Check for empty string
-      paths.add(travel.coverImagePath!);
+    final paths = <String>[];
+    if (_travel!.coverImagePath != null &&
+        _travel!.coverImagePath!.isNotEmpty) {
+      paths.add(_travel!.coverImagePath!);
     }
-    for (final comment in comments) {
-      for (final photo in comment.photos) {
-        paths.add(photo.imagePath);
-      }
+    for (final comment in _comments) {
+      paths.addAll(comment.photos.map((photo) => photo.imagePath));
     }
-    allImagePaths = paths;
-
-    isLoading = false;
-    notifyListeners();
+    _allImagePaths = paths;
+    // Notifica os listeners no final do método principal
   }
 }

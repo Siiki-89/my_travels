@@ -25,11 +25,11 @@ class DatabaseService {
   }
 
   Future<void> _createDB(Database db, int version) async {
-    await db.execute(createTravelerTable);
-    await db.execute(createTravelTable);
-    await db.execute(createStopPointTable);
-    await db.execute(createTravelTravelerTable);
-    await db.execute(createCommentTable);
-    await db.execute(createCommentPhotoTable);
+    await db.execute(TravelerTable.createTable);
+    await db.execute(TravelTable.createTable);
+    await db.execute(StopPointTable.createTable);
+    await db.execute(TravelTravelerTable.createTable);
+    await db.execute(CommentTable.createTable);
+    await db.execute(CommentPhotoTable.createTable);
   }
 }

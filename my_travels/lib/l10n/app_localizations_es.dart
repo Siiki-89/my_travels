@@ -228,4 +228,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noSearchResults => 'No se encontraron viajes con ese nombre.';
+
+  @override
+  String get ongoingTravels => 'Viajes en curso:';
+
+  @override
+  String get completedTravels => 'Viajes completados:';
+
+  @override
+  String get noOngoingTravels => 'No hay viajes en curso.';
+
+  @override
+  String get noCompletedTravels => 'No has completado ningún viaje.';
+
+  @override
+  String get clearFormTitle => 'Limpiar Formulario';
+
+  @override
+  String get clearFormContent => '¿Estás seguro de que te gustaría borrar todos los datos?';
+
+  @override
+  String get clearFormConfirm => 'Limpiar';
 }

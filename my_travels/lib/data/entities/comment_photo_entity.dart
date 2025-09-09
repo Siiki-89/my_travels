@@ -1,9 +1,13 @@
 class CommentPhoto {
+  const CommentPhoto({
+    this.id,
+    required this.commentId,
+    required this.imagePath,
+  });
+
   final int? id;
   final int commentId;
   final String imagePath;
-
-  CommentPhoto({this.id, required this.commentId, required this.imagePath});
 
   Map<String, dynamic> toMap() {
     return {'id': id, 'comment_id': commentId, 'image_path': imagePath};

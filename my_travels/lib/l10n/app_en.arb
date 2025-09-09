@@ -80,5 +80,12 @@
   "homeButtonExplore" : "Explore",
   "ageBelowZero": "Age must be greater than or equal to 0.",
   "ageAboveNormal": "Age above normal.",
-  "noSearchResults": "No trips found with that name."
+  "noSearchResults": "No trips found with that name.",
+  "ongoingTravels": "Ongoing travels:",
+  "completedTravels": "Completed travels:",
+  "noOngoingTravels": "No ongoing travels.",
+  "noCompletedTravels": "You haven't completed any travels yet.",
+  "clearFormTitle": "Clear Form",
+  "clearFormContent": "Are you sure you would like to clear all the data?",
+  "clearFormConfirm": "Clear"
 }

@@ -228,4 +228,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSearchResults => 'No trips found with that name.';
+
+  @override
+  String get ongoingTravels => 'Ongoing travels:';
+
+  @override
+  String get completedTravels => 'Completed travels:';
+
+  @override
+  String get noOngoingTravels => 'No ongoing travels.';
+
+  @override
+  String get noCompletedTravels => 'You haven\'t completed any travels yet.';
+
+  @override
+  String get clearFormTitle => 'Clear Form';
+
+  @override
+  String get clearFormContent => 'Are you sure you would like to clear all the data?';
+
+  @override
+  String get clearFormConfirm => 'Clear';
 }

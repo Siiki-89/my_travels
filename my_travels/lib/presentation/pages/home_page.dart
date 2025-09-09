@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,50 +31,127 @@ class HomePage extends StatelessWidget {
               )
             : CustomScrollView(
                 slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    floating: true,
-                    snap: true,
-                    centerTitle: true,
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    title: Text(loc.appName),
-                    bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(60),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
-                        ),
-                        child: _buildSearchBar(provider, loc),
-                      ),
-                    ),
+                  _buildSliverAppBar(context, provider, loc),
+
+                  // --- SEÇÃO DE VIAGENS EM ANDAMENTO ---
+                  _buildSectionHeader(loc.ongoingTravels),
+                  _buildTravelList(
+                    provider.ongoingTravels,
+                    loc.noOngoingTravels,
                   ),
-                  provider.travels.isEmpty
-                      ? SliverFillRemaining(
-                          child: Center(
-                            child: Text(
-                              loc.noSearchResults,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        )
-                      : SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final travel = provider.travels[index];
-                            return _TravelCard(travel: travel);
-                          }, childCount: provider.travels.length),
-                        ),
+
+                  // --- SEÇÃO DE VIAGENS CONCLUÍDAS ---
+                  _buildSectionHeader(loc.completedTravels),
+                  _buildTravelList(
+                    provider.completedTravels,
+                    loc.noCompletedTravels,
+                  ),
+
+                  // Espaçamento no final da lista
+                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
                 ],
               ),
       ),
     );
   }
 
-  Widget _buildSearchBar(HomeProvider provider, AppLocalizations loc) {
+  // Helper para construir o cabeçalho de cada seção
+  Widget _buildSectionHeader(String title) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 8),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  // Helper para construir a lista de viagens ou o estado de vazio da seção
+  Widget _buildTravelList(List<Travel> travels, String emptyMessage) {
+    if (travels.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+          child: Center(
+            child: Text(
+              emptyMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final travel = travels[index];
+        return _TravelCard(travel: travel);
+      }, childCount: travels.length),
+    );
+  }
+
+  // Código original da SliverAppBar (movido para um método para organização)
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    HomeProvider provider,
+    AppLocalizations loc,
+  ) {
+    return SliverAppBar(
+      pinned: true,
+      floating: false,
+      title: Text(
+        loc.appName,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: [Shadow(blurRadius: 10, color: Colors.black54)],
+        ),
+      ),
+      expandedHeight: 260, // Reduzi um pouco a altura para melhor visualização
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(56.0), // Ajustei a altura
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+          child: _buildSearchBar(provider, loc, context),
+        ),
+      ),
+      flexibleSpace: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            "assets/images/general/image_home.png",
+            fit: BoxFit.cover,
+          ),
+          Positioned(
+            bottom: -1, // Pequeno ajuste para evitar linhas
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 20,
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Código original do SearchBar e Botão (sem alterações)
+  Widget _buildSearchBar(
+    HomeProvider provider,
+    AppLocalizations loc,
+    BuildContext context,
+  ) {
     return Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30),
@@ -84,6 +161,7 @@ class HomePage extends StatelessWidget {
           hintText: loc.homeSearchHint,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
           filled: true,
+          fillColor: Theme.of(context).cardColor,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -94,7 +172,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  InkWell _buildButton(HomeProvider provider, BuildContext context) {
+  Widget _buildButton(HomeProvider provider, BuildContext context) {
     return InkWell(
       onTap: () async {
         if (provider.onPressed) return;
@@ -116,6 +194,9 @@ class HomePage extends StatelessWidget {
   }
 }
 
+// O widget _TravelCard e _TravelerAvatars continuam os mesmos
+// (coloque-os no final do seu arquivo home_page.dart)
+
 class _TravelCard extends StatelessWidget {
   final Travel travel;
   const _TravelCard({required this.travel});
@@ -132,34 +213,40 @@ class _TravelCard extends StatelessWidget {
         : 'Destino';
 
     return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SizedBox(
         height: 220,
         child: Card(
-          margin: const EdgeInsets.only(bottom: 24.0),
+          margin: EdgeInsets.zero, // Ajuste para o novo padding
           elevation: 6,
-          shadowColor: Colors.black.withOpacity(0.3),
+          shadowColor: Colors.black.withAlpha((0.3 * 255).toInt()),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, '/infoTravel', arguments: travel.id);
+            },
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: Image.file(
-                    File(travel.coverImagePath!),
-                    fit: BoxFit.cover,
-                    frameBuilder:
-                        (context, child, frame, wasSynchronouslyLoaded) {
-                          if (wasSynchronouslyLoaded) return child;
-                          return AnimatedOpacity(
-                            opacity: frame == null ? 0 : 1,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeOut,
-                            child: child,
-                          );
-                        },
+                  child: Hero(
+                    // Adicionado Hero para animação
+                    tag: 'travel_image_${travel.id}',
+                    child: Image.file(
+                      File(travel.coverImagePath!),
+                      fit: BoxFit.cover,
+                      frameBuilder: (context, child, frame, wasSyncLoaded) {
+                        if (wasSyncLoaded) return child;
+                        return AnimatedOpacity(
+                          opacity: frame == null ? 0 : 1,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: child,
+                        );
+                      },
+                    ),
                   ),
                 ),
                 Positioned.fill(
@@ -167,92 +254,95 @@ class _TravelCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.6),
-                          Colors.black.withOpacity(0.5),
+                          Colors.black.withAlpha((0.7 * 255).toInt()),
+                          Colors.black.withAlpha((0.5 * 255).toInt()),
                           Colors.transparent,
                         ],
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
-                        stops: const [0.0, 0.4, 1.0],
+                        stops: const [0.0, 0.5, 1.0],
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16, left: 16),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                travel.title,
-                                style: textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    const Shadow(
-                                      blurRadius: 10,
-                                      color: Colors.black54,
-                                    ),
-                                  ],
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              travel.title,
+                              style: textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                shadows: [
+                                  const Shadow(
+                                    blurRadius: 10,
+                                    color: Colors.black54,
+                                  ),
+                                ],
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          if (travel.travelers.isNotEmpty)
+                            _TravelerAvatars(travelers: travel.travelers),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '$startDestination → $endDestination',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: Colors.white70,
                               ),
                             ),
-                            if (travel.travelers.isNotEmpty)
-                              _TravelerAvatars(travelers: travel.travelers),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '$startDestination → $endDestination',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white70,
-                                ),
+                          ),
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/infoTravel',
+                                arguments: travel.id,
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(
+                                color: Colors.white,
+                                width: 1,
                               ),
-                            ),
-                            OutlinedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/infoTravel',
-                                  arguments: travel,
-                                );
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(
-                                  color: Colors.white,
-                                  width: 1.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 8,
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
                               ),
-                              child: Text(loc.homeButtonExplore),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
+                            child: Text(
+                              loc.homeButtonExplore,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -274,13 +364,13 @@ class _TravelerAvatars extends StatelessWidget {
     final displayTravelers = travelers.take(4).toList();
 
     return SizedBox(
-      width: (displayTravelers.length * (avatarRadius * 1.4)),
+      width: (displayTravelers.length * (avatarRadius * 1.5)),
       height: avatarRadius * 2,
       child: Stack(
         children: List.generate(displayTravelers.length, (index) {
           final traveler = displayTravelers[index];
           return Positioned(
-            left: index * (avatarRadius * 1.2),
+            left: index * (avatarRadius * 1.3),
             child: CircleAvatar(
               radius: avatarRadius,
               backgroundColor: Colors.white,

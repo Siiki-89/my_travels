@@ -1,17 +1,22 @@
-const commentTableName = 'Comment';
-const commentTableId = 'id';
-const commentTableStopPointId = 'stop_point_id';
-const commentTableTravelerId = 'traveler_id';
-const commentTableContent = 'content';
+import 'package:my_travels/data/tables/stop_point_table.dart';
+import 'package:my_travels/data/tables/traveler_table.dart';
 
-const createCommentTable =
-    '''
-  CREATE TABLE $commentTableName(
-    $commentTableId INTEGER PRIMARY KEY AUTOINCREMENT,
-    $commentTableStopPointId INTEGER NOT NULL,
-    $commentTableTravelerId INTEGER NOT NULL,
-    $commentTableContent TEXT NOT NULL,
-    FOREIGN KEY ($commentTableStopPointId) REFERENCES StopPoint(id),
-    FOREIGN KEY ($commentTableTravelerId) REFERENCES Traveler(id)
-  );
-''';
+abstract class CommentTable {
+  static const String tableName = 'Comment';
+  static const String id = 'id';
+  static const String stopPointId = 'stop_point_id';
+  static const String travelerId = 'traveler_id';
+  static const String content = 'content';
+
+  static const String createTable =
+      '''
+    CREATE TABLE $tableName(
+      $id INTEGER PRIMARY KEY AUTOINCREMENT,
+      $stopPointId INTEGER NOT NULL,
+      $travelerId INTEGER NOT NULL,
+      $content TEXT NOT NULL,
+      FOREIGN KEY ($stopPointId) REFERENCES ${StopPointTable.tableName}(${StopPointTable.id}),
+      FOREIGN KEY ($travelerId) REFERENCES ${TravelerTable.tableName}(${TravelerTable.id})
+    );
+  ''';
+}

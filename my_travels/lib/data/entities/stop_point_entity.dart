@@ -9,7 +9,7 @@ class StopPoint {
   final DateTime? arrivalDate;
   final DateTime? departureDate;
 
-  StopPoint({
+  const StopPoint({
     this.id,
     required this.travelId,
     required this.stopOrder,

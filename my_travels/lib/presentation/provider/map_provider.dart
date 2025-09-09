@@ -1,25 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/services/google_maps_service.dart';
 
-class MapProvider extends ChangeNotifier {
-  final _service = GoogleMapsService();
+class MapProvider with ChangeNotifier {
+  MapProvider({required this.googleMapsService});
+  final GoogleMapsService googleMapsService;
 
-  List<LocationMapModel?> _stops = [null, null];
+  List<LocationMapModel?> _stops = [];
   List<LocationMapModel?> get stops => _stops;
 
   List<LatLng> _polylinePoints = [];
   List<LatLng> get polylinePoints => _polylinePoints;
 
+  // >> NOVO MÉTODO MAIS EFICIENTE <<
+  Future<void> createRouteFromStops(List<LocationMapModel> newStops) async {
+    _stops = newStops;
+    _polylinePoints = []; // Limpa a rota antiga
+
+    if (newStops.length < 2) {
+      notifyListeners();
+      return;
+    }
+
+    for (var i = 0; i < newStops.length - 1; i++) {
+      final origin = LatLng(newStops[i].lat, newStops[i].long);
+      final destination = LatLng(newStops[i + 1].lat, newStops[i + 1].long);
+
+      final route = await googleMapsService.getRouteCoordinates(
+        origin,
+        destination,
+      );
+      _polylinePoints.addAll(route);
+    }
+    notifyListeners();
+  }
+
+  // O método abaixo ainda é útil para a tela de criação
   void setStop(int index, LocationMapModel location) {
     if (index >= _stops.length) {
       _stops.add(location);
     } else {
       _stops[index] = location;
     }
-    _updateRoute();
+    _updateRoute(); // Para feedback em tempo real na criação
     notifyListeners();
   }
 
@@ -28,51 +52,39 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _updateRoute() async {
-    _polylinePoints.clear();
+  void removeStop(int index) {
+    if (index < _stops.length) {
+      _stops.removeAt(index);
+      _updateRoute();
+      notifyListeners();
+    }
+  }
 
+  void clearStops() {
+    _stops = [];
+    _polylinePoints = [];
+    notifyListeners();
+  }
+
+  Future<void> _updateRoute() async {
+    _polylinePoints = [];
     final validStops = _stops.whereType<LocationMapModel>().toList();
 
-    if (validStops.length < 2) return;
+    if (validStops.length < 2) {
+      notifyListeners();
+      return;
+    }
 
-    for (int i = 0; i < validStops.length - 1; i++) {
+    for (var i = 0; i < validStops.length - 1; i++) {
       final origin = LatLng(validStops[i].lat, validStops[i].long);
       final destination = LatLng(validStops[i + 1].lat, validStops[i + 1].long);
 
-      final route = await _service.getRouteCoordinates(origin, destination);
+      final route = await googleMapsService.getRouteCoordinates(
+        origin,
+        destination,
+      );
       _polylinePoints.addAll(route);
     }
-
     notifyListeners();
-  }
-
-  void setStopsFromTravel(Travel travel) {
-    _stops = travel.stopPoints
-        .where((s) => s.latitude != null && s.longitude != null)
-        .map(
-          (s) => LocationMapModel(
-            locationId: s.id?.toString() ?? s.locationName,
-            description: s.locationName,
-            lat: s.latitude!,
-            long: s.longitude!,
-          ),
-        )
-        .toList();
-
-    _calculatePolyline();
-    notifyListeners();
-  }
-
-  void _calculatePolyline() async {
-    _polylinePoints = [];
-    for (int i = 0; i < _stops.length - 1; i++) {
-      final origin = LatLng(_stops[i]!.lat, _stops[i]!.long);
-      final dest = LatLng(_stops[i + 1]!.lat, _stops[i + 1]!.long);
-      final points = await GoogleMapsService().getRouteCoordinates(
-        origin,
-        dest,
-      );
-      polylinePoints.addAll(points);
-    }
   }
 }

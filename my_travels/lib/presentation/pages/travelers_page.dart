@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
 import 'package:my_travels/presentation/widgets/build_empty_state.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:my_travels/presentation/widgets/traveler_create_dialog.dart';
@@ -89,49 +90,23 @@ class TravelersPage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext dialogContext) {
-                            return AlertDialog(
-                              backgroundColor: Colors.black,
-                              title: Text(
-                                appLocalizations.confirmDeletion,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              content: Text(
+                        showSmoothDialog(
+                          context,
+                          ConfirmationDialog(
+                            title: appLocalizations.confirmDeletion,
+                            content:
                                 '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: Text(
-                                    appLocalizations.cancel,
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.red,
-                                  ),
-                                  child: Text(appLocalizations.delete),
-                                  onPressed: () async {
-                                    await context
-                                        .read<TravelerProvider>()
-                                        .deleteTraveler(traveler.id, context);
-
-                                    if (!dialogContext.mounted) return;
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                            confirmText: appLocalizations.delete,
+                            cancel: appLocalizations.cancel,
+                            onConfirm: () async {
+                              // A ação de deletar é passada aqui
+                              // O `await` não é mais necessário aqui pois o pop acontece dentro da função
+                              context.read<TravelerProvider>().deleteTraveler(
+                                traveler.id,
+                                context,
+                              );
+                            },
+                          ),
                         );
                       },
                     ),

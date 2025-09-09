@@ -3,15 +3,7 @@ import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 
 class Comment {
-  final int? id;
-  final int stopPointId;
-  final int travelerId;
-  final String content;
-  final StopPoint? stopPoint;
-  final Traveler? traveler;
-  final List<CommentPhoto> photos;
-
-  Comment({
+  const Comment({
     this.id,
     required this.stopPointId,
     required this.travelerId,
@@ -20,6 +12,14 @@ class Comment {
     this.traveler,
     this.photos = const [],
   });
+
+  final int? id;
+  final int stopPointId;
+  final int travelerId;
+  final String content;
+  final StopPoint? stopPoint;
+  final Traveler? traveler;
+  final List<CommentPhoto> photos;
 
   Map<String, dynamic> toMap() {
     return {

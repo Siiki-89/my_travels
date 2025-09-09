@@ -3,7 +3,7 @@ import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/presentation/provider/travel_provider.dart';
+import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/services/google_maps_service.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +22,7 @@ class PlaceSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<TravelProvider>();
+    final provider = context.watch<CreateTravelProvider>();
     final loc = AppLocalizations.of(context)!;
     final bool isStartPoint = (index == 0);
 
@@ -35,7 +35,7 @@ class PlaceSearchField extends StatelessWidget {
 
   Widget _buildAnimatedCard(
     BuildContext context,
-    TravelProvider provider,
+    CreateTravelProvider provider,
     AppLocalizations loc,
   ) {
     final bool isEditing = provider.editingIndex == index;
@@ -51,7 +51,6 @@ class PlaceSearchField extends StatelessWidget {
         child: Column(
           children: [
             _buildAutocompleteField(context, provider),
-
             if (isEditing) _buildAdditionalFields(context, provider, loc),
           ],
         ),
@@ -59,10 +58,15 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
+  // Em place_search_field.dart
+
   Widget _buildAutocompleteField(
     BuildContext context,
-    TravelProvider provider,
+    CreateTravelProvider provider,
   ) {
+    // Adicionamos a verificação aqui para ficar mais claro
+    final bool isStartPoint = (index == 0);
+
     return SizedBox(
       width: double.infinity,
       child: Autocomplete<LocationMapModel>(
@@ -83,7 +87,7 @@ class PlaceSearchField extends StatelessWidget {
           );
           if (detail != null && context.mounted) {
             FocusScope.of(context).unfocus();
-            provider.updateDestinationLocation(detail);
+            provider.updateDestinationLocation(index, detail);
             context.read<MapProvider>().setStop(index, detail);
             if (index == 0) {
               provider.concludeEditing();
@@ -91,30 +95,59 @@ class PlaceSearchField extends StatelessWidget {
           }
         },
         fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-          final hasTapped = provider.hasTappedOnce(index);
+          // 1. Obtém o valor atual do seu modelo de dados.
+          final String modelText = destination.location?.description ?? '';
 
-          return GestureDetector(
-            onTap: () {
-              if (!hasTapped) {
-                provider.registerFirstTap(index);
-                provider.startEditing(index);
-                FocusScope.of(context).unfocus();
-              }
-            },
-            child: AbsorbPointer(
-              absorbing: !hasTapped,
-              child: TextFormField(
-                controller: controller,
-                focusNode: focus,
-                decoration: InputDecoration(
-                  labelText: hint,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+          // 2. Compara com o texto atual do controller. Se forem diferentes,
+          //    significa que o estado mudou (como no reset) e a UI precisa ser atualizada.
+          if (controller.text != modelText) {
+            // Adia a atualização do controller para o final do frame de build.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controller.text = modelText;
+            });
+          }
+
+          // 1. Criamos o TextFormField uma única vez para evitar repetição
+          final textFormField = TextFormField(
+            controller: controller,
+            focusNode: focus,
+            decoration: InputDecoration(
+              labelText: hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
           );
+
+          // 2. Lógica condicional:
+          // Se for o ponto de partida, retorna o campo de texto diretamente.
+          if (isStartPoint) {
+            return textFormField;
+          }
+          // Caso contrário, mantém a lógica de expansão com dois cliques.
+          else {
+            final hasTapped = provider.hasTappedOnce(index);
+
+            return GestureDetector(
+              onTap: () {
+                if (!hasTapped) {
+                  provider.registerFirstTap(index);
+                  provider.startEditing(index);
+                  // A correção anterior é mantida aqui para evitar que o
+                  // teclado abra ao expandir os outros destinos.
+                  _handleFirstTap(context, provider, index);
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    FocusScope.of(context).unfocus();
+                  });
+                }
+              },
+              child: AbsorbPointer(
+                absorbing: !hasTapped,
+                child: textFormField, // Reutilizamos o widget criado acima
+              ),
+            );
+          }
+          // --- FIM DA MODIFICAÇÃO ---
         },
       ),
     );
@@ -122,7 +155,7 @@ class PlaceSearchField extends StatelessWidget {
 
   Widget _buildAdditionalFields(
     BuildContext context,
-    TravelProvider provider,
+    CreateTravelProvider provider,
     AppLocalizations loc,
   ) {
     return Padding(
@@ -163,6 +196,7 @@ class PlaceSearchField extends StatelessWidget {
               onPressed: () {
                 FocusScope.of(context).unfocus();
                 provider.resetFirstTap(index);
+                provider.resetAllTaps();
                 provider.concludeEditing();
               },
               style: AppButtonStyles.saveButtonStyle,
@@ -201,7 +235,7 @@ class PlaceSearchField extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 value,
-                style: TextStyle(color: Colors.grey.shade800, fontSize: 14),
+                style: TextStyle(color: Colors.blue, fontSize: 14),
               ),
             ),
           ),
@@ -213,10 +247,13 @@ class PlaceSearchField extends StatelessWidget {
   Future<void> _selectDate(
     BuildContext context,
     bool isArrival,
-    TravelProvider provider,
+    CreateTravelProvider provider,
   ) async {
     DateTime initialPickerDate;
     DateTime firstSelectableDate;
+
+    // Função auxiliar para normalizar a data (ignorar horas/minutos)
+    DateTime normalizeDate(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
     if (isArrival) {
       if (index == 0) {
@@ -229,18 +266,25 @@ class PlaceSearchField extends StatelessWidget {
       }
       initialPickerDate = provider.tempArrivalDate ?? firstSelectableDate;
     } else {
+      // A data de partida não pode ser anterior à data de chegada.
       firstSelectableDate = provider.tempArrivalDate ?? provider.startData;
       initialPickerDate = provider.tempDepartureDate ?? firstSelectableDate;
     }
 
-    if (initialPickerDate.isBefore(firstSelectableDate)) {
-      initialPickerDate = firstSelectableDate;
+    // ### CORREÇÃO APLICADA AQUI ###
+    // Normaliza as datas antes de qualquer comparação ou de passá-las ao DatePicker.
+    DateTime firstSelectableDay = normalizeDate(firstSelectableDate);
+    DateTime initialPickerDay = normalizeDate(initialPickerDate);
+
+    // Garante que a data inicial do picker não seja anterior à primeira data selecionável.
+    if (initialPickerDay.isBefore(firstSelectableDay)) {
+      initialPickerDay = firstSelectableDay;
     }
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialPickerDate,
-      firstDate: firstSelectableDate,
+      initialDate: initialPickerDay,
+      firstDate: firstSelectableDay,
       lastDate: DateTime(2101),
     );
 
@@ -251,5 +295,34 @@ class PlaceSearchField extends StatelessWidget {
         provider.updateDepartureDate(picked);
       }
     }
+  }
+
+  void _handleFirstTap(
+    BuildContext context,
+    CreateTravelProvider provider,
+    int index,
+  ) {
+    // 1. Inicia a edição e animação
+    provider.registerFirstTap(index);
+    provider.startEditing(index);
+
+    // 2. Agenda a rolagem da tela
+    // Usamos um pequeno delay para dar tempo da animação de expansão começar.
+    // Isso garante que o cálculo da posição para o scroll seja mais preciso.
+    Future.delayed(const Duration(milliseconds: 200), () {
+      // É uma boa prática verificar se o widget ainda está na tela ("montado")
+      // antes de usar seu 'context'.
+      if (context.mounted) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(
+            milliseconds: 400,
+          ), // Duração da animação de rolagem
+          curve: Curves.easeInOut,
+          alignment:
+              0, // Alinhamento na tela (0.0 = topo, 0.5 = meio, 1.0 = fim)
+        );
+      }
+    });
   }
 }
