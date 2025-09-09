@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/presentation/widgets/animated_floating_action_button.dart';
 import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
 import 'package:my_travels/presentation/widgets/build_empty_state.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
@@ -33,114 +34,94 @@ class TravelersPage extends StatelessWidget {
                 appLocalizations.noTravelersSubtitle,
                 appLocalizations.travelerManagementHint,
               )
-            : _buildTravelerList(travelerProvider, appLocalizations, context),
+            // A UI agora chama o widget privado e auto-contido.
+            : const _TravelerListView(),
       ),
-      floatingActionButton: _buildLottieButton(travelerProvider, context),
-    );
-  }
-
-  Widget _buildTravelerList(
-    TravelerProvider travelerProvider,
-    AppLocalizations appLocalizations,
-    BuildContext context,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: travelerProvider.travelers.length,
-            separatorBuilder: (context, index) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final traveler = travelerProvider.travelers[index];
-              return ListTile(
-                onTap: () {
-                  context.read<TravelerProvider>().prepareForEdit(traveler);
-                  showSmoothDialog(context, const CreateAddTravelerDialog());
-                },
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage:
-                      traveler.photoPath != null &&
-                          traveler.photoPath!.isNotEmpty
-                      ? FileImage(File(traveler.photoPath!))
-                      : null,
-                  child:
-                      traveler.photoPath == null || traveler.photoPath!.isEmpty
-                      ? const Icon(Icons.person, size: 34)
-                      : null,
-                ),
-                title: Text(
-                  traveler.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                subtitle: Text('${appLocalizations.ageHint}: ${traveler.age}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () {
-                        showSmoothDialog(
-                          context,
-                          ConfirmationDialog(
-                            title: appLocalizations.confirmDeletion,
-                            content:
-                                '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
-                            confirmText: appLocalizations.delete,
-                            cancel: appLocalizations.cancel,
-                            onConfirm: () async {
-                              // A ação de deletar é passada aqui
-                              // O `await` não é mais necessário aqui pois o pop acontece dentro da função
-                              context.read<TravelerProvider>().deleteTraveler(
-                                traveler.id,
-                                context,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 80),
-        ],
+      floatingActionButton: AnimatedLottieButton(
+        onTapAction: () async {
+          // Ação específica desta página: resetar campos e mostrar dialog.
+          context.read<TravelerProvider>().resetFields();
+          await showSmoothDialog(context, const CreateAddTravelerDialog());
+        },
       ),
     );
   }
+}
 
-  InkWell _buildLottieButton(TravelerProvider provider, BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        if (provider.onPressed) return;
+/// Widget privado que exibe a lista de viajantes.
+class _TravelerListView extends StatelessWidget {
+  const _TravelerListView();
 
-        provider.changeOnPressed();
-        await Future.delayed(const Duration(milliseconds: 1200));
+  @override
+  Widget build(BuildContext context) {
+    final travelerProvider = context.watch<TravelerProvider>();
 
-        showSmoothDialog(context, const CreateAddTravelerDialog());
-
-        await Future.delayed(const Duration(milliseconds: 200));
-        provider.changeOnPressed();
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 80), // Padding para o FAB
+      itemCount: travelerProvider.travelers.length,
+      separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final traveler = travelerProvider.travelers[index];
+        return _TravelerListItem(traveler: traveler);
       },
-      splashColor: Colors.transparent,
-      child: Lottie.asset(
-        'assets/images/lottie/buttons/add_button.json',
-        key: ValueKey(provider.onPressed),
-        animate: provider.onPressed,
-        width: 70,
-        height: 70,
+    );
+  }
+}
+
+/// Widget privado para exibir um único item da lista de viajantes.
+class _TravelerListItem extends StatelessWidget {
+  const _TravelerListItem({required this.traveler});
+
+  final Traveler traveler;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context)!;
+
+    return ListTile(
+      onTap: () {
+        context.read<TravelerProvider>().prepareForEdit(traveler);
+        showSmoothDialog(context, const CreateAddTravelerDialog());
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      leading: CircleAvatar(
+        radius: 30,
+        backgroundImage:
+            traveler.photoPath != null && traveler.photoPath!.isNotEmpty
+            ? FileImage(File(traveler.photoPath!))
+            : null,
+        child: traveler.photoPath == null || traveler.photoPath!.isEmpty
+            ? const Icon(Icons.person, size: 34)
+            : null,
+      ),
+      title: Text(
+        traveler.name,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text('${appLocalizations.ageHint}: ${traveler.age}'),
+      trailing: IconButton(
+        icon: const Icon(Icons.delete, color: Colors.redAccent),
+        onPressed: () {
+          showSmoothDialog(
+            context,
+            ConfirmationDialog(
+              title: appLocalizations.confirmDeletion,
+              content:
+                  '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
+              confirmText: appLocalizations.delete,
+              cancel: appLocalizations.cancel,
+              onConfirm: () async {
+                // A ação de deletar é passada aqui
+                // O `await` não é mais necessário aqui pois o pop acontece dentro da função
+                context.read<TravelerProvider>().deleteTraveler(
+                  traveler.id,
+                  context,
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

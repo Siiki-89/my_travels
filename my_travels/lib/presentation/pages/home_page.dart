@@ -4,6 +4,7 @@ import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
+import 'package:my_travels/presentation/widgets/animated_floating_action_button.dart';
 import 'package:my_travels/presentation/widgets/build_empty_state.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -17,7 +18,12 @@ class HomePage extends StatelessWidget {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      floatingActionButton: _buildButton(provider, context),
+      floatingActionButton: AnimatedLottieButton(
+        onTapAction: () async {
+          // Ação específica desta página: navegar para a rota '/addTravel'.
+          await Navigator.pushNamed(context, '/addTravel');
+        },
+      ),
       body: SafeArea(
         child: provider.isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -168,27 +174,6 @@ class HomePage extends StatelessWidget {
             borderSide: BorderSide.none,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildButton(HomeProvider provider, BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        if (provider.onPressed) return;
-        provider.changeOnPressed();
-        await Future.delayed(const Duration(milliseconds: 1200));
-        Navigator.pushNamed(context, '/addTravel');
-        await Future.delayed(const Duration(milliseconds: 200));
-        provider.changeOnPressed();
-      },
-      splashColor: Colors.transparent,
-      child: Lottie.asset(
-        'assets/images/lottie/buttons/add_button.json',
-        key: ValueKey(provider.onPressed),
-        animate: provider.onPressed,
-        width: 70,
-        height: 70,
       ),
     );
   }
