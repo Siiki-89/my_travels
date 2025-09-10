@@ -301,9 +301,6 @@ class _CropImageButton extends StatelessWidget {
   const _CropImageButton({required this.provider});
 
   Future<void> _cropImage(BuildContext context) async {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.pink),
-    );
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );

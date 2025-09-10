@@ -7,8 +7,8 @@ class MapProvider with ChangeNotifier {
   MapProvider({required this.googleMapsService});
   final GoogleMapsService googleMapsService;
 
-  List<LocationMapModel?> _stops = [];
-  List<LocationMapModel?> get stops => _stops;
+  List<LocationMapModel> _stops = [];
+  List<LocationMapModel> get stops => _stops;
 
   List<LatLng> _polylinePoints = [];
   List<LatLng> get polylinePoints => _polylinePoints;
@@ -48,7 +48,9 @@ class MapProvider with ChangeNotifier {
   }
 
   void addEmptyStop() {
-    _stops.add(null);
+    _stops.add(
+      LocationMapModel(description: '', locationId: '', lat: 0.0, long: 0.0),
+    );
     notifyListeners();
   }
 

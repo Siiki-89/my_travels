@@ -6,7 +6,7 @@ import 'package:my_travels/data/entities/travel_entity.dart' as entity;
 import 'package:my_travels/data/entities/traveler_entity.dart' as entity;
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/domain/errors/failures.dart';
-import 'package:my_travels/domain/use_cases/save_travel_use_case.dart';
+import 'package:my_travels/domain/use_cases/travel/save_travel_use_case.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
@@ -304,7 +304,17 @@ class CreateTravelProvider with ChangeNotifier {
 
   /// Remove um destino da lista pelo seu ID.
   void removeDestinationById(int id) {
+    // Pega o índice do destino que será removido ANTES de removê-lo.
+    final indexToRemove = _destinations.indexWhere((dest) => dest.id == id);
+
     _destinations.removeWhere((dest) => dest.id == id);
+
+    // Se o item que estamos removendo é o que estava sendo editado,
+    // saímos do modo de edição.
+    if (indexToRemove == _editingIndex) {
+      _editingIndex = null;
+    }
+
     notifyListeners();
   }
 
