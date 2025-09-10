@@ -11,6 +11,8 @@ import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/presentation/provider/info_travel_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
+import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -128,28 +130,31 @@ class _InfoTravelView extends StatelessWidget {
                 _buildStopPoints(travel),
                 const Divider(),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Participantes',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
                 ),
                 const SizedBox(height: 8),
-                _buildParticipantsList(travel.travelers),
+                _ParticipantsList(travelers: travel.travelers),
                 const SizedBox(height: 6),
                 const Divider(),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Trajeto da viagem',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.pushNamed(context, '/mappage'),
-                      icon: const Icon(Icons.map, color: Colors.blue),
+                    InkWell(
+                      onTap: () => Navigator.pushNamed(context, '/mappage'),
+                      child: Lottie.asset(
+                        'assets/images/lottie/general/map.json',
+                        height: 40,
+                        width: 40,
+                      ),
                     ),
                   ],
                 ),
@@ -192,15 +197,16 @@ class _InfoTravelView extends StatelessWidget {
   }
 
   Widget _buildDateContainer(DateTime date) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
+    return ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
       ),
-      padding: const EdgeInsets.all(8),
       child: Text(
         DateFormat('dd/MM/yyyy').format(date),
-        style: const TextStyle(fontSize: 14, color: Colors.black87),
+        style: const TextStyle(color: Colors.blue, fontSize: 16),
       ),
     );
   }
@@ -249,55 +255,80 @@ class _InfoTravelView extends StatelessWidget {
       }),
     );
   }
-
-  Widget _buildParticipantsList(List<Traveler> travelers) {
-    return Column(
-      children: travelers.map((traveler) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage:
-                    traveler.photoPath != null && traveler.photoPath!.isNotEmpty
-                    ? FileImage(File(traveler.photoPath!))
-                    : null,
-                child: traveler.photoPath == null || traveler.photoPath!.isEmpty
-                    ? const Icon(Icons.person, size: 35)
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    traveler.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (traveler.age != null)
-                    Text(
-                      '${traveler.age} anos',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
 }
 
 // Os sub-widgets (_CarouselView, etc.) usam o `context.watch` para se reconstruir
 // sempre que o provider notificar uma mudança.
+
+class _ParticipantsList extends StatelessWidget {
+  final List<Traveler> travelers;
+
+  const _ParticipantsList({required this.travelers});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      itemCount: travelers.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+
+      itemBuilder: (context, index) {
+        final traveler = travelers[index];
+
+        return Row(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundImage:
+                  traveler.photoPath != null && traveler.photoPath!.isNotEmpty
+                  ? FileImage(File(traveler.photoPath!))
+                  : null,
+              child: traveler.photoPath == null || traveler.photoPath!.isEmpty
+                  ? const Icon(Icons.person, size: 35)
+                  : null,
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  traveler.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                if (traveler.age != null)
+                  Text(
+                    '${traveler.age} anos',
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+              ],
+            ),
+            Spacer(),
+            IconButton(
+              onPressed: () {
+                showSmoothDialog(
+                  context,
+                  ConfirmationDialog(
+                    title: 'Insira imagem a viagem',
+                    content: 'As imagens ficarão vinculadas a viagem',
+                    confirmText: 'Salvar',
+                    cancel: 'Cancelar',
+                    onConfirm: () {},
+                  ),
+                );
+              },
+              icon: Icon(Icons.add),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 class _CarouselView extends StatelessWidget {
   const _CarouselView();
