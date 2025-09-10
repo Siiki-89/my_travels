@@ -69,7 +69,12 @@ void main() async {
               MapProvider(googleMapsService: context.read<GoogleMapsService>()),
         ),
 
-        ChangeNotifierProvider(create: (_) => InfoTravelProvider()),
+        ChangeNotifierProvider(
+          create: (context) => InfoTravelProvider(
+            travelRepository: context.read<TravelRepository>(),
+            commentRepository: context.read<CommentRepository>(),
+          ),
+        ),
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(preferencesRepository),
         ),

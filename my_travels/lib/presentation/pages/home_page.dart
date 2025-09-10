@@ -40,14 +40,14 @@ class HomePage extends StatelessWidget {
                   _buildSliverAppBar(context, provider, loc),
 
                   // --- SEÇÃO DE VIAGENS EM ANDAMENTO ---
-                  _buildSectionHeader(loc.ongoingTravels),
+                  _buildSectionHeader(loc.ongoingTravels, context),
                   _buildTravelList(
                     provider.ongoingTravels,
                     loc.noOngoingTravels,
                   ),
 
                   // --- SEÇÃO DE VIAGENS CONCLUÍDAS ---
-                  _buildSectionHeader(loc.completedTravels),
+                  _buildSectionHeader(loc.completedTravels, context),
                   _buildTravelList(
                     provider.completedTravels,
                     loc.noCompletedTravels,
@@ -62,13 +62,13 @@ class HomePage extends StatelessWidget {
   }
 
   // Helper para construir o cabeçalho de cada seção
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 8),
         child: Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
         ),
       ),
     );

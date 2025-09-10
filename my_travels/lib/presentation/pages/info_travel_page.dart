@@ -13,69 +13,84 @@ import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 
-class InfoTravelPage extends StatefulWidget {
+class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({super.key});
 
   @override
-  State<InfoTravelPage> createState() => _InfoTravelPageState();
-}
-
-class _InfoTravelPageState extends State<InfoTravelPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final travelId = ModalRoute.of(context)!.settings.arguments as int?;
-      // >> A CHAMADA AQUI AGORA PASSA O CONTEXT <<
-      context.read<InfoTravelProvider>().fetchTravelDetails(context, travelId);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final travelId = ModalRoute.of(context)!.settings.arguments as int?;
+
+    // Dispara a verificação em cada build. O provider vai decidir se busca os dados ou não.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<InfoTravelProvider>().fetchTravelDetailsIfNeeded(
+        context,
+        travelId,
+      );
+    });
+
     final provider = context.watch<InfoTravelProvider>();
+    final travel = provider.travel;
 
     return Scaffold(
-      appBar: AppBar(title: Text(provider.travel?.title ?? 'Carregando...')),
-      body: Builder(
-        builder: (context) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (provider.errorMessage != null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  provider.errorMessage!,
-                  textAlign: TextAlign.center,
+      body: SafeArea(
+        child: Builder(
+          builder: (context) {
+            if (provider.isLoading && travel == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (provider.errorMessage != null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    provider.errorMessage!,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+              );
+            }
+            if (travel == null) {
+              return const Center(child: Text('Nenhuma viagem para exibir.'));
+            }
+            return Stack(
+              children: [
+                _InfoTravelView(travel: travel),
+                Positioned(
+                  top: 0.0,
+                  left: 0.0,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black.withValues(alpha: 0.5),
+                        child: const BackButton(
+                          color:
+                              Colors.white, // Define a cor do ícone de voltar
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
-          }
-          if (provider.travel == null) {
-            return const Center(child: Text('Nenhuma viagem para exibir.'));
-          }
-
-          // >> A LÓGICA DE ATUALIZAR O MAPA FOI REMOVIDA DAQUI <<
-          return _InfoTravelView(travel: provider.travel!);
-        },
+          },
+        ),
       ),
     );
   }
-
-  // O MÉTODO _updateMapProvider FOI REMOVIDO DAQUI
 }
 
-// O restante da sua UI (que estava dentro de InfoTravelPage) agora fica em um widget separado.
-// Isso garante que ele só seja construído quando os dados estiverem prontos.
+/// A View principal que exibe os detalhes da viagem.
 class _InfoTravelView extends StatelessWidget {
   const _InfoTravelView({required this.travel});
   final Travel travel;
 
   @override
   Widget build(BuildContext context) {
+    final infoProvider = context.watch<InfoTravelProvider>();
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -87,18 +102,29 @@ class _InfoTravelView extends StatelessWidget {
               children: [
                 Text(
                   travel.title,
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
                 ),
                 const SizedBox(height: 8),
                 const Divider(),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     _buildDateContainer(travel.startDate),
-                    if (travel.vehicle != null) Text(travel.vehicle!),
+                    if (infoProvider.vehicleModel?.lottieAsset.isNotEmpty ??
+                        false)
+                      Lottie.asset(
+                        infoProvider.vehicleModel!.lottieAsset,
+                        width: 50,
+                        height: 50,
+                      )
+                    else if (travel.vehicle != null)
+                      Text(travel.vehicle!),
                     _buildDateContainer(travel.endDate),
                   ],
                 ),
+                const SizedBox(height: 16),
                 _buildStopPoints(travel),
                 const Divider(),
                 const SizedBox(height: 16),
@@ -142,14 +168,12 @@ class _InfoTravelView extends StatelessWidget {
                       final result = await Navigator.pushNamed(
                         context,
                         '/newcomment',
-                        arguments:
-                            travel, // Passa a travel completa para a tela de comment
+                        arguments: travel,
                       );
                       if (result == true && context.mounted) {
-                        context.read<InfoTravelProvider>().fetchTravelDetails(
-                          context,
-                          travel.id,
-                        );
+                        context
+                            .read<InfoTravelProvider>()
+                            .fetchTravelDetailsIfNeeded(context, travel.id);
                       }
                     },
                     style: AppButtonStyles.primaryButtonStyle,
