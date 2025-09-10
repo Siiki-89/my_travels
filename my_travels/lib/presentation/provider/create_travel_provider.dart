@@ -326,28 +326,42 @@ class CreateTravelProvider with ChangeNotifier {
     _resetValidationFlags();
     concludeEditing();
 
-    // 1. Monta a entidade 'Travel' com os dados do estado atual do provider.
+    // 1. Filtra os destinos que são válidos (têm uma localização).
+    final validDestinations = _destinations
+        .where((d) => d.location != null)
+        .toList();
+
+    // 2. Determina a data final correta.
+    // Se houver destinos válidos, usa a data de partida do último.
+    // Caso contrário, usa a data final que o usuário definiu (que pode ser a data de hoje).
+    final DateTime finalTravelDate =
+        validDestinations.isNotEmpty &&
+            validDestinations.last.departureDate != null
+        ? validDestinations.last.departureDate!
+        : _finalData;
+
+    // 3. Monta a entidade 'Travel' com os dados do estado atual do provider.
     final travelToSave = entity.Travel(
       title: titleController.text,
       startDate: _startData,
-      endDate: _finalData,
+      endDate: finalTravelDate, // <-- USA A NOVA DATA FINAL AQUI
       vehicle: _transportSelect.label,
       coverImagePath: _coverImage?.path,
-      stopPoints: _destinations
-          .where((d) => d.location != null)
-          .map(
-            (destinationModel) => entity.StopPoint(
-              travelId: 0,
-              stopOrder: _destinations.indexOf(destinationModel),
-              locationName: destinationModel.location!.description,
-              latitude: destinationModel.location!.lat,
-              longitude: destinationModel.location!.long,
-              description: destinationModel.description,
-              arrivalDate: destinationModel.arrivalDate,
-              departureDate: destinationModel.departureDate,
-            ),
-          )
-          .toList(),
+      stopPoints:
+          validDestinations // Reutiliza a lista já filtrada
+              .map(
+                (destinationModel) => entity.StopPoint(
+                  travelId: 0,
+                  stopOrder: _destinations.indexOf(destinationModel),
+                  locationName: destinationModel.location!.description,
+                  latitude: destinationModel.location!.lat,
+                  longitude: destinationModel.location!.long,
+                  description: destinationModel.description,
+                  arrivalDate: destinationModel.arrivalDate,
+                  departureDate: destinationModel.departureDate,
+                ),
+              )
+              .toList(),
       travelers: travelerProvider.selectedTravelers
           .map(
             (travelerModel) =>
@@ -358,15 +372,17 @@ class CreateTravelProvider with ChangeNotifier {
     );
 
     try {
-      // 2. Chama o Use Case para executar a lógica de negócio (validação e salvamento).
+      // Chama o Use Case para executar a lógica de negócio (validação e salvamento).
       await _saveTravelUseCase.call(travelToSave);
 
-      // 3. Em caso de SUCESSO, atualiza a home, mostra feedback e reseta o form.
-      await context.read<HomeProvider>().fetchTravels();
-      _showSuccessSnackBar(context, 'Viagem salva com sucesso!');
-      resetTravelForm(travelerProvider);
+      // Em caso de SUCESSO, atualiza a home, mostra feedback e reseta o form.
+      if (context.mounted) {
+        await context.read<HomeProvider>().fetchTravels();
+        _showSuccessSnackBar(context, 'Viagem salva com sucesso!');
+        resetTravelForm(travelerProvider);
+      }
     } on TravelValidationException catch (e) {
-      // 4. Em caso de ERRO DE VALIDAÇÃO, mostra o erro e atualiza os flags da UI.
+      // Em caso de ERRO DE VALIDAÇÃO, mostra o erro e atualiza os flags da UI.
       _showErrorSnackBar(context, e.message);
 
       if (e is InvalidCoverImageException) validateImage = true;
@@ -376,9 +392,9 @@ class CreateTravelProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      // 5. Em caso de outros erros, mostra uma mensagem genérica.
+      // Em caso de outros erros, mostra uma mensagem genérica.
       _showErrorSnackBar(context, 'Ocorreu um erro inesperado ao salvar.');
-      print("Erro genérico ao salvar a viagem: $e");
+      debugPrint("Erro genérico ao salvar a viagem: $e");
     }
   }
 
