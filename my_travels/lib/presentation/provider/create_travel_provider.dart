@@ -14,6 +14,7 @@ import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/utils/transport_data.dart';
 import 'package:provider/provider.dart';
 
 /// [CreateTravelProvider] - Gerenciador de Estado para a Criação de Viagens.
@@ -50,7 +51,7 @@ class CreateTravelProvider with ChangeNotifier {
   // -- Listas de Seleção e Dados --
   final List<ExperienceModel> _selectedExperiences = [];
   final List<ExperienceModel> _availableExperiences = [];
-  final List<TransportModel> _availableTransport = [];
+  List<TransportModel> _availableTransport = [];
   List<DestinationModel> _destinations = [DestinationModel(id: 0)];
 
   // -- Controle de Edição de Destinos --
@@ -192,44 +193,8 @@ class CreateTravelProvider with ChangeNotifier {
 
   /// Carrega a lista de veículos disponíveis (apenas uma vez).
   void loadAvailableVehicles(BuildContext context) {
-    // ++ CORREÇÃO APLICADA ++
-    // Verifica o flag antes de carregar, para evitar múltiplas execuções.
-    if (_vehiclesLoaded) return;
-
-    final appLocalizations = AppLocalizations.of(context)!;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    _availableTransport.clear();
-    const String lottiePath = 'assets/images/lottie/typelocomotion/';
-    _availableTransport.addAll([
-      TransportModel(
-        label: appLocalizations.vehicleCar,
-        lottieAsset: isDarkMode
-            ? '${lottiePath}car_dark.json'
-            : '${lottiePath}car.json',
-      ),
-      TransportModel(
-        label: appLocalizations.vehicleMotorcycle,
-        lottieAsset: '${lottiePath}motorcycle.json',
-      ),
-      TransportModel(
-        label: appLocalizations.vehicleBus,
-        lottieAsset: '${lottiePath}bus.json',
-      ),
-      TransportModel(
-        label: appLocalizations.vehicleAirplane,
-        lottieAsset: '${lottiePath}airplane.json',
-      ),
-      TransportModel(
-        label: appLocalizations.vehicleCruise,
-        lottieAsset: isDarkMode
-            ? '${lottiePath}cruise_dark.json'
-            : '${lottiePath}cruise.json',
-      ),
-    ]);
-    // ++ CORREÇÃO APLICADA ++
-    // Atualiza o flag para indicar que os dados já foram carregados.
-    _vehiclesLoaded = true;
+    _availableTransport = getAvailableVehicles(context);
+    notifyListeners();
   }
 
   /// Inicia o modo de edição para um destino específico.

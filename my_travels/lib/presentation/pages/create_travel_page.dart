@@ -697,9 +697,11 @@ class _SelectTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CreateTravelProvider>(
       builder: (context, provider, _) {
-        provider.loadAvailableVehicles(context);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          provider.loadAvailableVehicles(context);
+        });
 
-        return Container(
+        return SizedBox(
           height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
@@ -712,7 +714,6 @@ class _SelectTransport extends StatelessWidget {
 
               return GestureDetector(
                 onTap: () => provider.selectVehicle(transport),
-
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
