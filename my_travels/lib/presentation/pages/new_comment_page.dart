@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
@@ -17,6 +16,7 @@ class NewCommentPage extends StatelessWidget {
     final travel = ModalRoute.of(context)!.settings.arguments as Travel;
 
     return ChangeNotifierProvider(
+      // O Provider já cria o UseCase internamente.
       create: (_) => NewCommentProvider(travel: travel),
       child: Scaffold(
         appBar: AppBar(
@@ -59,7 +59,6 @@ class _NewCommentView extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            // Usando o novo widget estilizado
             CustomDropdown<Traveler>(
               hintText: 'Selecione o autor do comentário',
               value: provider.selectedTraveler,
@@ -74,9 +73,8 @@ class _NewCommentView extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            // Usando o novo widget estilizado novamente
             CustomDropdown<StopPoint>(
-              hintText: 'Vincular a um local (opcional)',
+              hintText: 'Vincular a um local',
               value: provider.selectedStopPoint,
               items: travel.stopPoints
                   .map(
@@ -123,7 +121,9 @@ class _NewCommentView extends StatelessWidget {
                 onPressed: provider.isLoading
                     ? null
                     : () async {
-                        final success = await provider.saveComment();
+                        // A UI apenas chama o método...
+                        final success = await provider.saveComment(context);
+                        // ...e reage ao sucesso.
                         if (success && context.mounted) {
                           Navigator.of(context).pop(true);
                         }
@@ -145,6 +145,7 @@ class _NewCommentView extends StatelessWidget {
   }
 
   Widget _buildPhotoPreview(NewCommentProvider provider) {
+    // Este widget continua o mesmo.
     return SizedBox(
       height: 100,
       child: ListView.builder(

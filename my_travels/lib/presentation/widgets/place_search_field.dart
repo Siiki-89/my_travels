@@ -251,6 +251,7 @@ class PlaceSearchField extends StatelessWidget {
     bool isArrival,
     CreateTravelProvider provider,
   ) async {
+    FocusScope.of(context).unfocus();
     DateTime initialPickerDate;
     DateTime firstSelectableDate;
 

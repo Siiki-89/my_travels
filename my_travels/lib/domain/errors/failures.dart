@@ -39,3 +39,13 @@ abstract class TravelerValidationException implements Exception {
 class InvalidTravelerDataException extends TravelerValidationException {
   InvalidTravelerDataException(String message) : super(message);
 }
+
+abstract class CommentValidationException implements Exception {
+  final String message;
+  CommentValidationException(this.message);
+}
+
+// Classe concreta que pode ser usada para lançar os erros.
+class InvalidCommentDataException extends CommentValidationException {
+  InvalidCommentDataException(String message) : super(message);
+}

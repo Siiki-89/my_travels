@@ -238,11 +238,16 @@ class _InfoTravelView extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
+                      // ### AQUI ESTÁ A MUDANÇA ###
+                      // 1. A navegação agora é 'await' para esperar por um resultado.
                       final result = await Navigator.pushNamed(
                         context,
                         '/newcomment',
                         arguments: travel,
                       );
+
+                      // 2. Se o resultado for 'true' (indicando sucesso),
+                      //    pedimos ao provider para recarregar os dados.
                       if (result == true && context.mounted) {
                         context
                             .read<InfoTravelProvider>()
