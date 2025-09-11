@@ -100,10 +100,12 @@ class PlaceSearchField extends StatelessWidget {
 
           // 2. Compara com o texto atual do controller. Se forem diferentes,
           //    significa que o estado mudou (como no reset) e a UI precisa ser atualizada.
-          if (controller.text != modelText) {
-            // Adia a atualização do controller para o final do frame de build.
+          if (controller.text != modelText && !focus.hasFocus) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controller.text = modelText;
+              controller.selection = TextSelection.fromPosition(
+                TextPosition(offset: controller.text.length),
+              );
             });
           }
 
