@@ -142,10 +142,38 @@ class _InfoTravelView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  travel.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Título da viagem (ocupa o espaço disponível)
+                    Expanded(
+                      child: Text(
+                        travel.title,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Switch para marcar como concluída
+                    Transform.scale(
+                      // Use valores menores que 1.0 para diminuir.
+                      // 0.8 é um bom ponto de partida.
+                      scale: 0.8,
+                      child: Switch(
+                        value: travel.isFinished,
+                        onChanged: (newValue) {
+                          // Chama o método do provider para alterar o status
+                          context.read<InfoTravelProvider>().toggleTravelStatus(
+                            context,
+                            newValue,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
+
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 8),
@@ -333,13 +361,7 @@ class _ParticipantsList extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  traveler.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                Text(traveler.name, style: const TextStyle(fontSize: 16)),
                 if (traveler.age != null)
                   Text(
                     '${traveler.age} anos',
@@ -529,37 +551,40 @@ class _PreviewMap extends StatelessWidget {
 
           final bounds = calculateBounds(stops);
 
-          return gmaps.GoogleMap(
-            initialCameraPosition: gmaps.CameraPosition(
-              target: gmaps.LatLng(stops.first.lat, stops.first.long),
-              zoom: 10,
-            ),
-            markers: stops
-                .map(
-                  (s) => gmaps.Marker(
-                    markerId: gmaps.MarkerId(s.locationId),
-                    position: gmaps.LatLng(s.lat, s.long),
-                  ),
-                )
-                .toSet(),
-            polylines: {
-              gmaps.Polyline(
-                polylineId: const gmaps.PolylineId('preview_route'),
-                color: Colors.red,
-                width: 3,
-                points: mapProvider.polylinePoints,
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: gmaps.GoogleMap(
+              initialCameraPosition: gmaps.CameraPosition(
+                target: gmaps.LatLng(stops.first.lat, stops.first.long),
+                zoom: 10,
               ),
-            },
-            onMapCreated: (controller) {
-              if (!mapController.isCompleted) {
-                mapController.complete(controller);
-              }
-              controller.animateCamera(
-                gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
-              );
-            },
-            zoomControlsEnabled: false,
-            zoomGesturesEnabled: false,
+              markers: stops
+                  .map(
+                    (s) => gmaps.Marker(
+                      markerId: gmaps.MarkerId(s.locationId),
+                      position: gmaps.LatLng(s.lat, s.long),
+                    ),
+                  )
+                  .toSet(),
+              polylines: {
+                gmaps.Polyline(
+                  polylineId: const gmaps.PolylineId('preview_route'),
+                  color: Colors.red,
+                  width: 3,
+                  points: mapProvider.polylinePoints,
+                ),
+              },
+              onMapCreated: (controller) {
+                if (!mapController.isCompleted) {
+                  mapController.complete(controller);
+                }
+                controller.animateCamera(
+                  gmaps.CameraUpdate.newLatLngBounds(bounds, 50),
+                );
+              },
+              zoomControlsEnabled: false,
+              zoomGesturesEnabled: false,
+            ),
           );
         },
       ),
@@ -659,11 +684,18 @@ class _ConfirmationDialogImage extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                  child: ElevatedButton(
+                    style: AppButtonStyles.primaryButtonStyle,
+                    onPressed: () {
+                      context
+                          .read<InfoTravelProvider>()
+                          .clearNewCommentFields();
+                      Navigator.of(context).pop();
+                    },
                     child: Text(cancelText),
                   ),
                 ),
+
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
@@ -693,27 +725,37 @@ class _CommentsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<InfoTravelProvider>();
-    final comments = provider.comments;
+
+    // --- AQUI ESTÁ A MUDANÇA ---
+    // Filtramos a lista para pegar apenas comentários que têm texto.
+    // Usamos trim() para remover espaços em branco e garantir que o conteúdo é real.
+    final commentsWithContent = provider.comments
+        .where((comment) => comment.content.trim().isNotEmpty)
+        .toList();
+    // --- FIM DA MUDANÇA ---
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${comments.length} Comentários',
+          // Usamos a contagem da nova lista filtrada
+          '${commentsWithContent.length} Comentários',
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         const SizedBox(height: 12),
-        if (comments.isEmpty)
+        // Verificamos se a nova lista está vazia
+        if (commentsWithContent.isEmpty)
           const Text('Nenhum comentário ainda.')
         else
           SizedBox(
             height: 140,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: comments.length,
+              // Usamos os dados da nova lista filtrada
+              itemCount: commentsWithContent.length,
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
-                final comment = comments[index];
+                final comment = commentsWithContent[index];
                 return Container(
                   width: 220,
                   padding: const EdgeInsets.all(8),

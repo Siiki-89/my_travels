@@ -40,14 +40,21 @@ class HomePage extends StatelessWidget {
                   _buildSliverAppBar(context, provider, loc),
 
                   // --- SEÇÃO DE VIAGENS EM ANDAMENTO ---
-                  _buildSectionHeader(loc.ongoingTravels, context),
+                  // Só mostra o cabeçalho se a lista não estiver vazia.
+                  if (provider.ongoingTravels.isNotEmpty)
+                    _buildSectionHeader(loc.ongoingTravels, context),
+
+                  // A lista em si já lida com o estado de vazio, então continua igual.
                   _buildTravelList(
                     provider.ongoingTravels,
                     loc.noOngoingTravels,
                   ),
 
                   // --- SEÇÃO DE VIAGENS CONCLUÍDAS ---
-                  _buildSectionHeader(loc.completedTravels, context),
+                  // Só mostra o cabeçalho se a lista não estiver vazia.
+                  if (provider.completedTravels.isNotEmpty)
+                    _buildSectionHeader(loc.completedTravels, context),
+
                   _buildTravelList(
                     provider.completedTravels,
                     loc.noCompletedTravels,
@@ -265,7 +272,6 @@ class _TravelCard extends StatelessWidget {
                               travel.title,
                               style: textTheme.headlineSmall?.copyWith(
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
                                 shadows: [
                                   const Shadow(
                                     blurRadius: 10,

@@ -147,4 +147,37 @@ class TravelRepository {
       rethrow; // Re-lança a exceção para que a camada superior (provider) possa lidar com ela.
     }
   }
+
+  Future<void> markTravelAsFinished(int travelId) async {
+    final db = await _dbService.database;
+    try {
+      await db.update(
+        TravelTable.tableName,
+        {TravelTable.isFinished: 1}, // 1 representa 'true'
+        where: '${TravelTable.id} = ?',
+        whereArgs: [travelId],
+      );
+      debugPrint('Viagem com ID $travelId marcada como finalizada.');
+    } catch (e) {
+      debugPrint('Erro ao marcar a viagem $travelId como finalizada: $e');
+      rethrow;
+    }
+  }
+
+  /// Atualiza o status de uma viagem para "em andamento" (is_finished = 0).
+  Future<void> markTravelAsUnfinished(int travelId) async {
+    final db = await _dbService.database;
+    try {
+      await db.update(
+        TravelTable.tableName,
+        {TravelTable.isFinished: 0}, // 0 representa 'false'
+        where: '${TravelTable.id} = ?',
+        whereArgs: [travelId],
+      );
+      debugPrint('Viagem com ID $travelId marcada como "em andamento".');
+    } catch (e) {
+      debugPrint('Erro ao marcar a viagem $travelId como "em andamento": $e');
+      rethrow;
+    }
+  }
 }

@@ -9,6 +9,7 @@ import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/domain/use_cases/travel/delete_travel_use_case.dart';
+import 'package:my_travels/domain/use_cases/travel/update_travel_status_use_case.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
@@ -21,12 +22,18 @@ class InfoTravelProvider extends ChangeNotifier {
   final CommentRepository _commentRepository;
   final DeleteTravelUseCase _deleteTravelUseCase;
 
+  // ### AQUI ESTÁ A CORREÇÃO ###
+  // 1. Declare a variável para o novo use case.
+  final UpdateTravelStatusUseCase _updateTravelStatusUseCase;
+
   InfoTravelProvider({
     required TravelRepository travelRepository,
     required CommentRepository commentRepository,
   }) : _travelRepository = travelRepository,
        _commentRepository = commentRepository,
-       _deleteTravelUseCase = DeleteTravelUseCase(travelRepository);
+       _deleteTravelUseCase = DeleteTravelUseCase(travelRepository),
+       // 2. Inicialize o use case no construtor, assim como os outros.
+       _updateTravelStatusUseCase = UpdateTravelStatusUseCase(travelRepository);
 
   // --- ESTADO DA UI ---
   Travel? _travel;
@@ -216,6 +223,50 @@ class InfoTravelProvider extends ChangeNotifier {
       _errorMessage = 'Erro ao deletar a viagem: $e';
       notifyListeners();
       debugPrint("Erro em deleteTravel: $e");
+    }
+  }
+
+  Future<void> toggleTravelStatus(BuildContext context, bool isFinished) async {
+    if (_travel == null) return;
+
+    try {
+      // 1. Chama o use case para atualizar o status no banco de dados
+      await _updateTravelStatusUseCase(
+        travelId: _travel!.id!,
+        isFinished: isFinished,
+      );
+
+      // 2. Atualiza o estado local do objeto 'travel' para refletir a mudança na UI
+      _travel = _travel!.copyWith(isFinished: isFinished);
+
+      // ### AQUI ESTÁ A LÓGICA ADICIONADA ###
+
+      // 3. Mostra uma SnackBar de feedback para o usuário
+      if (context.mounted) {
+        final message = isFinished
+            ? 'Viagem marcada como concluída!'
+            : 'Viagem reaberta.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // 4. Atualiza a lista na HomePage
+        // Usamos listen: false pois estamos dentro de um método.
+        Provider.of<HomeProvider>(context, listen: false).fetchTravels();
+      }
+
+      // ### FIM DA LÓGICA ADICIONADA ###
+
+      // Notifica os listeners para que a UI (o Switch) se atualize
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Erro ao atualizar o status da viagem: $e';
+      notifyListeners();
+      debugPrint("Erro em toggleTravelStatus: $e");
     }
   }
 }

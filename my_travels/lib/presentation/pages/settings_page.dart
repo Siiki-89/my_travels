@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle: Text(appLocalizations.darkModeSubtitle),
                 hoverColor: Colors.white,
                 thumbColor: WidgetStateProperty.all(Colors.black),
-                trackColor: WidgetStateProperty.all(Colors.blue.shade200),
+                trackColor: WidgetStateProperty.all(Colors.blue.shade100),
                 value: themeProvider.themeMode == ThemeMode.dark,
                 onChanged: (bool value) {
                   themeProvider.toggleTheme();
