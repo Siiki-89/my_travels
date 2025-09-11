@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_travels/data/entities/comment_entity.dart';
+import 'package:my_travels/data/entities/comment_photo_entity.dart';
+import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
+import 'package:my_travels/domain/use_cases/travel/delete_travel_use_case.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
+import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/utils/transport_data.dart';
 import 'package:provider/provider.dart';
@@ -12,13 +19,14 @@ import 'package:provider/provider.dart';
 class InfoTravelProvider extends ChangeNotifier {
   final TravelRepository _travelRepository;
   final CommentRepository _commentRepository;
+  final DeleteTravelUseCase _deleteTravelUseCase;
 
-  // Construtor com Injeção de Dependência (melhor prática)
   InfoTravelProvider({
     required TravelRepository travelRepository,
     required CommentRepository commentRepository,
   }) : _travelRepository = travelRepository,
-       _commentRepository = commentRepository;
+       _commentRepository = commentRepository,
+       _deleteTravelUseCase = DeleteTravelUseCase(travelRepository);
 
   // --- ESTADO DA UI ---
   Travel? _travel;
@@ -30,8 +38,8 @@ class InfoTravelProvider extends ChangeNotifier {
   int _currentImageIndex = 0;
 
   // --- VARIÁVEIS DE CONTROLE INTERNO ---
-  int? _currentlyLoadedId; // Guarda o ID da viagem que já foi carregada
-  bool _isFetching = false; // Guarda se uma busca já está em andamento
+  int? _currentlyLoadedId;
+  bool _isFetching = false;
 
   // --- GETTERS ---
   Travel? get travel => _travel;
@@ -42,28 +50,20 @@ class InfoTravelProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   int get currentImageIndex => _currentImageIndex;
 
-  /// Este é o método "porteiro". A UI deve SEMPRE chamar este.
-  /// É seguro chamá-lo em cada build.
+  // --- LÓGICA DE NEGÓCIO ---
+
   void fetchTravelDetailsIfNeeded(BuildContext context, int? travelId) {
-    // A verificação agora é robusta. Não faz nada se:
-    // 1. O ID for nulo.
-    // 2. Uma busca já estiver em andamento.
-    // 3. Os dados para este ID já foram carregados com sucesso.
     if (travelId == null || _isFetching || _currentlyLoadedId == travelId) {
       return;
     }
-
-    // Se passar pela verificação, inicia a busca real.
     _fetchTravelDetails(context, travelId);
   }
 
-  /// Este é o método "trabalhador". Contém a lógica de busca real.
   Future<void> _fetchTravelDetails(BuildContext context, int? travelId) async {
     _isFetching = true;
     _isLoading = true;
-    _travel =
-        null; // Limpa os dados antigos para não mostrar info da viagem anterior
-    notifyListeners(); // Agora esta chamada é segura
+    _travel = null;
+    notifyListeners();
 
     try {
       final fetchedTravel = await _travelRepository.getTravelById(travelId!);
@@ -71,8 +71,7 @@ class InfoTravelProvider extends ChangeNotifier {
         throw Exception('Viagem com ID $travelId não foi encontrada.');
       }
       _travel = fetchedTravel;
-      _currentlyLoadedId =
-          travelId; // Marca este ID como carregado com sucesso.
+      _currentlyLoadedId = travelId;
 
       if (_travel?.vehicle != null && context.mounted) {
         final availableVehicles = getAvailableVehicles(context);
@@ -81,7 +80,6 @@ class InfoTravelProvider extends ChangeNotifier {
           orElse: () => TransportModel(label: '', lottieAsset: ''),
         );
       }
-
       await _loadCommentsAndImages();
 
       if (context.mounted) {
@@ -101,8 +99,7 @@ class InfoTravelProvider extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Erro ao carregar detalhes da viagem: $e';
-      _currentlyLoadedId =
-          null; // Reseta em caso de erro para permitir nova tentativa
+      _currentlyLoadedId = null;
     } finally {
       _isFetching = false;
       _isLoading = false;
@@ -136,5 +133,89 @@ class InfoTravelProvider extends ChangeNotifier {
   void setCurrentImageIndex(int index) {
     _currentImageIndex = index;
     notifyListeners();
+  }
+
+  List<File> _selectedImagesForComment = [];
+  StopPoint? _selectedStopPointForComment;
+
+  List<File> get selectedImagesForComment => _selectedImagesForComment;
+  StopPoint? get selectedStopPointForComment => _selectedStopPointForComment;
+
+  void clearNewCommentFields() {
+    _selectedImagesForComment = [];
+    _selectedStopPointForComment = null;
+    notifyListeners();
+  }
+
+  Future<void> pickImages() async {
+    final pickedFiles = await ImagePicker().pickMultiImage();
+    _selectedImagesForComment.addAll(
+      pickedFiles.map((file) => File(file.path)),
+    );
+    notifyListeners();
+  }
+
+  void removeImage(File image) {
+    _selectedImagesForComment.remove(image);
+    notifyListeners();
+  }
+
+  void selectStopPoint(StopPoint? stopPoint) {
+    _selectedStopPointForComment = stopPoint;
+    notifyListeners();
+  }
+
+  Future<void> saveImagesAsComment(BuildContext context) async {
+    if (_travel == null || _selectedImagesForComment.isEmpty) return;
+    if (_travel!.travelers.isEmpty) {
+      _errorMessage = "Não é possível salvar: a viagem não tem participantes.";
+      notifyListeners();
+      return;
+    }
+
+    final stopPointId =
+        _selectedStopPointForComment?.id ?? _travel!.stopPoints.first.id;
+
+    if (stopPointId == null) {
+      _errorMessage =
+          "Não foi possível salvar: a viagem não tem um ponto de partida.";
+      notifyListeners();
+      return;
+    }
+
+    final newComment = Comment(
+      stopPointId: stopPointId,
+      content: '',
+      travelerId: _travel!.travelers.first.id!,
+      photos: _selectedImagesForComment
+          .map((file) => CommentPhoto(commentId: 0, imagePath: file.path))
+          .toList(),
+    );
+
+    try {
+      await _commentRepository.insertComment(newComment);
+      clearNewCommentFields();
+      await _fetchTravelDetails(context, _travel!.id);
+    } catch (e) {
+      _errorMessage = 'Erro ao salvar as imagens: $e';
+      notifyListeners();
+    }
+  }
+
+  // O método para deletar a viagem agora está correto.
+  Future<void> deleteTravel(BuildContext context) async {
+    if (_travel?.id == null) return;
+
+    try {
+      await _deleteTravelUseCase(_travel!.id!);
+      if (context.mounted) {
+        Provider.of<HomeProvider>(context, listen: false).fetchTravels();
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      _errorMessage = 'Erro ao deletar a viagem: $e';
+      notifyListeners();
+      debugPrint("Erro em deleteTravel: $e");
+    }
   }
 }

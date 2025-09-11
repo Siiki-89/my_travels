@@ -1,11 +1,12 @@
 import 'dart:io';
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/presentation/provider/new_comment_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/custom_dropdown.dart';
 import 'package:provider/provider.dart';
 
 class NewCommentPage extends StatelessWidget {
@@ -13,10 +14,8 @@ class NewCommentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A `InfoTravelPage` agora passa a Travel completa nos argumentos
     final travel = ModalRoute.of(context)!.settings.arguments as Travel;
 
-    // Criamos um provider que só existe para esta tela
     return ChangeNotifierProvider(
       create: (_) => NewCommentProvider(travel: travel),
       child: Scaffold(
@@ -55,36 +54,45 @@ class _NewCommentView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Participante'),
+            Text(
+              'Participante',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            _buildDropdownButton<Traveler>(
-              context,
+            // Usando o novo widget estilizado
+            CustomDropdown<Traveler>(
+              hintText: 'Selecione o autor do comentário',
+              value: provider.selectedTraveler,
               items: travel.travelers
                   .map((t) => DropdownMenuItem(value: t, child: Text(t.name)))
                   .toList(),
-              hintText: '...',
               onChanged: provider.selectTraveler,
-              selectedValue: provider.selectedTraveler,
             ),
             const SizedBox(height: 16),
-            const Text('Local da viagem'),
+            Text(
+              'Local da viagem',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
-            _buildDropdownButton<StopPoint>(
-              context,
+            // Usando o novo widget estilizado novamente
+            CustomDropdown<StopPoint>(
+              hintText: 'Vincular a um local (opcional)',
+              value: provider.selectedStopPoint,
               items: travel.stopPoints
                   .map(
                     (sp) => DropdownMenuItem(
                       value: sp,
-                      child: Text(sp.locationName),
+                      child: Text(
+                        sp.locationName,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   )
                   .toList(),
-              hintText: '...',
               onChanged: provider.selectStopPoint,
-              selectedValue: provider.selectedStopPoint,
             ),
             const SizedBox(height: 16),
-            const Text('Comentário'),
+            Text('Comentário', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             TextFormField(
               controller: provider.contentController,
@@ -102,11 +110,8 @@ class _NewCommentView extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: provider.pickImages,
                   style: AppButtonStyles.primaryButtonStyle,
-                  icon: const Icon(Icons.image, color: Colors.white),
-                  label: const Text(
-                    'Selecione Fotos',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  icon: const Icon(Icons.image),
+                  label: const Text('Selecione Fotos'),
                 ),
               ),
             ),
@@ -135,33 +140,6 @@ class _NewCommentView extends StatelessWidget {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownButton<T>(
-    BuildContext context, {
-    required List<DropdownMenuItem<T>> items,
-    required String hintText,
-    required void Function(T?) onChanged,
-    T? selectedValue,
-  }) {
-    return DropdownButton2<T>(
-      isExpanded: true,
-      hint: Text(hintText),
-      value: selectedValue,
-      items: items,
-      onChanged: onChanged,
-      buttonStyleData: ButtonStyleData(
-        height: 50,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.grey),
-        ),
-      ),
-      dropdownStyleData: DropdownStyleData(
-        maxHeight: 200,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
       ),
     );
   }

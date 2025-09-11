@@ -111,4 +111,40 @@ class TravelRepository {
     }
     return travels;
   }
+
+  Future<void> deleteTravel(int travelId) async {
+    final db = await _dbService.database;
+    try {
+      // Usamos uma transação para garantir que todas as operações
+      // sejam concluídas com sucesso. Se uma falhar, todas são revertidas.
+      await db.transaction((txn) async {
+        // Passo 1: Deletar os links na tabela de junção (travel_traveler)
+        await txn.delete(
+          TravelTravelerTable.tableName,
+          where: '${TravelTravelerTable.travelId} = ?',
+          whereArgs: [travelId],
+        );
+
+        // Passo 2: Deletar todos os pontos de parada (stop points) associados
+        await txn.delete(
+          StopPointTable.tableName,
+          where: '${StopPointTable.travelId} = ?',
+          whereArgs: [travelId],
+        );
+
+        // Passo 3: Finalmente, deletar a viagem principal
+        await txn.delete(
+          TravelTable.tableName,
+          where: '${TravelTable.id} = ?',
+          whereArgs: [travelId],
+        );
+      });
+      debugPrint(
+        'Viagem com ID $travelId e todos os dados associados foram deletados.',
+      );
+    } catch (e) {
+      debugPrint('Erro ao deletar a viagem com ID $travelId: $e');
+      rethrow; // Re-lança a exceção para que a camada superior (provider) possa lidar com ela.
+    }
+  }
 }

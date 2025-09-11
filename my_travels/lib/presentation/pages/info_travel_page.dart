@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:intl/intl.dart';
+import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/provider/info_travel_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
+import 'package:my_travels/presentation/widgets/custom_dropdown.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
 import 'package:my_travels/utils/map_utils.dart';
 import 'package:provider/provider.dart';
@@ -70,6 +73,43 @@ class InfoTravelPage extends StatelessWidget {
                         child: const BackButton(
                           color:
                               Colors.white, // Define a cor do ícone de voltar
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0.0,
+                  right: 0.0,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black.withValues(alpha: 0.5),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            showSmoothDialog(
+                              context,
+                              ConfirmationDialog(
+                                title: 'Deletar Viagem',
+                                content:
+                                    'Tem certeza que deseja deletar permanentemente a viagem "${travel.title}"?',
+                                cancel: 'Cancelar',
+                                confirmText: 'Deletar',
+
+                                onConfirm: () {
+                                  // Agora ele chama a ação correta do provider correto.
+                                  context
+                                      .read<InfoTravelProvider>()
+                                      .deleteTravel(context);
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -312,12 +352,12 @@ class _ParticipantsList extends StatelessWidget {
               onPressed: () {
                 showSmoothDialog(
                   context,
-                  ConfirmationDialog(
-                    title: 'Insira imagem a viagem',
-                    content: 'As imagens ficarão vinculadas a viagem',
+                  const _ConfirmationDialogImage(
+                    title: 'Adicionar Novas Fotos',
+                    content:
+                        'Selecione as fotos da sua galeria para adicionar à viagem.',
                     confirmText: 'Salvar',
-                    cancel: 'Cancelar',
-                    onConfirm: () {},
+                    cancelText: 'Cancelar',
                   ),
                 );
               },
@@ -327,6 +367,93 @@ class _ParticipantsList extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _ImagePickerArea extends StatelessWidget {
+  final InfoTravelProvider provider;
+
+  const _ImagePickerArea({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    if (provider.selectedImagesForComment.isEmpty) {
+      // Botão para adicionar imagens quando a lista está vazia
+      return InkWell(
+        onTap: () => provider.pickImages(),
+        child: Container(
+          height: 100,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+          child: const Center(
+            child: Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+          ),
+        ),
+      );
+    } else {
+      // Lista horizontal de imagens selecionadas
+      return SizedBox(
+        height: 100,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount:
+              provider.selectedImagesForComment.length +
+              1, // +1 para o botão de adicionar
+          itemBuilder: (context, index) {
+            if (index == provider.selectedImagesForComment.length) {
+              // Botão para adicionar mais imagens
+              return InkWell(
+                onTap: () => provider.pickImages(),
+                child: Container(
+                  width: 100,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.add, size: 40, color: Colors.grey),
+                ),
+              );
+            }
+
+            final imageFile = provider.selectedImagesForComment[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      imageFile,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: GestureDetector(
+                      onTap: () => provider.removeImage(imageFile),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 }
 
@@ -435,6 +562,126 @@ class _PreviewMap extends StatelessWidget {
             zoomGesturesEnabled: false,
           );
         },
+      ),
+    );
+  }
+}
+
+class _ConfirmationDialogImage extends StatelessWidget {
+  final String title;
+  final String content;
+  final String confirmText;
+  final String cancelText;
+
+  const _ConfirmationDialogImage({
+    required this.title,
+    required this.content,
+    required this.confirmText,
+    required this.cancelText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<InfoTravelProvider>();
+    final travel = provider.travel;
+    if (travel == null) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+    final List<DropdownMenuItem<StopPoint?>> dropdownItems = [
+      // 2. Adicione um item inicial que representa a opção "Nenhum"
+      // O valor dele é 'null', e ele exibe o texto do hint.
+      const DropdownMenuItem<StopPoint?>(
+        value: null,
+        child: Text('Viagem geral'),
+      ),
+      ...travel.stopPoints.map((sp) {
+        return DropdownMenuItem<StopPoint?>(
+          value: sp,
+          child: Text(sp.locationName, overflow: TextOverflow.ellipsis),
+        );
+      }),
+    ];
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Alinha os títulos à esquerda
+          children: [
+            Center(
+              // Centraliza apenas o título principal
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              content,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+
+            // Título para o Dropdown
+            Text(
+              'Vincular a um local',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+
+            // --- AQUI ESTÁ A MUDANÇA ---
+            // Substituído o DropdownButton pelo seu widget estilizado e reutilizável
+            CustomDropdown<StopPoint?>(
+              hintText: 'Geral da viagem (opcional)',
+              value: provider.selectedStopPointForComment,
+              items: dropdownItems, // <--- Usa a nova lista
+              onChanged: (value) => provider.selectStopPoint(value),
+            ),
+
+            // --- FIM DA MUDANÇA ---
+            const SizedBox(height: 24),
+            // Área de seleção de imagens
+            _ImagePickerArea(provider: provider),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(cancelText),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.primaryButtonStyle,
+                    onPressed: () {
+                      provider.saveImagesAsComment(context);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      confirmText,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
