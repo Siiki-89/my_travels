@@ -22,6 +22,7 @@ import 'package:lottie/lottie.dart';
 
 class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({super.key});
+  static final GlobalKey _mapKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +62,7 @@ class InfoTravelPage extends StatelessWidget {
             }
             return Stack(
               children: [
-                _InfoTravelView(travel: travel),
+                _InfoTravelView(travel: travel, mapKey: _mapKey),
                 Positioned(
                   top: 0.0,
                   left: 0.0,
@@ -115,6 +116,42 @@ class InfoTravelPage extends StatelessWidget {
                     ),
                   ),
                 ),
+                Positioned(
+                  top: 0.0,
+                  right: 50.0, // afasta um pouco do botão de deletar
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black.withValues(alpha: 0.5),
+                        child: IconButton(
+                          icon: Icon(
+                            travel.isFinished
+                                ? Icons.picture_as_pdf
+                                : Icons.edit,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (travel.isFinished) {
+                              // Gera PDF
+                              context.read<InfoTravelProvider>().generatePdf(
+                                _mapKey,
+                                context,
+                              );
+                            } else {
+                              // Abre tela de edição
+                              /*Navigator.pushNamed(
+                                context,
+                                '/editTravel',
+                                arguments: travel,
+                              );*/
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             );
           },
@@ -126,8 +163,9 @@ class InfoTravelPage extends StatelessWidget {
 
 /// A View principal que exibe os detalhes da viagem.
 class _InfoTravelView extends StatelessWidget {
-  const _InfoTravelView({required this.travel});
+  const _InfoTravelView({required this.travel, required this.mapKey});
   final Travel travel;
+  final GlobalKey mapKey;
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +265,7 @@ class _InfoTravelView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const _PreviewMap(),
+                RepaintBoundary(key: mapKey, child: const _PreviewMap()),
                 const SizedBox(height: 12),
                 const Divider(),
                 const SizedBox(height: 12),
@@ -248,10 +286,14 @@ class _InfoTravelView extends StatelessWidget {
 
                       // 2. Se o resultado for 'true' (indicando sucesso),
                       //    pedimos ao provider para recarregar os dados.
-                      if (result == true && context.mounted) {
+                      if (result == true) {
                         context
                             .read<InfoTravelProvider>()
-                            .fetchTravelDetailsIfNeeded(context, travel.id);
+                            .fetchTravelDetailsIfNeeded(
+                              context,
+                              travel.id!,
+                              forceReload: true,
+                            );
                       }
                     },
                     style: AppButtonStyles.primaryButtonStyle,
@@ -463,7 +505,7 @@ class _ImagePickerArea extends StatelessWidget {
                       onTap: () => provider.removeImage(imageFile),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(

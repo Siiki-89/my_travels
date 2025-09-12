@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_travels/data/entities/comment_entity.dart';
 import 'package:my_travels/data/entities/comment_photo_entity.dart';
@@ -10,10 +12,12 @@ import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/domain/use_cases/travel/delete_travel_use_case.dart';
 import 'package:my_travels/domain/use_cases/travel/update_travel_status_use_case.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/services/pdf_generator_service.dart';
 import 'package:my_travels/utils/transport_data.dart';
 import 'package:provider/provider.dart';
 
@@ -59,10 +63,17 @@ class InfoTravelProvider extends ChangeNotifier {
 
   // --- LÓGICA DE NEGÓCIO ---
 
-  void fetchTravelDetailsIfNeeded(BuildContext context, int? travelId) {
-    if (travelId == null || _isFetching || _currentlyLoadedId == travelId) {
+  void fetchTravelDetailsIfNeeded(
+    BuildContext context,
+    int? travelId, {
+    bool forceReload = false,
+  }) {
+    if (travelId == null || _isFetching) return;
+
+    if (!forceReload && _currentlyLoadedId == travelId) {
       return;
     }
+
     _fetchTravelDetails(context, travelId);
   }
 
@@ -267,6 +278,32 @@ class InfoTravelProvider extends ChangeNotifier {
       _errorMessage = 'Erro ao atualizar o status da viagem: $e';
       notifyListeners();
       debugPrint("Erro em toggleTravelStatus: $e");
+    }
+  }
+
+  Future<void> generatePdf(GlobalKey mapKey, BuildContext context) async {
+    if (travel == null) return;
+
+    try {
+      // 1. Captura a imagem do widget do mapa
+      RenderRepaintBoundary boundary =
+          mapKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      final mapSnapshot = byteData!.buffer.asUint8List();
+
+      // 2. Cria e chama o serviço de geração de PDF
+      final pdfService = PdfGeneratorService(
+        travel: travel!,
+        mapSnapshot: mapSnapshot,
+        l10n: AppLocalizations.of(context)!, // Passa as localizações
+        comments: _comments,
+      );
+      await pdfService.generateAndShareBooklet();
+    } catch (e) {
+      _errorMessage = 'Erro ao gerar o PDF: $e';
+      notifyListeners();
+      debugPrint("Erro em generatePdf: $e");
     }
   }
 }
