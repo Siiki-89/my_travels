@@ -1,21 +1,10 @@
-// Em lib/data/entities/travel_entity.dart
-
 import 'package:my_travels/data/entities/stop_point_entity.dart';
-import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/data/tables/travel_table.dart';
+import 'package:my_travels/data/entities/traveler_entity.dart';
 
+/// Represents a travel itinerary with its details and associated data.
 class Travel {
-  final int? id;
-  final String title;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String? vehicle;
-  final String? coverImagePath;
-  final List<StopPoint> stopPoints;
-  final List<Traveler> travelers;
-  // ### 1. PROPRIEDADE ADICIONADA ###
-  final bool isFinished;
-
+  /// Creates a travel instance.
   const Travel({
     this.id,
     required this.title,
@@ -25,12 +14,37 @@ class Travel {
     this.coverImagePath,
     this.stopPoints = const [],
     this.travelers = const [],
-    // ### 2. CONSTRUTOR ATUALIZADO ###
     required this.isFinished,
   });
 
-  // ### 3. MÉTODO toMap ATUALIZADO ###
+  /// The unique identifier of the travel.
+  final int? id;
 
+  /// The title of the travel.
+  final String title;
+
+  /// The start date of the travel.
+  final DateTime startDate;
+
+  /// The end date of the travel.
+  final DateTime endDate;
+
+  /// The vehicle used for the travel (e.g., car, plane).
+  final String? vehicle;
+
+  /// The local file path for the travel's cover image.
+  final String? coverImagePath;
+
+  /// A list of stop points associated with this travel.
+  final List<StopPoint> stopPoints;
+
+  /// A list of travelers associated with this travel.
+  final List<Traveler> travelers;
+
+  /// A flag indicating if the travel has been completed.
+  final bool isFinished;
+
+  /// Converts this Travel instance to a map for database storage.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -40,31 +54,29 @@ class Travel {
       'vehicle': vehicle,
       'cover_image_path': coverImagePath,
       'is_finished': isFinished ? 1 : 0,
-      // stopPoints e travelers geralmente são salvos em tabelas separadas
     };
   }
 
-  // ### 4. MÉTODO fromMap ATUALIZADO ###
+  /// Creates a Travel instance from a map retrieved from the database.
   factory Travel.fromMap(
     Map<String, dynamic> map, {
     List<StopPoint>? stopPoints,
     List<Traveler>? travelers,
   }) {
     return Travel(
-      id: map['id'],
-      title: map['title'],
-      startDate: DateTime.parse(map['start_date']),
-      endDate: DateTime.parse(map['end_date']),
-      vehicle: map['vehicle'],
-      coverImagePath: map['cover_image_path'],
+      id: map['id'] as int?,
+      title: map['title'] as String,
+      startDate: DateTime.parse(map['start_date'] as String),
+      endDate: DateTime.parse(map['end_date'] as String),
+      vehicle: map['vehicle'] as String?,
+      coverImagePath: map['cover_image_path'] as String?,
       stopPoints: stopPoints ?? [],
       travelers: travelers ?? [],
-      // Converte o inteiro do banco (0 ou 1) para booleano
-      isFinished: map[TravelTable.isFinished] == 1,
+      isFinished: (map[TravelTable.isFinished] as int) == 1,
     );
   }
 
-  // ### 5. MÉTODO copyWith ADICIONADO (BOA PRÁTICA) ###
+  /// Creates a copy of this Travel with the given fields replaced with new values.
   Travel copyWith({
     int? id,
     String? title,
