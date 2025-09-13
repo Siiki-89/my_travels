@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:sqflite/sqflite.dart';
+
 import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
@@ -7,21 +9,24 @@ import 'package:my_travels/data/tables/stop_point_table.dart';
 import 'package:my_travels/data/tables/travel_table.dart';
 import 'package:my_travels/data/tables/travel_traveler_table.dart';
 import 'package:my_travels/data/tables/traveler_table.dart';
-import 'package:sqflite/sqflite.dart';
 
+/// Manages travel-related data operations with the local database.
 class TravelRepository {
+  /// The singleton instance of the database service.
   final DatabaseService _dbService = DatabaseService.instance;
 
+  /// Inserts a new travel itinerary and its associated data into the database.
+  ///
+  /// This includes the travel details, its stop points, and the links to its
+  /// travelers. The operation is performed in a transaction for data integrity.
   Future<void> insertTravel(Travel travel) async {
     final db = await _dbService.database;
     try {
       await db.transaction((txn) async {
-        // ### MELHORIA: Garante que a viagem seja sempre inserida como "não finalizada" ###
+        // Ensures a new travel is always marked as not finished by default.
         final travelToInsert = travel.copyWith(isFinished: false);
         final travelMap = travelToInsert.toMap();
 
-        // Não é preciso remover o 'id' do mapa, o método 'insert' do sqflite o ignora
-        // quando a chave primária é AUTOINCREMENT.
         final travelId = await txn.insert(
           TravelTable.tableName,
           travelMap,
@@ -44,12 +49,15 @@ class TravelRepository {
         }
       });
     } catch (e) {
-      debugPrint('Erro ao inserir viagem: $e');
+      // debugPrint('Erro ao inserir viagem: $e');
       rethrow;
     }
   }
 
-  // >> A MELHORIA PONTUAL QUE VOCÊ APROVOU <<
+  /// Retrieves a single, complete travel object by its ID.
+  ///
+  /// This includes its list of stop points and associated travelers.
+  /// Returns `null` if no travel with the given [id] is found.
   Future<Travel?> getTravelById(int id) async {
     final db = await _dbService.database;
     final travelMaps = await db.query(
@@ -97,13 +105,13 @@ class TravelRepository {
     );
   }
 
+  /// Retrieves a list of all travels, including their details.
   Future<List<Travel>> getTravels() async {
     final db = await _dbService.database;
     final travelMaps = await db.query(TravelTable.tableName);
     final travels = <Travel>[];
 
     for (final travelMap in travelMaps) {
-      // Usamos a nova função para buscar os detalhes completos
       final fullTravel = await getTravelById(travelMap[TravelTable.id] as int);
       if (fullTravel != null) {
         travels.add(fullTravel);
@@ -112,42 +120,36 @@ class TravelRepository {
     return travels;
   }
 
+  /// Deletes a travel and all its associated data from the database.
+  ///
+  /// This includes stop points and traveler links, performed in a transaction.
   Future<void> deleteTravel(int travelId) async {
     final db = await _dbService.database;
     try {
-      // Usamos uma transação para garantir que todas as operações
-      // sejam concluídas com sucesso. Se uma falhar, todas são revertidas.
       await db.transaction((txn) async {
-        // Passo 1: Deletar os links na tabela de junção (travel_traveler)
         await txn.delete(
           TravelTravelerTable.tableName,
           where: '${TravelTravelerTable.travelId} = ?',
           whereArgs: [travelId],
         );
-
-        // Passo 2: Deletar todos os pontos de parada (stop points) associados
         await txn.delete(
           StopPointTable.tableName,
           where: '${StopPointTable.travelId} = ?',
           whereArgs: [travelId],
         );
-
-        // Passo 3: Finalmente, deletar a viagem principal
         await txn.delete(
           TravelTable.tableName,
           where: '${TravelTable.id} = ?',
           whereArgs: [travelId],
         );
       });
-      debugPrint(
-        'Viagem com ID $travelId e todos os dados associados foram deletados.',
-      );
     } catch (e) {
-      debugPrint('Erro ao deletar a viagem com ID $travelId: $e');
-      rethrow; // Re-lança a exceção para que a camada superior (provider) possa lidar com ela.
+      // debugPrint('Erro ao deletar viagem: $e');
+      rethrow;
     }
   }
 
+  /// Updates a travel's status to finished (is_finished = 1).
   Future<void> markTravelAsFinished(int travelId) async {
     final db = await _dbService.database;
     try {
@@ -157,14 +159,13 @@ class TravelRepository {
         where: '${TravelTable.id} = ?',
         whereArgs: [travelId],
       );
-      debugPrint('Viagem com ID $travelId marcada como finalizada.');
     } catch (e) {
-      debugPrint('Erro ao marcar a viagem $travelId como finalizada: $e');
+      // debugPrint('Erro ao marcar viagem como finalizada: $e');
       rethrow;
     }
   }
 
-  /// Atualiza o status de uma viagem para "em andamento" (is_finished = 0).
+  /// Updates a travel's status to unfinished (is_finished = 0).
   Future<void> markTravelAsUnfinished(int travelId) async {
     final db = await _dbService.database;
     try {
@@ -174,9 +175,8 @@ class TravelRepository {
         where: '${TravelTable.id} = ?',
         whereArgs: [travelId],
       );
-      debugPrint('Viagem com ID $travelId marcada como "em andamento".');
     } catch (e) {
-      debugPrint('Erro ao marcar a viagem $travelId como "em andamento": $e');
+      // debugPrint('Erro ao marcar viagem como "em andamento": $e');
       rethrow;
     }
   }

@@ -19,7 +19,7 @@ class DatabaseService {
   /// The underlying database instance.
   static Database? _database;
 
-  /// Public getter for the database. 📂
+  /// Public getter for the database.
   ///
   /// If the database is already initialized, it returns the existing instance.
   /// Otherwise, it initializes the database and then returns it.
