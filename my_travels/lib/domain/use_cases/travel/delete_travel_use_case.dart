@@ -1,14 +1,19 @@
-// Em lib/domain/use_cases/travel/delete_travel_use_case.dart
-
 import 'package:my_travels/data/repository/travel_repository.dart';
 
+/// A use case responsible for deleting a travel and its associated data.
 class DeleteTravelUseCase {
+  /// The repository that handles the data layer operations for travels.
   final TravelRepository _repository;
-  DeleteTravelUseCase(this._repository);
 
+  /// Creates an instance of [DeleteTravelUseCase].
+  const DeleteTravelUseCase(this._repository);
+
+  /// Executes the use case.
+  ///
+  /// Deletes a travel identified by its [travelId].
   Future<void> call(int travelId) {
-    // A lógica é simples: apenas chama o método de deletar do repositório.
-    // Regras de negócio mais complexas poderiam ser adicionadas aqui no futuro.
+    // The logic is simple: it just calls the delete method from the repository.
+    // More complex business rules could be added here in the future.
     return _repository.deleteTravel(travelId);
   }
 }

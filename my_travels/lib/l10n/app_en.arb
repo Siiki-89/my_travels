@@ -87,5 +87,21 @@
   "noCompletedTravels": "You haven't completed any travels yet.",
   "clearFormTitle": "Clear Form",
   "clearFormContent": "Are you sure you would like to clear all the data?",
-  "clearFormConfirm": "Clear"
+  "clearFormConfirm": "Clear",
+  "errorCommentEmpty": "Please, type something.",
+  "errorCommentTooLong": "The comment cannot be longer than 280 characters.",
+  "errorSelectAuthor": "Please, select the author of the comment.",
+  "errorLinkCommentToLocation": "Please, link the comment to a location on the trip.",
+  "errorSelectCoverImage": "Please, select a cover image.",
+  "errorChooseTransport": "Please, choose a transport type.",
+  "errorAddOneTraveler": "Add at least one traveler to the trip.",
+  "errorMinTwoStops": "The trip must have at least a departure point and a destination.",
+  "errorAllStopsNeedLocation": "All destinations must have a location filled in.",
+  "errorAllStopsNeedDates": "All arrival and departure dates for destinations must be filled in.",
+  "errorDepartureBeforeArrival": "A destination's departure date cannot be earlier than its arrival date.",
+  "errorArrivalBeforePreviousDeparture": "A destination's arrival cannot be before the departure from the previous location.",
+  "errorTravelerNameTooShort": "The name must have at least 3 characters.",
+  "errorTravelerNameTooLong": "The name cannot exceed 50 characters.",
+  "errorTravelerAgeInvalid": "Please, enter a valid age (0-120)."
+
 }

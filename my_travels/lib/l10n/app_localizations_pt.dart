@@ -249,4 +249,49 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get clearFormConfirm => 'Limpar';
+
+  @override
+  String get errorCommentEmpty => 'Por favor, digite algo.';
+
+  @override
+  String get errorCommentTooLong => 'O comentário não pode ter mais de 280 caracteres.';
+
+  @override
+  String get errorSelectAuthor => 'Por favor, selecione o autor do comentário.';
+
+  @override
+  String get errorLinkCommentToLocation => 'Por favor, vincule o comentário a um local da viagem.';
+
+  @override
+  String get errorSelectCoverImage => 'Por favor, selecione uma imagem de capa.';
+
+  @override
+  String get errorChooseTransport => 'Por favor, escolha um tipo de transporte.';
+
+  @override
+  String get errorAddOneTraveler => 'Adicione pelo menos um viajante à viagem.';
+
+  @override
+  String get errorMinTwoStops => 'A viagem deve ter pelo menos um ponto de partida e um destino.';
+
+  @override
+  String get errorAllStopsNeedLocation => 'Todos os destinos devem ter um local preenchido.';
+
+  @override
+  String get errorAllStopsNeedDates => 'Todas as datas de chegada e partida dos destinos devem ser preenchidas.';
+
+  @override
+  String get errorDepartureBeforeArrival => 'A data de partida de um destino não pode ser anterior à data de chegada.';
+
+  @override
+  String get errorArrivalBeforePreviousDeparture => 'A chegada em um destino não pode ser antes da partida do local anterior.';
+
+  @override
+  String get errorTravelerNameTooShort => 'The name must have at least 3 characters.';
+
+  @override
+  String get errorTravelerNameTooLong => 'The name cannot exceed 50 characters.';
+
+  @override
+  String get errorTravelerAgeInvalid => 'Please, enter a valid age (0-120).';
 }

@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Manages user preferences stored locally on the device. ⚙️
+/// Manages user preferences stored locally on the device.
 ///
 /// This class provides a simple interface to save and retrieve
 /// settings like theme mode and language code using `SharedPreferences`.

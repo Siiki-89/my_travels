@@ -576,6 +576,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clearFormConfirm;
+
+  /// No description provided for @errorCommentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, type something.'**
+  String get errorCommentEmpty;
+
+  /// No description provided for @errorCommentTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'The comment cannot be longer than 280 characters.'**
+  String get errorCommentTooLong;
+
+  /// No description provided for @errorSelectAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, select the author of the comment.'**
+  String get errorSelectAuthor;
+
+  /// No description provided for @errorLinkCommentToLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, link the comment to a location on the trip.'**
+  String get errorLinkCommentToLocation;
+
+  /// No description provided for @errorSelectCoverImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, select a cover image.'**
+  String get errorSelectCoverImage;
+
+  /// No description provided for @errorChooseTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, choose a transport type.'**
+  String get errorChooseTransport;
+
+  /// No description provided for @errorAddOneTraveler.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one traveler to the trip.'**
+  String get errorAddOneTraveler;
+
+  /// No description provided for @errorMinTwoStops.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip must have at least a departure point and a destination.'**
+  String get errorMinTwoStops;
+
+  /// No description provided for @errorAllStopsNeedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'All destinations must have a location filled in.'**
+  String get errorAllStopsNeedLocation;
+
+  /// No description provided for @errorAllStopsNeedDates.
+  ///
+  /// In en, this message translates to:
+  /// **'All arrival and departure dates for destinations must be filled in.'**
+  String get errorAllStopsNeedDates;
+
+  /// No description provided for @errorDepartureBeforeArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'A destination\'s departure date cannot be earlier than its arrival date.'**
+  String get errorDepartureBeforeArrival;
+
+  /// No description provided for @errorArrivalBeforePreviousDeparture.
+  ///
+  /// In en, this message translates to:
+  /// **'A destination\'s arrival cannot be before the departure from the previous location.'**
+  String get errorArrivalBeforePreviousDeparture;
+
+  /// No description provided for @errorTravelerNameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The name must have at least 3 characters.'**
+  String get errorTravelerNameTooShort;
+
+  /// No description provided for @errorTravelerNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'The name cannot exceed 50 characters.'**
+  String get errorTravelerNameTooLong;
+
+  /// No description provided for @errorTravelerAgeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please, enter a valid age (0-120).'**
+  String get errorTravelerAgeInvalid;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

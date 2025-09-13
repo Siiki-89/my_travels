@@ -1,34 +1,37 @@
-// Em lib/domain/use_cases/traveler/save_traveler_use_case.dart
-
 import 'package:my_travels/data/entities/traveler_entity.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
 import 'package:my_travels/domain/errors/failures.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 
+/// A use case for validating and then saving (inserting or updating) a traveler.
 class SaveTravelerUseCase {
+  /// The repository that handles the data layer operations for travelers.
   final TravelerRepository _repository;
-  SaveTravelerUseCase(this._repository);
 
-  Future<void> call(Traveler traveler) async {
-    // Regra 1: O nome não pode ser vazio e deve ter entre 3 e 50 caracteres.
-    if (traveler.name.trim().length < 3) {
-      throw InvalidTravelerDataException(
-        'O nome deve ter pelo menos 3 caracteres.',
-      );
-    }
-    if (traveler.name.trim().length > 50) {
-      throw InvalidTravelerDataException(
-        'O nome não pode exceder 50 caracteres.',
-      );
-    }
+  /// Creates an instance of [SaveTravelerUseCase].
+  const SaveTravelerUseCase(this._repository);
 
-    // Regra 2: A idade deve ser um número válido entre 0 e 120.
-    if (traveler.age! < 0 || traveler.age! > 120) {
-      throw InvalidTravelerDataException(
-        'Por favor, insira uma idade válida (0-120).',
-      );
+  /// Executes the use case.
+  ///
+  /// Validates the [traveler]'s data against business rules. If valid, it
+  /// updates the traveler if an ID exists, otherwise it inserts a new one.
+  /// Throws an [InvalidTravelerException] if validation fails.
+  Future<void> call(Traveler traveler, AppLocalizations l10n) async {
+    // Rule 1: Name cannot be empty and must be between 3 and 50 characters.
+    final trimmedName = traveler.name.trim();
+    if (trimmedName.length < 3) {
+      throw InvalidTravelerException(l10n.errorTravelerNameTooShort);
+    }
+    if (trimmedName.length > 50) {
+      throw InvalidTravelerException(l10n.errorTravelerNameTooLong);
     }
 
-    // Se o viajante já tem um ID, atualiza. Senão, insere.
+    // Rule 2: If age is provided, it must be a valid number between 0 and 120.
+    if (traveler.age != null && (traveler.age! < 0 || traveler.age! > 120)) {
+      throw InvalidTravelerException(l10n.errorTravelerAgeInvalid);
+    }
+
+    // If the traveler already has an ID, update. Otherwise, insert.
     if (traveler.id != null) {
       await _repository.updateTraveler(traveler);
     } else {

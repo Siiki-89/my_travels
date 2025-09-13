@@ -1,59 +1,53 @@
-// domain/use_cases/save_travel_use_case.dart
+// In lib/domain/use_cases/travel/save_travel_use_case.dart
 
 import 'package:my_travels/data/entities/travel_entity.dart' as entity;
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/domain/errors/failures.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 
+/// A use case for validating and saving a travel itinerary.
 class SaveTravelUseCase {
+  /// The repository that handles the data layer operations for travels.
   final TravelRepository _repository;
 
-  SaveTravelUseCase(this._repository);
+  /// Creates an instance of [SaveTravelUseCase].
+  const SaveTravelUseCase(this._repository);
 
-  /// Executa a lógica de validação e salvamento da viagem.
-  /// Lança uma [TravelValidationException] se alguma regra de negócio for violada.
-  Future<void> call(entity.Travel travel) async {
-    // 1. Validações Gerais (Capa, Transporte, Viajantes)
-    // ... (código anterior sem alterações)
+  /// Executes the business logic for validating and saving a travel.
+  ///
+  /// Throws a [TravelValidationException] if any business rule is violated.
+  Future<void> call(entity.Travel travel, AppLocalizations l10n) async {
+    // 1. General Validations (Cover, Transport, Travelers)
     if (travel.coverImagePath == null || travel.coverImagePath!.isEmpty) {
-      throw InvalidCoverImageException(
-        'Por favor, selecione uma imagem de capa.',
-      );
+      throw InvalidCoverImageException(l10n.errorSelectCoverImage);
     }
-    if (travel.vehicle!.isEmpty) {
-      throw InvalidTransportException(
-        'Por favor, escolha um tipo de transporte.',
-      );
+    if (travel.vehicle == null || travel.vehicle!.isEmpty) {
+      throw InvalidTransportException(l10n.errorChooseTransport);
     }
     if (travel.travelers.isEmpty) {
-      throw InvalidTravelersException(
-        'Adicione pelo menos um viajante à viagem.',
-      );
+      throw InvalidTravelersException(l10n.errorAddOneTraveler);
     }
 
-    // 2. Validações da Rota (Estrutura)
-    // ... (código anterior sem alterações)
+    // 2. Route Structure Validations
     if (travel.stopPoints.length < 2) {
-      throw InvalidRouteException(
-        'A viagem deve ter pelo menos um ponto de partida e um destino.',
-      );
+      throw InvalidRouteException(l10n.errorMinTwoStops);
     }
-    if (travel.stopPoints.any((p) => p.locationName.isEmpty)) {
-      throw InvalidRouteException(
-        'Todos os destinos devem ter um local preenchido.',
-      );
+    if (travel.stopPoints.any((p) => p.locationName.trim().isEmpty)) {
+      throw InvalidRouteException(l10n.errorAllStopsNeedLocation);
     }
+    // This check ensures that dates are not null for intermediate stops.
     if (travel.stopPoints
         .skip(1)
         .any((p) => p.arrivalDate == null || p.departureDate == null)) {
-      throw InvalidRouteException(
-        'Todas as datas de chegada e partida dos destinos devem ser preenchidas.',
-      );
+      throw InvalidRouteException(l10n.errorAllStopsNeedDates);
     }
 
-    // 3. Validações da Linha do Tempo da Rota
+    // 3. Route Timeline Validations
     for (int i = 1; i < travel.stopPoints.length; i++) {
       final currentStop = travel.stopPoints[i];
 
+      // It's safe to use the ! operator here because the check above
+      // already guarantees that these dates are not null for this part of the loop.
       final arrivalDate = currentStop.arrivalDate!;
       final departureDate = currentStop.departureDate!;
 
@@ -65,10 +59,7 @@ class SaveTravelUseCase {
         previousDepartureDate = previousStop.departureDate!;
       }
 
-      // ### INÍCIO DA CORREÇÃO ###
-
-      // Normaliza as datas para ignorar a hora, minuto e segundo.
-      // Isso garante que a comparação seja feita apenas no nível do dia.
+      // Normalizes dates to ignore time, ensuring comparison is day-level only.
       final arrivalDay = DateTime(
         arrivalDate.year,
         arrivalDate.month,
@@ -85,26 +76,18 @@ class SaveTravelUseCase {
         previousDepartureDate.day,
       );
 
-      // ### FIM DA CORREÇÃO ###
-
-      // Verificação 1: Consistência interna do destino.
-      // Usa as datas normalizadas para a comparação.
+      // Validation 1: Internal consistency of the stop point.
       if (departureDay.isBefore(arrivalDay)) {
-        throw InvalidRouteException(
-          'No destino "${currentStop.locationName}", a data de partida não pode ser anterior à data de chegada.',
-        );
+        throw InvalidRouteException(l10n.errorDepartureBeforeArrival);
       }
 
-      // Verificação 2: Consistência sequencial entre destinos.
-      // Usa as datas normalizadas para a comparação.
+      // Validation 2: Sequential consistency between stop points.
       if (arrivalDay.isBefore(previousDepartureDay)) {
-        throw InvalidRouteException(
-          'A chegada em "${currentStop.locationName}" não pode ser antes da partida do local anterior.',
-        );
+        throw InvalidRouteException(l10n.errorArrivalBeforePreviousDeparture);
       }
     }
 
-    // Se todas as validações passarem, insere no repositório
+    // If all validations pass, insert into the repository.
     await _repository.insertTravel(travel);
   }
 }

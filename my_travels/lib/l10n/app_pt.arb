@@ -86,5 +86,21 @@
   "noCompletedTravels": "Não completou nenhuma viagem.",
   "clearFormTitle": "Limpar Formulário",
   "clearFormContent": "Você tem certeza que gostaria de limpar todos os dados?",
-  "clearFormConfirm": "Limpar"
+  "clearFormConfirm": "Limpar",
+  "errorCommentEmpty": "Por favor, digite algo.",
+  "errorCommentTooLong": "O comentário não pode ter mais de 280 caracteres.",
+  "errorSelectAuthor": "Por favor, selecione o autor do comentário.",
+  "errorLinkCommentToLocation": "Por favor, vincule o comentário a um local da viagem.",
+  "errorSelectCoverImage": "Por favor, selecione uma imagem de capa.",
+  "errorChooseTransport": "Por favor, escolha um tipo de transporte.",
+  "errorAddOneTraveler": "Adicione pelo menos um viajante à viagem.",
+  "errorMinTwoStops": "A viagem deve ter pelo menos um ponto de partida e um destino.",
+  "errorAllStopsNeedLocation": "Todos os destinos devem ter um local preenchido.",
+  "errorAllStopsNeedDates": "Todas as datas de chegada e partida dos destinos devem ser preenchidas.",
+  "errorDepartureBeforeArrival": "A data de partida de um destino não pode ser anterior à data de chegada.",
+  "errorArrivalBeforePreviousDeparture": "A chegada em um destino não pode ser antes da partida do local anterior.",
+  "errorTravelerNameTooShort": "O nome deve ter pelo menos 3 caracteres.",
+  "errorTravelerNameTooLong": "O nome não pode exceder 50 caracteres.",
+  "errorTravelerAgeInvalid": "Por favor, insira uma idade válida (0-120)."
+
 }

@@ -249,4 +249,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearFormConfirm => 'Clear';
+
+  @override
+  String get errorCommentEmpty => 'Please, type something.';
+
+  @override
+  String get errorCommentTooLong => 'The comment cannot be longer than 280 characters.';
+
+  @override
+  String get errorSelectAuthor => 'Please, select the author of the comment.';
+
+  @override
+  String get errorLinkCommentToLocation => 'Please, link the comment to a location on the trip.';
+
+  @override
+  String get errorSelectCoverImage => 'Please, select a cover image.';
+
+  @override
+  String get errorChooseTransport => 'Please, choose a transport type.';
+
+  @override
+  String get errorAddOneTraveler => 'Add at least one traveler to the trip.';
+
+  @override
+  String get errorMinTwoStops => 'The trip must have at least a departure point and a destination.';
+
+  @override
+  String get errorAllStopsNeedLocation => 'All destinations must have a location filled in.';
+
+  @override
+  String get errorAllStopsNeedDates => 'All arrival and departure dates for destinations must be filled in.';
+
+  @override
+  String get errorDepartureBeforeArrival => 'A destination\'s departure date cannot be earlier than its arrival date.';
+
+  @override
+  String get errorArrivalBeforePreviousDeparture => 'A destination\'s arrival cannot be before the departure from the previous location.';
+
+  @override
+  String get errorTravelerNameTooShort => 'The name must have at least 3 characters.';
+
+  @override
+  String get errorTravelerNameTooLong => 'The name cannot exceed 50 characters.';
+
+  @override
+  String get errorTravelerAgeInvalid => 'Please, enter a valid age (0-120).';
 }
