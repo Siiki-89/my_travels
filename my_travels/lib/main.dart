@@ -62,7 +62,9 @@ void main() async {
 
         // =======================================================
         ChangeNotifierProvider(create: (_) => CreateTravelProvider()),
-        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(
+          create: (_) => HomeProvider(repository: travelRepository),
+        ),
 
         ChangeNotifierProvider(
           create: (context) =>

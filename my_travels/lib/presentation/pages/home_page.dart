@@ -1,122 +1,95 @@
+// In lib/presentation/pages/home_page.dart
+
 import 'dart:io';
+
+import 'package:my_travels/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
-import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/widgets/animated_floating_action_button.dart';
 import 'package:my_travels/presentation/widgets/build_empty_state.dart';
-import 'package:provider/provider.dart';
-import 'package:lottie/lottie.dart';
 
+/// The main screen of the application, displaying ongoing and completed travels.
 class HomePage extends StatelessWidget {
+  /// Creates an instance of [HomePage].
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<HomeProvider>();
-    final loc = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Kicks off the initial fetch for travels, if it hasn't started yet.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      provider.fetchTravelsIfNeeded(l10n);
+    });
 
     return Scaffold(
       floatingActionButton: AnimatedLottieButton(
         onTapAction: () async {
-          // Ação específica desta página: navegar para a rota '/addTravel'.
           await Navigator.pushNamed(context, '/addTravel');
         },
       ),
       body: SafeArea(
         child: provider.isLoading
             ? const Center(child: CircularProgressIndicator())
+            : provider.errorMessage != null
+            ? Center(child: Text(provider.errorMessage!))
             : provider.allTravels.isEmpty
             ? buildEmptyState(
                 context,
                 'assets/images/lottie/general/loading.json',
-                loc.noTravelsTitle,
-                loc.noTravelsSubtitle,
-                loc.travelManagementHint,
+                l10n.noTravelsTitle,
+                l10n.noTravelsSubtitle,
+                l10n.travelManagementHint,
               )
             : CustomScrollView(
                 slivers: [
-                  _buildSliverAppBar(context, provider, loc),
+                  const _SliverAppBar(),
 
-                  // --- SEÇÃO DE VIAGENS EM ANDAMENTO ---
-                  // Só mostra o cabeçalho se a lista não estiver vazia.
                   if (provider.ongoingTravels.isNotEmpty)
-                    _buildSectionHeader(loc.ongoingTravels, context),
+                    _SectionHeader(title: l10n.ongoingTravels),
 
-                  // A lista em si já lida com o estado de vazio, então continua igual.
-                  _buildTravelList(
-                    provider.ongoingTravels,
-                    loc.noOngoingTravels,
+                  _TravelList(
+                    travels: provider.ongoingTravels,
+                    emptyMessage: l10n.noOngoingTravels,
                   ),
 
-                  // --- SEÇÃO DE VIAGENS CONCLUÍDAS ---
-                  // Só mostra o cabeçalho se a lista não estiver vazia.
                   if (provider.completedTravels.isNotEmpty)
-                    _buildSectionHeader(loc.completedTravels, context),
+                    _SectionHeader(title: l10n.completedTravels),
 
-                  _buildTravelList(
-                    provider.completedTravels,
-                    loc.noCompletedTravels,
+                  _TravelList(
+                    travels: provider.completedTravels,
+                    emptyMessage: l10n.noCompletedTravels,
                   ),
 
-                  // Espaçamento no final da lista
                   const SliverToBoxAdapter(child: SizedBox(height: 80)),
                 ],
               ),
       ),
     );
   }
+}
 
-  // Helper para construir o cabeçalho de cada seção
-  Widget _buildSectionHeader(String title, BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 6, bottom: 8),
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
-        ),
-      ),
-    );
-  }
+// -- PRIVATE WIDGETS (INTERNAL COMPONENTS OF THE PAGE) --
 
-  // Helper para construir a lista de viagens ou o estado de vazio da seção
-  Widget _buildTravelList(List<Travel> travels, String emptyMessage) {
-    if (travels.isEmpty) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-          child: Center(
-            child: Text(
-              emptyMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-            ),
-          ),
-        ),
-      );
-    }
+/// The custom SliverAppBar for the home screen, including the search bar.
+class _SliverAppBar extends StatelessWidget {
+  const _SliverAppBar();
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final travel = travels[index];
-        return _TravelCard(travel: travel);
-      }, childCount: travels.length),
-    );
-  }
-
-  // Código original da SliverAppBar (movido para um método para organização)
-  Widget _buildSliverAppBar(
-    BuildContext context,
-    HomeProvider provider,
-    AppLocalizations loc,
-  ) {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SliverAppBar(
+      centerTitle: true,
+
       pinned: true,
-      floating: false,
       title: Text(
-        loc.appName,
+        l10n.appName,
         style: const TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -124,12 +97,12 @@ class HomePage extends StatelessWidget {
           shadows: [Shadow(blurRadius: 10, color: Colors.black54)],
         ),
       ),
-      expandedHeight: 260, // Reduzi um pouco a altura para melhor visualização
+      expandedHeight: 260,
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(56.0), // Ajustei a altura
+        preferredSize: const Size.fromHeight(60.0),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
-          child: _buildSearchBar(provider, loc, context),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: const _SearchBar(),
         ),
       ),
       flexibleSpace: Stack(
@@ -140,7 +113,7 @@ class HomePage extends StatelessWidget {
             fit: BoxFit.cover,
           ),
           Positioned(
-            bottom: -1, // Pequeno ajuste para evitar linhas
+            bottom: -1,
             left: 0,
             right: 0,
             child: Container(
@@ -158,23 +131,26 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+}
 
-  // Código original do SearchBar e Botão (sem alterações)
-  Widget _buildSearchBar(
-    HomeProvider provider,
-    AppLocalizations loc,
-    BuildContext context,
-  ) {
+/// The search bar widget for the home screen.
+class _SearchBar extends StatelessWidget {
+  const _SearchBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.read<HomeProvider>();
+    final l10n = AppLocalizations.of(context)!;
     return Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30),
       child: TextField(
         onChanged: provider.search,
         decoration: InputDecoration(
-          hintText: loc.homeSearchHint,
+          hintText: l10n.homeSearchHint,
+          fillColor: Colors.white12,
           prefixIcon: const Icon(Icons.search, color: Colors.grey),
           filled: true,
-          fillColor: Theme.of(context).cardColor,
           contentPadding: const EdgeInsets.symmetric(vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
@@ -186,32 +162,79 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// O widget _TravelCard e _TravelerAvatars continuam os mesmos
-// (coloque-os no final do seu arquivo home_page.dart)
+/// A sliver widget to display a section header.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
 
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 8),
+        child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
+      ),
+    );
+  }
+}
+
+/// A sliver widget that displays a list of travels or an empty message.
+class _TravelList extends StatelessWidget {
+  final List<Travel> travels;
+  final String emptyMessage;
+
+  const _TravelList({required this.travels, required this.emptyMessage});
+
+  @override
+  Widget build(BuildContext context) {
+    if (travels.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+          child: Center(
+            child: Text(
+              emptyMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => _TravelCard(travel: travels[index]),
+        childCount: travels.length,
+      ),
+    );
+  }
+}
+
+/// A card widget to display a single travel summary.
 class _TravelCard extends StatelessWidget {
   final Travel travel;
   const _TravelCard({required this.travel});
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final startDestination = travel.stopPoints.isNotEmpty
         ? travel.stopPoints.first.locationName.split(',').first
-        : 'Origem';
+        : 'Origin';
     final endDestination = travel.stopPoints.length > 1
         ? travel.stopPoints.last.locationName.split(',').first
-        : 'Destino';
+        : 'Destination';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SizedBox(
         height: 220,
         child: Card(
-          margin: EdgeInsets.zero, // Ajuste para o novo padding
+          margin: EdgeInsets.zero,
           elevation: 6,
-          shadowColor: Colors.black.withAlpha((0.3 * 255).toInt()),
+          shadowColor: Colors.black.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
           ),
@@ -222,37 +245,37 @@ class _TravelCard extends StatelessWidget {
             },
             child: Stack(
               children: [
-                Positioned.fill(
-                  child: Hero(
-                    // Adicionado Hero para animação
-                    tag: 'travel_image_${travel.id}',
-                    child: Image.file(
-                      File(travel.coverImagePath!),
-                      fit: BoxFit.cover,
-                      frameBuilder: (context, child, frame, wasSyncLoaded) {
-                        if (wasSyncLoaded) return child;
-                        return AnimatedOpacity(
-                          opacity: frame == null ? 0 : 1,
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeOut,
-                          child: child,
-                        );
-                      },
+                if (travel.coverImagePath != null)
+                  Positioned.fill(
+                    child: Hero(
+                      tag: 'travel_image_${travel.id}',
+                      child: Image.file(
+                        File(travel.coverImagePath!),
+                        fit: BoxFit.cover,
+                        frameBuilder: (context, child, frame, wasSyncLoaded) {
+                          if (wasSyncLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOut,
+                            child: child,
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
                 Positioned.fill(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withAlpha((0.7 * 255).toInt()),
-                          Colors.black.withAlpha((0.5 * 255).toInt()),
+                          Colors.black87,
+                          Colors.black54,
                           Colors.transparent,
                         ],
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
-                        stops: const [0.0, 0.5, 1.0],
+                        stops: [0.0, 0.5, 1.0],
                       ),
                     ),
                   ),
@@ -327,7 +350,7 @@ class _TravelCard extends StatelessWidget {
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
-                              loc.homeButtonExplore,
+                              l10n.homeButtonExplore,
                               style: const TextStyle(fontSize: 12),
                             ),
                           ),
@@ -345,6 +368,7 @@ class _TravelCard extends StatelessWidget {
   }
 }
 
+/// A widget that displays a row of overlapping traveler avatars.
 class _TravelerAvatars extends StatelessWidget {
   final List<Traveler> travelers;
   const _TravelerAvatars({required this.travelers});

@@ -55,7 +55,7 @@ class TravelerProvider with ChangeNotifier {
       _travelers = await _getTravelersUseCase();
     } catch (e) {
       _errorMessage = 'Erro ao carregar viajantes.';
-      debugPrint("Erro em loadTravelers: $e");
+      //debugPrint("Erro em loadTravelers: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

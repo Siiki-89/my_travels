@@ -161,11 +161,9 @@ class CreateTravelPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(l10n.travelAddTypeInterest),
+                              // IconButton para Pontos de Interesse (Versão Nova)
                               IconButton(
                                 onPressed: () {
-                                  context
-                                      .read<CreateTravelProvider>()
-                                      .loadAvailableExperiences(context);
                                   showSmoothDialog(
                                     context: context,
                                     dialog: const _SelectExperienceDialog(),
@@ -459,6 +457,11 @@ class _SelectExperienceDialog extends StatelessWidget {
             Flexible(
               child: Consumer<CreateTravelProvider>(
                 builder: (context, provider, child) {
+                  // Load experiences only if list is empty
+                  if (provider.availableExperiences.isEmpty) {
+                    provider.loadAvailableExperiences(context);
+                  }
+
                   return SingleChildScrollView(
                     child: Wrap(
                       spacing: 12.0,
@@ -467,6 +470,7 @@ class _SelectExperienceDialog extends StatelessWidget {
                         final bool isSelected = provider.isSelectedExperience(
                           experience,
                         );
+
                         return GestureDetector(
                           onTap: () => provider.toggleExperience(experience),
                           child: SizedBox(
@@ -553,7 +557,10 @@ class _SelectExperienceDialog extends StatelessWidget {
               child: ElevatedButton(
                 style: AppButtonStyles.primaryButtonStyle,
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.saveButton),
+                child: Text(
+                  l10n.saveButton,
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],
@@ -775,11 +782,7 @@ class _SelectTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CreateTravelProvider>(
       builder: (context, provider, _) {
-        // Loads the vehicles if they haven't been loaded yet.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          provider.loadAvailableVehicles(context);
-        });
-
+        provider.loadAvailableVehicles(context);
         return SizedBox(
           height: 100,
           child: ListView.separated(
@@ -922,7 +925,7 @@ class _AnimatedValidationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final defaultColor = Theme.of(context).colorScheme?.onSurfaceVariant;
 
     return AnimatedDefaultTextStyle(
       duration: const Duration(milliseconds: 300),
