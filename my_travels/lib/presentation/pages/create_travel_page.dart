@@ -1,5 +1,3 @@
-// In lib/presentation/pages/create_travel_page.dart
-
 import 'dart:io';
 import 'dart:ui';
 
@@ -12,7 +10,6 @@ import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/utils/snackbar_helper.dart';
 import 'package:provider/provider.dart';
 
-import 'package:my_travels/model/experience_model.dart';
 import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';

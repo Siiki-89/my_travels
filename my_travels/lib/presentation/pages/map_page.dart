@@ -1,5 +1,3 @@
-// In lib/presentation/pages/map_page.dart
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
