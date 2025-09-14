@@ -330,4 +330,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noRouteToShow => 'Não há trajeto para mostrar.';
+
+  @override
+  String get languageNameEnglish => 'Inglês';
+
+  @override
+  String get languageNamePortuguese => 'Português';
+
+  @override
+  String get languageNameSpanish => 'Espanhol';
 }

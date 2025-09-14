@@ -330,4 +330,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noRouteToShow => 'No hay ninguna ruta que mostrar.';
+
+  @override
+  String get languageNameEnglish => 'Inglés';
+
+  @override
+  String get languageNamePortuguese => 'Portugués';
+
+  @override
+  String get languageNameSpanish => 'Español';
 }

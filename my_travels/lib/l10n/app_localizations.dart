@@ -738,6 +738,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There is no route to display.'**
   String get noRouteToShow;
+
+  /// No description provided for @languageNameEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageNameEnglish;
+
+  /// No description provided for @languageNamePortuguese.
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get languageNamePortuguese;
+
+  /// No description provided for @languageNameSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get languageNameSpanish;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -113,5 +113,8 @@
   "removeDestinationTooltip": "Eliminar destino",
   "titleMaxLengthError": "El título no puede exceder los 50 caracteres.",
   "travelSavedSuccess": "¡Viaje guardado con éxito!",
-  "noRouteToShow": "No hay ninguna ruta que mostrar."
+  "noRouteToShow": "No hay ninguna ruta que mostrar.",
+  "languageNameEnglish": "Inglés",
+  "languageNamePortuguese": "Portugués",
+  "languageNameSpanish": "Español"
 }
