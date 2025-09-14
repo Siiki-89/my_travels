@@ -294,4 +294,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorTravelerAgeInvalid => 'Por favor, ingresa una edad válida (0-120).';
+
+  @override
+  String get unexpectedErrorOnSave => 'Ocurrió un error inesperado al guardar.';
+
+  @override
+  String get errorLoadingTravels => 'Error al cargar los viajes.';
+
+  @override
+  String get titleMinLengthError => 'El título debe tener al menos 3 caracteres.';
+
+  @override
+  String get cropperToolbarTitle => 'Recortar Imagen';
+
+  @override
+  String get noTravelerFound => 'No se encontró ningún viajero.';
+
+  @override
+  String get registerTraveler => 'Registrar Viajero';
+
+  @override
+  String get showMap => 'Mostrar mapa';
+
+  @override
+  String get addDestination => 'Añadir destino';
+
+  @override
+  String get removeDestinationTooltip => 'Eliminar destino';
+
+  @override
+  String get titleMaxLengthError => 'El título no puede exceder los 50 caracteres.';
+
+  @override
+  String get travelSavedSuccess => '¡Viaje guardado con éxito!';
 }

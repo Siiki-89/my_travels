@@ -43,7 +43,10 @@ class TravelersPage extends StatelessWidget {
         onTapAction: () async {
           // Ação específica desta página: resetar campos e mostrar dialog.
           context.read<TravelerProvider>().resetFields();
-          await showSmoothDialog(context, CreateAddTravelerDialog());
+          await showSmoothDialog(
+            context: context,
+            dialog: CreateAddTravelerDialog(),
+          );
         },
       ),
     );
@@ -83,7 +86,7 @@ class _TravelerListItem extends StatelessWidget {
     return ListTile(
       onTap: () {
         context.read<TravelerProvider>().prepareForEdit(traveler);
-        showSmoothDialog(context, CreateAddTravelerDialog());
+        showSmoothDialog(context: context, dialog: CreateAddTravelerDialog());
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       leading: CircleAvatar(
@@ -106,13 +109,13 @@ class _TravelerListItem extends StatelessWidget {
         icon: const Icon(Icons.delete, color: Colors.redAccent),
         onPressed: () {
           showSmoothDialog(
-            context,
-            ConfirmationDialog(
+            context: context,
+            dialog: ConfirmationDialog(
               title: appLocalizations.confirmDeletion,
               content:
                   '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
               confirmText: appLocalizations.delete,
-              cancel: appLocalizations.cancel,
+              cancelText: appLocalizations.cancel,
               onConfirm: () async {
                 // A ação de deletar é passada aqui
                 // O `await` não é mais necessário aqui pois o pop acontece dentro da função

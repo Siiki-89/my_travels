@@ -294,4 +294,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorTravelerAgeInvalid => 'Please, enter a valid age (0-120).';
+
+  @override
+  String get unexpectedErrorOnSave => 'An unexpected error occurred while saving.';
+
+  @override
+  String get errorLoadingTravels => 'Error loading travels.';
+
+  @override
+  String get titleMinLengthError => 'Title must have at least 3 characters.';
+
+  @override
+  String get cropperToolbarTitle => 'Crop Image';
+
+  @override
+  String get noTravelerFound => 'No traveler found.';
+
+  @override
+  String get registerTraveler => 'Register Traveler';
+
+  @override
+  String get showMap => 'Show map';
+
+  @override
+  String get addDestination => 'Add destination';
+
+  @override
+  String get removeDestinationTooltip => 'Remove destination';
+
+  @override
+  String get titleMaxLengthError => 'Title cannot exceed 50 characters.';
+
+  @override
+  String get travelSavedSuccess => 'Travel saved successfully!';
 }

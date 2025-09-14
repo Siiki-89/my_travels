@@ -287,11 +287,44 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorArrivalBeforePreviousDeparture => 'A chegada em um destino não pode ser antes da partida do local anterior.';
 
   @override
-  String get errorTravelerNameTooShort => 'The name must have at least 3 characters.';
+  String get errorTravelerNameTooShort => 'O nome deve ter pelo menos 3 caracteres.';
 
   @override
-  String get errorTravelerNameTooLong => 'The name cannot exceed 50 characters.';
+  String get errorTravelerNameTooLong => 'O nome não pode exceder 50 caracteres.';
 
   @override
-  String get errorTravelerAgeInvalid => 'Please, enter a valid age (0-120).';
+  String get errorTravelerAgeInvalid => 'Por favor, insira uma idade válida (0-120).';
+
+  @override
+  String get unexpectedErrorOnSave => 'Ocorreu um erro inesperado ao salvar.';
+
+  @override
+  String get errorLoadingTravels => 'Erro ao carregar viagens.';
+
+  @override
+  String get titleMinLengthError => 'O título deve ter pelo menos 3 caracteres.';
+
+  @override
+  String get cropperToolbarTitle => 'Recortar Imagem';
+
+  @override
+  String get noTravelerFound => 'Nenhum viajante encontrado.';
+
+  @override
+  String get registerTraveler => 'Cadastrar Viajante';
+
+  @override
+  String get showMap => 'Mostrar mapa';
+
+  @override
+  String get addDestination => 'Adicionar destino';
+
+  @override
+  String get removeDestinationTooltip => 'Remover destino';
+
+  @override
+  String get titleMaxLengthError => 'O título não pode exceder 50 caracteres.';
+
+  @override
+  String get travelSavedSuccess => 'Viagem salva com sucesso!';
 }

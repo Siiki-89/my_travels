@@ -5,14 +5,14 @@ class ConfirmationDialog extends StatelessWidget {
   final String title;
   final String content;
   final String confirmText;
-  final String cancel;
+  final String cancelText;
   final VoidCallback onConfirm;
 
   const ConfirmationDialog({
     super.key,
     required this.title,
     required this.content,
-    required this.cancel,
+    required this.cancelText,
     required this.confirmText,
     required this.onConfirm,
   });
@@ -45,7 +45,7 @@ class ConfirmationDialog extends StatelessWidget {
                     style: AppButtonStyles.primaryButtonStyle,
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
-                      cancel,
+                      cancelText,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),

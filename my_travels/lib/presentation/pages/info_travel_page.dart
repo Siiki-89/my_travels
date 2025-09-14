@@ -94,12 +94,12 @@ class InfoTravelPage extends StatelessWidget {
                           ),
                           onPressed: () {
                             showSmoothDialog(
-                              context,
-                              ConfirmationDialog(
+                              context: context,
+                              dialog: ConfirmationDialog(
                                 title: 'Deletar Viagem',
                                 content:
                                     'Tem certeza que deseja deletar permanentemente a viagem "${travel.title}"?',
-                                cancel: 'Cancelar',
+                                cancelText: 'Cancelar',
                                 confirmText: 'Deletar',
 
                                 onConfirm: () {
@@ -420,8 +420,8 @@ class _ParticipantsList extends StatelessWidget {
             IconButton(
               onPressed: () {
                 showSmoothDialog(
-                  context,
-                  const _ConfirmationDialogImage(
+                  context: context,
+                  dialog: const _ConfirmationDialogImage(
                     title: 'Adicionar Novas Fotos',
                     content:
                         'Selecione as fotos da sua galeria para adicionar à viagem.',

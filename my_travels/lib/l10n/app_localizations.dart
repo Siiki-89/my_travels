@@ -666,6 +666,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please, enter a valid age (0-120).'**
   String get errorTravelerAgeInvalid;
+
+  /// No description provided for @unexpectedErrorOnSave.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while saving.'**
+  String get unexpectedErrorOnSave;
+
+  /// No description provided for @errorLoadingTravels.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading travels.'**
+  String get errorLoadingTravels;
+
+  /// No description provided for @titleMinLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Title must have at least 3 characters.'**
+  String get titleMinLengthError;
+
+  /// No description provided for @cropperToolbarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop Image'**
+  String get cropperToolbarTitle;
+
+  /// No description provided for @noTravelerFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No traveler found.'**
+  String get noTravelerFound;
+
+  /// No description provided for @registerTraveler.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Traveler'**
+  String get registerTraveler;
+
+  /// No description provided for @showMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show map'**
+  String get showMap;
+
+  /// No description provided for @addDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Add destination'**
+  String get addDestination;
+
+  /// No description provided for @removeDestinationTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove destination'**
+  String get removeDestinationTooltip;
+
+  /// No description provided for @titleMaxLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Title cannot exceed 50 characters.'**
+  String get titleMaxLengthError;
+
+  /// No description provided for @travelSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel saved successfully!'**
+  String get travelSavedSuccess;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

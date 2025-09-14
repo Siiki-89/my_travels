@@ -34,7 +34,6 @@
   "darkModeTitle": "Dark Mode",
   "darkModeSubtitle": "Activate or deactivate dark theme",
   "home": "Home",
-
   "add" : "Add",
   "travelAddTitle": "Trip title",
   "travelAddStartJourneyDateText" : "Start of the journey",
@@ -102,6 +101,16 @@
   "errorArrivalBeforePreviousDeparture": "A destination's arrival cannot be before the departure from the previous location.",
   "errorTravelerNameTooShort": "The name must have at least 3 characters.",
   "errorTravelerNameTooLong": "The name cannot exceed 50 characters.",
-  "errorTravelerAgeInvalid": "Please, enter a valid age (0-120)."
-
+  "errorTravelerAgeInvalid": "Please, enter a valid age (0-120).",
+  "unexpectedErrorOnSave": "An unexpected error occurred while saving.",
+  "errorLoadingTravels": "Error loading travels.",
+  "titleMinLengthError": "Title must have at least 3 characters.",
+  "cropperToolbarTitle": "Crop Image",
+  "noTravelerFound": "No traveler found.",
+  "registerTraveler": "Register Traveler",
+  "showMap": "Show map",
+  "addDestination": "Add destination",
+  "removeDestinationTooltip": "Remove destination",
+  "titleMaxLengthError": "Title cannot exceed 50 characters.",
+  "travelSavedSuccess": "Travel saved successfully!"
 }

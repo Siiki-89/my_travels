@@ -223,11 +223,12 @@ class InfoTravelProvider extends ChangeNotifier {
   // O método para deletar a viagem agora está correto.
   Future<void> deleteTravel(BuildContext context) async {
     if (_travel?.id == null) return;
+    AppLocalizations l10n = AppLocalizations.of(context)!;
 
     try {
       await _deleteTravelUseCase(_travel!.id!);
       if (context.mounted) {
-        Provider.of<HomeProvider>(context, listen: false).fetchTravels();
+        Provider.of<HomeProvider>(context, listen: false).fetchTravels(l10n);
         Navigator.of(context).pop();
       }
     } catch (e) {
@@ -239,6 +240,7 @@ class InfoTravelProvider extends ChangeNotifier {
 
   Future<void> toggleTravelStatus(BuildContext context, bool isFinished) async {
     if (_travel == null) return;
+    AppLocalizations l10n = AppLocalizations.of(context)!;
 
     try {
       // 1. Chama o use case para atualizar o status no banco de dados
@@ -267,7 +269,7 @@ class InfoTravelProvider extends ChangeNotifier {
 
         // 4. Atualiza a lista na HomePage
         // Usamos listen: false pois estamos dentro de um método.
-        Provider.of<HomeProvider>(context, listen: false).fetchTravels();
+        Provider.of<HomeProvider>(context, listen: false).fetchTravels(l10n);
       }
 
       // ### FIM DA LÓGICA ADICIONADA ###

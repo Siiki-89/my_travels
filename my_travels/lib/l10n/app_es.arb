@@ -99,8 +99,18 @@
   "errorAllStopsNeedDates": "Todas las fechas de llegada y salida de los destinos deben ser rellenadas.",
   "errorDepartureBeforeArrival": "La fecha de salida de un destino no puede ser anterior a su fecha de llegada.",
   "errorArrivalBeforePreviousDeparture": "La llegada a un destino no puede ser anterior a la salida del lugar previo.",
-   "errorTravelerNameTooShort": "El nombre debe tener al menos 3 caracteres.",
+  "errorTravelerNameTooShort": "El nombre debe tener al menos 3 caracteres.",
   "errorTravelerNameTooLong": "El nombre no puede exceder los 50 caracteres.",
-  "errorTravelerAgeInvalid": "Por favor, ingresa una edad válida (0-120)."
-
+  "errorTravelerAgeInvalid": "Por favor, ingresa una edad válida (0-120).",
+  "unexpectedErrorOnSave": "Ocurrió un error inesperado al guardar.",
+  "errorLoadingTravels": "Error al cargar los viajes.",
+  "titleMinLengthError": "El título debe tener al menos 3 caracteres.",
+  "cropperToolbarTitle": "Recortar Imagen",
+  "noTravelerFound": "No se encontró ningún viajero.",
+  "registerTraveler": "Registrar Viajero",
+  "showMap": "Mostrar mapa",
+  "addDestination": "Añadir destino",
+  "removeDestinationTooltip": "Eliminar destino",
+  "titleMaxLengthError": "El título no puede exceder los 50 caracteres.",
+  "travelSavedSuccess": "¡Viaje guardado con éxito!"
 }

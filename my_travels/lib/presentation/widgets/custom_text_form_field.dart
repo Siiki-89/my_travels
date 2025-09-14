@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class CustomTextFormField extends StatelessWidget {
   final String labelText;
   final TextEditingController controller;
+  final int? maxLength;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
 
@@ -13,6 +14,7 @@ class CustomTextFormField extends StatelessWidget {
     super.key,
     required this.labelText,
     required this.controller,
+    this.maxLength,
     this.validator,
     this.keyboardType = TextInputType.text,
     // O padrão é `false`, então você não precisa mudar nada nas outras telas.
@@ -36,6 +38,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      maxLength: maxLength,
       style: TextStyle(color: colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: labelText,

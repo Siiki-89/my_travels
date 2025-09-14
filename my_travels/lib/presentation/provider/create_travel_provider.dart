@@ -1,177 +1,137 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:my_travels/data/repository/travel_repository.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+
 import 'package:my_travels/data/entities/stop_point_entity.dart' as entity;
 import 'package:my_travels/data/entities/travel_entity.dart' as entity;
 import 'package:my_travels/data/entities/traveler_entity.dart' as entity;
-import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/domain/errors/failures.dart';
 import 'package:my_travels/domain/use_cases/travel/save_travel_use_case.dart';
-import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/destination_model.dart';
 import 'package:my_travels/model/experience_model.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
+import 'package:my_travels/utils/experience_model.dart';
 import 'package:my_travels/utils/transport_data.dart';
-import 'package:provider/provider.dart';
 
-/// [CreateTravelProvider] - Gerenciador de Estado para a Criação de Viagens.
-///
-/// Responsável por gerenciar o estado da tela de criação de viagem,
-/// servindo como uma ponte entre a UI (View) e a lógica de negócio (Use Cases).
+/// State manager for the travel creation screen.
 class CreateTravelProvider with ChangeNotifier {
-  // ===========================================================================
-  // SEÇÃO: DEPENDÊNCIAS E CAMADA DE DOMÍNIO
-  // ===========================================================================
+  final SaveTravelUseCase _saveTravelUseCase;
 
-  final TravelRepository _travelRepository = TravelRepository();
-  late final SaveTravelUseCase _saveTravelUseCase;
-
-  /// Construtor: Inicializa o UseCase, injetando o repositório.
-  CreateTravelProvider() {
-    _saveTravelUseCase = SaveTravelUseCase(_travelRepository);
-  }
-
-  // ===========================================================================
-  // SEÇÃO: ESTADO INTERNO DO PROVIDER (STATE)
-  // ===========================================================================
-
-  // -- Controladores de Texto --
+  /// Creates an instance of [CreateTravelProvider].
+  CreateTravelProvider({SaveTravelUseCase? saveTravelUseCase})
+    : _saveTravelUseCase =
+          saveTravelUseCase ?? SaveTravelUseCase(TravelRepository());
+  // -- Text Controllers --
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
 
-  // -- Estado do Formulário Principal --
-  DateTime _startData = DateTime.now();
-  DateTime _finalData = DateTime.now();
+  // -- Main Form State --
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now();
   File? _coverImage;
-  TransportModel _transportSelect = TransportModel(label: '', lottieAsset: '');
-
-  // -- Listas de Seleção e Dados --
+  TransportModel _selectedTransport = TransportModel(
+    label: '',
+    lottieAsset: '',
+  );
   final List<ExperienceModel> _selectedExperiences = [];
-  final List<ExperienceModel> _availableExperiences = [];
-  List<TransportModel> _availableTransport = [];
+  List<ExperienceModel> _availableExperiences = [];
+  List<TransportModel> _availableTransports = [];
   List<DestinationModel> _destinations = [DestinationModel(id: 0)];
 
-  // -- Controle de Edição de Destinos --
+  // -- Destination Editing Control --
   int _nextId = 1;
   int? _editingIndex;
   DateTime? _tempArrivalDate;
   DateTime? _tempDepartureDate;
   final Map<int, bool> _destinationFirstTap = {};
 
-  // -- Flags de Validação para a UI --
-  bool validateImage = false;
-  bool validateVehicle = false;
-  bool validateTravelers = false;
-  bool validateRoute = false;
+  // -- UI Feedback State --
+  String? _errorMessage;
+  bool _saveSuccess = false;
+  bool _isLoading = false;
+  bool _showImageError = false;
+  bool _showVehicleError = false;
+  bool _showTravelersError = false;
+  bool _showRouteError = false;
 
-  // ++ CORREÇÃO APLICADA ++
-  // Flags para evitar carregamento múltiplo de dados estáticos.
+  // -- Flags to prevent multiple loads of static data --
   bool _experiencesLoaded = false;
   bool _vehiclesLoaded = false;
 
-  // ===========================================================================
-  // SEÇÃO: GETTERS (EXPOSIÇÃO SEGURA DO ESTADO PARA A UI)
-  // ===========================================================================
-
-  DateTime get startData => _startData;
-  DateTime get finalData => _finalData;
-  String get startDateString => formatDate(_startData);
-  String get finalDateString => formatDate(_finalData);
+  // -- Getters for safe state exposure to the UI --
+  DateTime get startDate => _startDate;
+  DateTime get endDate => _endDate;
+  String get startDateString => _formatDate(_startDate);
+  String get endDateString => _formatDate(_endDate);
   File? get coverImage => _coverImage;
-  List<ExperienceModel> get selectedExperiences => _selectedExperiences;
-  List<ExperienceModel> get availableExperiences => _availableExperiences;
-  TransportModel get transportSelect => _transportSelect;
-  List<TransportModel> get availableTransport => _availableTransport;
+  TransportModel get selectedTransport => _selectedTransport;
   List<DestinationModel> get destinations => _destinations;
   int? get editingIndex => _editingIndex;
+  List<ExperienceModel> get selectedExperiences => _selectedExperiences;
+  List<ExperienceModel> get availableExperiences => _availableExperiences;
+  List<TransportModel> get availableTransports => _availableTransports;
   DateTime? get tempArrivalDate => _tempArrivalDate;
   DateTime? get tempDepartureDate => _tempDepartureDate;
   String get arrivalDateString =>
-      _tempArrivalDate != null ? formatDate(_tempArrivalDate!) : 'Selecione';
-  String get departureDateString => _tempDepartureDate != null
-      ? formatDate(_tempDepartureDate!)
-      : 'Selecione';
+      _tempArrivalDate != null ? _formatDate(_tempArrivalDate!) : 'Select';
+  String get departureDateString =>
+      _tempDepartureDate != null ? _formatDate(_tempDepartureDate!) : 'Select';
 
-  // ===========================================================================
-  // SEÇÃO: AÇÕES (MÉTODOS QUE MODIFICAM O ESTADO)
-  // ===========================================================================
+  String? get errorMessage => _errorMessage;
+  bool get saveSuccess => _saveSuccess;
+  bool get isLoading => _isLoading;
+  bool get showImageError => _showImageError;
+  bool get showVehicleError => _showVehicleError;
+  bool get showTravelersError => _showTravelersError;
+  bool get showRouteError => _showRouteError;
 
-  /// Atualiza a imagem de capa da viagem.
+  // -- Methods that modify the state --
+
+  /// Updates the travel's cover image.
   void setImage(File? newImage) {
     _coverImage = newImage;
     notifyListeners();
   }
 
-  /// Atualiza as datas de início ou fim da viagem.
-  void updateDate(DateTime newDate, bool isStartDate) {
+  /// Updates the start or end dates of the travel.
+  void updateDate(DateTime newDate, {required bool isStartDate}) {
     if (isStartDate) {
-      _startData = newDate;
-      if (_finalData.isBefore(_startData)) {
-        _finalData = _startData;
+      _startDate = newDate;
+      if (_endDate.isBefore(_startDate)) {
+        _endDate = _startDate;
       }
     } else {
-      _finalData = newDate;
+      _endDate = newDate;
     }
     notifyListeners();
   }
 
-  /// Formata uma data para o padrão dd/MM/yyyy.
-  String formatDate(DateTime date) {
-    return DateFormat('dd/MM/yyyy').format(date);
+  /// Loads the list of available vehicles (only once).
+  void loadAvailableVehicles(BuildContext context) {
+    if (_vehiclesLoaded) return;
+    _availableTransports = getAvailableVehicles(context);
+    _vehiclesLoaded = true;
   }
 
-  /// Carrega a lista de experiências disponíveis (apenas uma vez).
+  /// Loads the list of available experiences (only once).
   void loadAvailableExperiences(BuildContext context) {
-    // ++ CORREÇÃO APLICADA ++
-    // Verifica o flag antes de carregar, para evitar múltiplas execuções.
     if (_experiencesLoaded) return;
-
-    final appLocalizations = AppLocalizations.of(context)!;
-    _availableExperiences.clear();
-    _availableExperiences.addAll([
-      ExperienceModel(
-        label: appLocalizations.experiencePark,
-        image: 'assets/images/experience/park.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceBar,
-        image: 'assets/images/experience/bar.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceCulinary,
-        image: 'assets/images/experience/culinary.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceHistoric,
-        image: 'assets/images/experience/historic.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceNature,
-        image: 'assets/images/experience/nature.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceCulture,
-        image: 'assets/images/experience/culture.png',
-      ),
-      ExperienceModel(
-        label: appLocalizations.experienceShow,
-        image: 'assets/images/experience/show.png',
-      ),
-    ]);
-    // ++ CORREÇÃO APLICADA ++
-    // Atualiza o flag para indicar que os dados já foram carregados.
+    _availableExperiences = getAvailableExperiences(context);
     _experiencesLoaded = true;
   }
 
-  /// Verifica se uma experiência específica está na lista de selecionadas.
+  /// Checks if a specific experience is in the selected list.
   bool isSelectedExperience(ExperienceModel experience) {
     return _selectedExperiences.contains(experience);
   }
 
-  /// Adiciona ou remove uma experiência da lista de selecionadas.
+  /// Toggles an experience in the selected list.
   void toggleExperience(ExperienceModel experience) {
     if (isSelectedExperience(experience)) {
       _selectedExperiences.remove(experience);
@@ -181,46 +141,56 @@ class CreateTravelProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Verifica se um veículo específico é o selecionado.
+  /// Checks if a specific vehicle is the selected one.
   bool isSelectedVehicle(TransportModel transport) =>
-      _transportSelect.label == transport.label;
+      _selectedTransport.label == transport.label;
 
-  /// Define o veículo selecionado para a viagem.
+  /// Selects the vehicle for the travel.
   void selectVehicle(TransportModel transport) {
-    _transportSelect = transport;
+    _selectedTransport = transport;
     notifyListeners();
   }
 
-  /// Carrega a lista de veículos disponíveis (apenas uma vez).
-  void loadAvailableVehicles(BuildContext context) {
-    _availableTransport = getAvailableVehicles(context);
+  // -- Destination Management Methods --
+
+  /// Adds a new destination to the list.
+  void addDestination() {
+    _destinations.add(DestinationModel(id: _nextId++));
     notifyListeners();
   }
 
-  /// Inicia o modo de edição para um destino específico.
+  /// Updates the location of a destination being edited.
+  void updateDestinationLocation(int index, LocationMapModel location) {
+    if (index >= 0 && index < _destinations.length) {
+      final destination = _destinations[index];
+      _destinations[index] = destination.copyWith(
+        location: location,
+        description: location.description,
+      );
+      notifyListeners();
+    }
+  }
+
+  /// Starts editing mode for a specific destination.
   void startEditing(int index) {
     _editingIndex = index;
     final destination = _destinations[index];
     descriptionController.text = destination.description ?? '';
+
     if (destination.arrivalDate != null) {
       _tempArrivalDate = destination.arrivalDate;
       _tempDepartureDate = destination.departureDate;
     } else {
-      if (index > 0) {
-        final previousDepartureDate = _destinations[index - 1].departureDate;
-        _tempArrivalDate = previousDepartureDate;
-        _tempDepartureDate = previousDepartureDate?.add(
-          const Duration(days: 1),
-        );
-      } else {
-        _tempArrivalDate = _startData;
-        _tempDepartureDate = _startData.add(const Duration(days: 1));
-      }
+      final DateTime previousDate = (index > 0)
+          ? _destinations[index - 1].departureDate ?? _startDate
+          : _startDate;
+      _tempArrivalDate = previousDate;
+      _tempDepartureDate = previousDate.add(const Duration(days: 1));
     }
     notifyListeners();
   }
 
-  /// Salva as alterações de um destino e finaliza o modo de edição.
+  /// Saves the changes for a destination and exits editing mode.
   void concludeEditing() {
     if (_editingIndex != null) {
       final destination = _destinations[_editingIndex!];
@@ -237,173 +207,100 @@ class CreateTravelProvider with ChangeNotifier {
     }
   }
 
-  /// Adiciona um novo destino à lista.
-  void addDestination() {
-    _destinations.add(DestinationModel(id: _nextId++));
-    notifyListeners();
-  }
-
-  /// Atualiza a localização de um destino que está sendo editado.
-  void updateDestinationLocation(int index, LocationMapModel location) {
-    if (index >= 0 && index < _destinations.length) {
-      final destination = _destinations[index];
-      _destinations[index] = destination.copyWith(
-        location: location,
-        description: location.description,
-      );
-      notifyListeners();
-    }
-  }
-
-  /// Atualiza a data de chegada temporária durante a edição.
+  /// Updates the temporary arrival date during editing.
   void updateArrivalDate(DateTime date) {
     _tempArrivalDate = date;
     notifyListeners();
   }
 
-  /// Atualiza a data de partida temporária durante a edição.
+  /// Updates the temporary departure date during editing.
   void updateDepartureDate(DateTime date) {
     _tempDepartureDate = date;
     notifyListeners();
   }
 
-  /// Remove um destino da lista pelo seu ID.
+  /// Removes a destination from the list by its ID.
   void removeDestinationById(int id) {
-    // Pega o índice do destino que será removido ANTES de removê-lo.
-    final indexToRemove = _destinations.indexWhere((dest) => dest.id == id);
+    final indexToRemove = _destinations.indexWhere((d) => d.id == id);
+    if (indexToRemove == -1) return;
 
-    _destinations.removeWhere((dest) => dest.id == id);
-
-    // Se o item que estamos removendo é o que estava sendo editado,
-    // saímos do modo de edição.
+    _destinations.removeAt(indexToRemove);
     if (indexToRemove == _editingIndex) {
       _editingIndex = null;
     }
-
     notifyListeners();
   }
 
-  /// Orquestra a validação e o salvamento da viagem.
-  Future<void> saveTravel(
-    BuildContext context,
-    TravelerProvider travelerProvider,
-  ) async {
-    _resetValidationFlags();
-    concludeEditing();
-
-    // 1. Filtra os destinos que são válidos (têm uma localização).
-    final validDestinations = _destinations
-        .where((d) => d.location != null)
-        .toList();
-
-    // 2. Determina a data final correta.
-    // Se houver destinos válidos, usa a data de partida do último.
-    // Caso contrário, usa a data final que o usuário definiu (que pode ser a data de hoje).
-    final DateTime finalTravelDate =
-        validDestinations.isNotEmpty &&
-            validDestinations.last.departureDate != null
-        ? validDestinations.last.departureDate!
-        : _finalData;
-
-    // 3. Monta a entidade 'Travel' com os dados do estado atual do provider.
-    final travelToSave = entity.Travel(
-      title: titleController.text,
-      startDate: _startData,
-      endDate: finalTravelDate, // <-- USA A NOVA DATA FINAL AQUI
-      vehicle: _transportSelect.label,
-      coverImagePath: _coverImage?.path,
-      stopPoints:
-          validDestinations // Reutiliza a lista já filtrada
-              .map(
-                (destinationModel) => entity.StopPoint(
-                  travelId: 0,
-                  stopOrder: _destinations.indexOf(destinationModel),
-                  locationName: destinationModel.location!.description,
-                  latitude: destinationModel.location!.lat,
-                  longitude: destinationModel.location!.long,
-                  description: destinationModel.description,
-                  arrivalDate: destinationModel.arrivalDate,
-                  departureDate: destinationModel.departureDate,
-                ),
-              )
-              .toList(),
-      travelers: travelerProvider.selectedTravelers
-          .map(
-            (travelerModel) =>
-                entity.Traveler(id: travelerModel.id, name: travelerModel.name),
-          )
-          .toList(),
-      isFinished: false,
-    );
-
-    try {
-      // Chama o Use Case para executar a lógica de negócio (validação e salvamento).
-      await _saveTravelUseCase.call(travelToSave);
-
-      // Em caso de SUCESSO, atualiza a home, mostra feedback e reseta o form.
-      if (context.mounted) {
-        await context.read<HomeProvider>().fetchTravels();
-        _showSuccessSnackBar(context, 'Viagem salva com sucesso!');
-        resetTravelForm(travelerProvider);
-      }
-    } on TravelValidationException catch (e) {
-      // Em caso de ERRO DE VALIDAÇÃO, mostra o erro e atualiza os flags da UI.
-      _showErrorSnackBar(context, e.message);
-
-      if (e is InvalidCoverImageException) validateImage = true;
-      if (e is InvalidTransportException) validateVehicle = true;
-      if (e is InvalidTravelersException) validateTravelers = true;
-      if (e is InvalidRouteException) validateRoute = true;
-
-      notifyListeners();
-    } catch (e) {
-      // Em caso de outros erros, mostra uma mensagem genérica.
-      _showErrorSnackBar(context, 'Ocorreu um erro inesperado ao salvar.');
-      debugPrint("Erro genérico ao salvar a viagem: $e");
-    }
-  }
-
-  /// Registra o primeiro toque em um destino.
+  /// Checks if a destination has been tapped for the first time.
   bool hasTappedOnce(int index) => _destinationFirstTap[index] ?? false;
+
+  /// Registers the first tap on a destination to trigger expansion.
   void registerFirstTap(int index) {
     _destinationFirstTap[index] = true;
     notifyListeners();
   }
 
-  /// Reseta o estado de "primeiro toque" para um destino.
+  /// Resets the "first tap" state for a specific destination.
   void resetFirstTap(int index) {
     _destinationFirstTap.remove(index);
     notifyListeners();
   }
 
-  /// Limpa o estado de "primeiro toque" para todos os destinos.
+  /// Clears the "first tap" state for all destinations.
   void resetAllTaps() {
     _destinationFirstTap.clear();
     notifyListeners();
   }
 
-  /// Reseta todos os flags de validação para o estado inicial.
-  _resetValidationFlags() {
-    validateImage = false;
-    validateVehicle = false;
-    validateTravelers = false;
-    validateRoute = false;
+  // -- Main Save Logic --
+
+  /// Orchestrates the validation and saving of the travel.
+  ///
+  /// Updates internal state (_saveSuccess or _errorMessage) to which the UI must react.
+  Future<void> saveTravel(
+    TravelerProvider travelerProvider,
+    HomeProvider homeProvider,
+    AppLocalizations l10n,
+  ) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _saveSuccess = false;
+    _resetValidationFlags();
     notifyListeners();
+
+    if (_editingIndex != null) concludeEditing();
+
+    final travelToSave = _buildTravelEntity(travelerProvider);
+
+    try {
+      await _saveTravelUseCase.call(travelToSave, l10n);
+
+      // On SUCCESS: update the success flag and trigger side effects.
+      _saveSuccess = true;
+      await homeProvider.fetchTravels(l10n);
+      resetForm(travelerProvider);
+    } on TravelValidationException catch (e) {
+      _errorMessage = e.message;
+      _handleValidationException(e);
+    } catch (e) {
+      _errorMessage = l10n.unexpectedErrorOnSave;
+      // debugPrint("Generic error while saving travel: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  /// Limpa e reseta completamente o estado do formulário.
-  /// Limpa e reseta completamente o estado do formulário.
-  void resetTravelForm(TravelerProvider travelerProvider) {
-    // Acessamos a lista pública do TravelerProvider e usamos o método .clear()
-    travelerProvider.selectedTravelers.clear();
-
+  /// Resets the form state completely after a successful save or cancellation.
+  void resetForm(TravelerProvider travelerProvider) {
+    travelerProvider.clearSelection();
     titleController.clear();
     descriptionController.clear();
     _coverImage = null;
-    _startData = DateTime.now();
-    _finalData = DateTime.now();
+    _startDate = DateTime.now();
+    _endDate = DateTime.now();
     _selectedExperiences.clear();
-    _transportSelect = TransportModel(label: '', lottieAsset: '');
+    _selectedTransport = TransportModel(label: '', lottieAsset: '');
     _destinations = [DestinationModel(id: 0)];
     _nextId = 1;
     _editingIndex = null;
@@ -413,25 +310,69 @@ class CreateTravelProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Exibe um SnackBar de erro.
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
+  // -- Private Helper Methods --
+
+  /// Builds the domain [Travel] entity from the provider's current state.
+  entity.Travel _buildTravelEntity(TravelerProvider travelerProvider) {
+    final validDestinations = _destinations
+        .where((d) => d.location != null)
+        .toList();
+    final DateTime finalTravelDate =
+        validDestinations.isNotEmpty &&
+            validDestinations.last.departureDate != null
+        ? validDestinations.last.departureDate!
+        : _endDate;
+
+    return entity.Travel(
+      title: titleController.text,
+      startDate: _startDate,
+      endDate: finalTravelDate,
+      vehicle: _selectedTransport.label,
+      coverImagePath: _coverImage?.path,
+      stopPoints: validDestinations
+          .map(
+            (dest) => entity.StopPoint(
+              travelId: 0,
+              stopOrder: _destinations.indexOf(dest),
+              locationName: dest.location!.description,
+              latitude: dest.location!.lat,
+              longitude: dest.location!.long,
+              description: dest.description,
+              arrivalDate: dest.arrivalDate,
+              departureDate: dest.departureDate,
+            ),
+          )
+          .toList(),
+      travelers: travelerProvider.selectedTravelers
+          .map((t) => entity.Traveler(id: t.id, name: t.name))
+          .toList(),
+      isFinished: false,
     );
   }
 
-  /// Exibe um SnackBar de sucesso (criado para consistência).
-  void _showSuccessSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  /// Sets the correct validation flag based on the exception type.
+  void _handleValidationException(TravelValidationException e) {
+    if (e is InvalidCoverImageException) _showImageError = true;
+    if (e is InvalidTransportException) _showVehicleError = true;
+    if (e is InvalidTravelersException) _showTravelersError = true;
+    if (e is InvalidRouteException) _showRouteError = true;
+  }
+
+  /// Formats a date to the dd/MM/yyyy pattern.
+  String _formatDate(DateTime date) => DateFormat('dd/MM/yyyy').format(date);
+
+  /// Resets all validation flags to their initial state.
+  void _resetValidationFlags() {
+    _showImageError = false;
+    _showVehicleError = false;
+    _showTravelersError = false;
+    _showRouteError = false;
+  }
+
+  @override
+  void dispose() {
+    descriptionController.dispose();
+    titleController.dispose();
+    super.dispose();
   }
 }

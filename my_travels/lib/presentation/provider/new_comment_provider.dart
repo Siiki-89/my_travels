@@ -53,7 +53,7 @@ class NewCommentProvider extends ChangeNotifier {
 
   /// Salva o comentário. Retorna `true` se for bem-sucedido.
   /// Lida com a exibição de erros para o usuário.
-  Future<bool> saveComment(BuildContext context) async {
+  /* Future<bool> saveComment(BuildContext context) async {
     // --- VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS ---
     // A validação agora acontece ANTES de qualquer outra coisa.
     if (selectedTraveler == null) {
@@ -102,7 +102,7 @@ class NewCommentProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-  }
+  } */
 
   // Não se esqueça de ter um método para mostrar a SnackBar no seu provider
   void _showErrorSnackBar(BuildContext context, String message) {

@@ -122,11 +122,11 @@ class _NewCommentView extends StatelessWidget {
                     ? null
                     : () async {
                         // A UI apenas chama o método...
-                        final success = await provider.saveComment(context);
+                        /* final success = await provider.saveComment(context);
                         // ...e reage ao sucesso.
                         if (success && context.mounted) {
                           Navigator.of(context).pop(true);
-                        }
+                        } */
                       },
                 style: AppButtonStyles.primaryButtonStyle,
                 child: provider.isLoading

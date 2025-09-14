@@ -1,18 +1,24 @@
+// In lib/presentation/pages/create_travel_page.dart (or its own file)
+
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
-import 'package:my_travels/model/destination_model.dart';
-import 'package:my_travels/model/location_map_model.dart';
-import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/presentation/provider/create_travel_provider.dart';
-import 'package:my_travels/presentation/styles/app_button_styles.dart';
-import 'package:my_travels/services/google_maps_service.dart';
 import 'package:provider/provider.dart';
 
+import 'package:my_travels/model/destination_model.dart';
+import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/provider/create_travel_provider.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/services/google_maps_service.dart';
+
+/// A widget that provides a search field for places using Google Autocomplete.
+/// It also expands to show additional fields for editing destination details.
 class PlaceSearchField extends StatelessWidget {
   final DestinationModel destination;
   final int index;
   final String hint;
 
+  /// Creates an instance of [PlaceSearchField].
   const PlaceSearchField({
     super.key,
     required this.index,
@@ -23,20 +29,21 @@ class PlaceSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CreateTravelProvider>();
-    final loc = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final bool isStartPoint = (index == 0);
 
     if (isStartPoint) {
       return _buildAutocompleteField(context, provider);
     } else {
-      return _buildAnimatedCard(context, provider, loc);
+      return _buildAnimatedCard(context, provider, l10n);
     }
   }
 
+  /// Builds an animated container that expands/collapses to show editing fields.
   Widget _buildAnimatedCard(
     BuildContext context,
     CreateTravelProvider provider,
-    AppLocalizations loc,
+    AppLocalizations l10n,
   ) {
     final bool isEditing = provider.editingIndex == index;
     final double containerHeight = isEditing ? 310.0 : 60.0;
@@ -51,20 +58,19 @@ class PlaceSearchField extends StatelessWidget {
         child: Column(
           children: [
             _buildAutocompleteField(context, provider),
-            if (isEditing) _buildAdditionalFields(context, provider, loc),
+            if (isEditing) _buildAdditionalFields(context, provider, l10n),
           ],
         ),
       ),
     );
   }
 
-  // Em place_search_field.dart
-
+  /// Builds the core text field with Google Places Autocomplete functionality.
   Widget _buildAutocompleteField(
     BuildContext context,
     CreateTravelProvider provider,
   ) {
-    // Adicionamos a verificação aqui para ficar mais claro
+    // This check makes the logic clearer.
     final bool isStartPoint = (index == 0);
 
     return SizedBox(
@@ -89,17 +95,15 @@ class PlaceSearchField extends StatelessWidget {
             FocusScope.of(context).unfocus();
             provider.updateDestinationLocation(index, detail);
             context.read<MapProvider>().setStop(index, detail);
+            // This was your original logic, kept as is.
             if (index == 0) {
               provider.concludeEditing();
             }
           }
         },
         fieldViewBuilder: (ctx, controller, focus, onSubmitted) {
-          // 1. Obtém o valor atual do seu modelo de dados.
+          // Syncs the controller's text with the model's state, e.g., after a form reset.
           final String modelText = destination.location?.description ?? '';
-
-          // 2. Compara com o texto atual do controller. Se forem diferentes,
-          //    significa que o estado mudou (como no reset) e a UI precisa ser atualizada.
           if (controller.text != modelText && !focus.hasFocus) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controller.text = modelText;
@@ -109,7 +113,6 @@ class PlaceSearchField extends StatelessWidget {
             });
           }
 
-          // 1. Criamos o TextFormField uma única vez para evitar repetição
           final textFormField = TextFormField(
             controller: controller,
             focusNode: focus,
@@ -121,22 +124,19 @@ class PlaceSearchField extends StatelessWidget {
             ),
           );
 
-          // 2. Lógica condicional:
-          // Se for o ponto de partida, retorna o campo de texto diretamente.
+          // If it's the starting point, return the text field directly.
           if (isStartPoint) {
             return textFormField;
           }
-          // Caso contrário, mantém a lógica de expansão com dois cliques.
+          // Otherwise, maintain the two-tap expansion logic.
           else {
             final hasTapped = provider.hasTappedOnce(index);
 
             return GestureDetector(
               onTap: () {
                 if (!hasTapped) {
-                  provider.registerFirstTap(index);
-                  provider.startEditing(index);
-                  // A correção anterior é mantida aqui para evitar que o
-                  // teclado abra ao expandir os outros destinos.
+                  // The previous fix is kept here to prevent the keyboard
+                  // from opening when expanding other destinations.
                   _handleFirstTap(context, provider, index);
                   Future.delayed(const Duration(milliseconds: 100), () {
                     FocusScope.of(context).unfocus();
@@ -145,20 +145,20 @@ class PlaceSearchField extends StatelessWidget {
               },
               child: AbsorbPointer(
                 absorbing: !hasTapped,
-                child: textFormField, // Reutilizamos o widget criado acima
+                child: textFormField, // Reuses the widget created above
               ),
             );
           }
-          // --- FIM DA MODIFICAÇÃO ---
         },
       ),
     );
   }
 
+  /// Builds the additional fields (description, dates, save button) that appear on expansion.
   Widget _buildAdditionalFields(
     BuildContext context,
     CreateTravelProvider provider,
-    AppLocalizations loc,
+    AppLocalizations l10n,
   ) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
@@ -168,7 +168,7 @@ class PlaceSearchField extends StatelessWidget {
             key: ValueKey('description_$index'),
             controller: provider.descriptionController,
             decoration: InputDecoration(
-              labelText: loc.travelAddDecriptionText,
+              labelText: l10n.travelAddDecriptionText,
               border: const OutlineInputBorder(),
             ),
             maxLines: 2,
@@ -178,14 +178,14 @@ class PlaceSearchField extends StatelessWidget {
             children: [
               _buildDateField(
                 context,
-                loc.travelAddStart,
+                l10n.travelAddStart,
                 provider.arrivalDateString,
                 () => _selectDate(context, true, provider),
               ),
               const SizedBox(width: 8),
               _buildDateField(
                 context,
-                loc.travelAddFinal,
+                l10n.travelAddFinal,
                 provider.departureDateString,
                 () => _selectDate(context, false, provider),
               ),
@@ -198,12 +198,11 @@ class PlaceSearchField extends StatelessWidget {
               onPressed: () {
                 FocusScope.of(context).unfocus();
                 provider.resetFirstTap(index);
-                provider.resetAllTaps();
                 provider.concludeEditing();
               },
               style: AppButtonStyles.saveButtonStyle,
               child: Text(
-                loc.travelAddPointButton,
+                l10n.travelAddPointButton,
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -213,6 +212,7 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
+  /// Builds a single date field button.
   Widget _buildDateField(
     BuildContext context,
     String label,
@@ -237,7 +237,7 @@ class PlaceSearchField extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 value,
-                style: TextStyle(color: Colors.blue, fontSize: 14),
+                style: const TextStyle(color: Colors.blue, fontSize: 14),
               ),
             ),
           ),
@@ -246,6 +246,7 @@ class PlaceSearchField extends StatelessWidget {
     );
   }
 
+  /// Shows the date picker and updates the provider's state.
   Future<void> _selectDate(
     BuildContext context,
     bool isArrival,
@@ -255,31 +256,30 @@ class PlaceSearchField extends StatelessWidget {
     DateTime initialPickerDate;
     DateTime firstSelectableDate;
 
-    // Função auxiliar para normalizar a data (ignorar horas/minutos)
+    // Helper function to normalize the date (ignore time).
     DateTime normalizeDate(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
     if (isArrival) {
       if (index == 0) {
-        firstSelectableDate = provider.startData;
+        firstSelectableDate = provider.startDate;
       } else {
         final previousDestinationDeparture =
             provider.destinations[index - 1].departureDate;
         firstSelectableDate =
-            previousDestinationDeparture ?? provider.startData;
+            previousDestinationDeparture ?? provider.startDate;
       }
       initialPickerDate = provider.tempArrivalDate ?? firstSelectableDate;
     } else {
-      // A data de partida não pode ser anterior à data de chegada.
-      firstSelectableDate = provider.tempArrivalDate ?? provider.startData;
+      // The departure date cannot be earlier than the arrival date.
+      firstSelectableDate = provider.tempArrivalDate ?? provider.startDate;
       initialPickerDate = provider.tempDepartureDate ?? firstSelectableDate;
     }
 
-    // ### CORREÇÃO APLICADA AQUI ###
-    // Normaliza as datas antes de qualquer comparação ou de passá-las ao DatePicker.
+    // Normalizes dates before any comparison or passing them to the DatePicker.
     DateTime firstSelectableDay = normalizeDate(firstSelectableDate);
     DateTime initialPickerDay = normalizeDate(initialPickerDate);
 
-    // Garante que a data inicial do picker não seja anterior à primeira data selecionável.
+    // Ensures the picker's initial date is not before the first selectable date.
     if (initialPickerDay.isBefore(firstSelectableDay)) {
       initialPickerDay = firstSelectableDay;
     }
@@ -300,30 +300,28 @@ class PlaceSearchField extends StatelessWidget {
     }
   }
 
+  /// Handles the logic for the first tap on a destination card to expand it.
   void _handleFirstTap(
     BuildContext context,
     CreateTravelProvider provider,
     int index,
   ) {
-    // 1. Inicia a edição e animação
+    // 1. Starts the editing and animation
     provider.registerFirstTap(index);
     provider.startEditing(index);
 
-    // 2. Agenda a rolagem da tela
-    // Usamos um pequeno delay para dar tempo da animação de expansão começar.
-    // Isso garante que o cálculo da posição para o scroll seja mais preciso.
+    // 2. Schedules the screen scroll
+    // A small delay is used to give the expansion animation time to start.
+    // This ensures the position calculation for the scroll is more accurate.
     Future.delayed(const Duration(milliseconds: 200), () {
-      // É uma boa prática verificar se o widget ainda está na tela ("montado")
-      // antes de usar seu 'context'.
+      // It's good practice to check if the widget is still on screen ("mounted")
+      // before using its 'context'.
       if (context.mounted) {
         Scrollable.ensureVisible(
           context,
-          duration: const Duration(
-            milliseconds: 400,
-          ), // Duração da animação de rolagem
+          duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
-          alignment:
-              0, // Alinhamento na tela (0.0 = topo, 0.5 = meio, 1.0 = fim)
+          alignment: 0.0, // Aligns to the top of the viewport
         );
       }
     });

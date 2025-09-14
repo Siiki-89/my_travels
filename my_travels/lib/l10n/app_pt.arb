@@ -101,6 +101,16 @@
   "errorArrivalBeforePreviousDeparture": "A chegada em um destino não pode ser antes da partida do local anterior.",
   "errorTravelerNameTooShort": "O nome deve ter pelo menos 3 caracteres.",
   "errorTravelerNameTooLong": "O nome não pode exceder 50 caracteres.",
-  "errorTravelerAgeInvalid": "Por favor, insira uma idade válida (0-120)."
-
+  "errorTravelerAgeInvalid": "Por favor, insira uma idade válida (0-120).",
+  "unexpectedErrorOnSave": "Ocorreu um erro inesperado ao salvar.",
+  "errorLoadingTravels": "Erro ao carregar viagens.",
+  "titleMinLengthError": "O título deve ter pelo menos 3 caracteres.",
+  "cropperToolbarTitle": "Recortar Imagem",
+  "noTravelerFound": "Nenhum viajante encontrado.",
+  "registerTraveler": "Cadastrar Viajante",
+  "showMap": "Mostrar mapa",
+  "addDestination": "Adicionar destino",
+  "removeDestinationTooltip": "Remover destino",
+  "titleMaxLengthError": "O título não pode exceder 50 caracteres.",
+  "travelSavedSuccess": "Viagem salva com sucesso!"
 }

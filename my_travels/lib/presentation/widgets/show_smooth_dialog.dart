@@ -1,13 +1,20 @@
+// In lib/presentation/widgets/show_smooth_dialog.dart
+
 import 'package:flutter/material.dart';
 
-Future<void> showSmoothDialog(
-  BuildContext context,
-  Widget dialog, {
+/// Displays a dialog with a smooth scale and fade transition.
+///
+/// This function wraps Flutter's [showGeneralDialog] to provide a
+/// consistent and pleasant animation for all dialogs in the app.
+Future<T?> showSmoothDialog<T>({
+  required BuildContext context,
+  required Widget dialog,
   Duration duration = const Duration(milliseconds: 300),
+  bool isDismissible = false,
 }) {
-  return showGeneralDialog(
+  return showGeneralDialog<T>(
     context: context,
-    barrierDismissible: false,
+    barrierDismissible: isDismissible,
     barrierLabel: "Dialog",
     pageBuilder: (context, animation, secondaryAnimation) {
       return const SizedBox.shrink();

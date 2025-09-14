@@ -1,9 +1,18 @@
+// In lib/presentation/pages/create_travel_page.dart
+
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:my_travels/presentation/provider/home_provider.dart';
+import 'package:my_travels/utils/snackbar_helper.dart';
+import 'package:provider/provider.dart';
+
+import 'package:my_travels/model/experience_model.dart';
 import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
@@ -12,28 +21,25 @@ import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
 import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 import 'package:my_travels/presentation/widgets/place_search_field.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 
+// The form key is managed here for the entire page's form.
 final _formKey = GlobalKey<FormState>();
 
-// =======================================================
-// WIDGET DA PÁGINA PRINCIPAL
-// =======================================================
-
+/// A page for creating a new travel itinerary.
 class CreateTravelPage extends StatelessWidget {
+  /// Creates an instance of [CreateTravelPage].
   const CreateTravelPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final createTravelProvider = context.watch<CreateTravelProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(appLocalizations.add),
+        title: Text(l10n.add),
         centerTitle: true,
-        actions: [_buildButtonClean(context, appLocalizations)],
+        actions: [_buildClearButton(context, l10n)],
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -43,29 +49,38 @@ class CreateTravelPage extends StatelessWidget {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Chamada ao novo widget privado para a imagem
+                    // Calls the private widget for the image picker/cropper.
                     Consumer<CreateTravelProvider>(
-                      builder: (context, providerTravel, _) {
-                        return _CropImageButton(provider: providerTravel);
+                      builder: (context, provider, _) {
+                        return _CropImageButton(provider: provider);
                       },
                     ),
-
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Titulo da viagem
+                          // Travel Title
                           const SizedBox(height: 16),
                           CustomTextFormField(
-                            labelText: appLocalizations.travelAddTitle,
+                            labelText: l10n.travelAddTitle,
                             controller: createTravelProvider.titleController,
-                            validator: (title) => title!.length < 3
-                                ? 'pelo menos 3 caracteres'
-                                : null,
+                            maxLength:
+                                50, // <-- 1. Limite visual e de digitação na UI
+                            validator: (title) {
+                              // A validação agora cobre os dois casos
+                              if (title == null || title.trim().length < 3) {
+                                return l10n.titleMinLengthError;
+                              }
+                              if (title.trim().length > 50) {
+                                return l10n
+                                    .titleMaxLengthError; // <-- 2. Validação da regra de negócio
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 16),
-                          Text(appLocalizations.travelAddStartJourneyDateText),
+                          Text(l10n.travelAddStartJourneyDateText),
                           const SizedBox(height: 10),
                           ElevatedButton(
                             onPressed: () => _selectDate(context, true),
@@ -83,33 +98,33 @@ class CreateTravelPage extends StatelessWidget {
                             ),
                           ),
 
-                          // Veiculo de locomoção
+                          // Vehicle
                           const SizedBox(height: 16),
                           _AnimatedValidationText(
-                            hasError: createTravelProvider.validateVehicle,
-                            text: appLocalizations.travelAddTypeLocomotion,
+                            hasError: createTravelProvider.showVehicleError,
+                            text: l10n.travelAddTypeLocomotion,
                           ),
                           const SizedBox(height: 16),
                           const _SelectTransport(),
                           const SizedBox(height: 10),
 
-                          // Viajantes
+                          // Travelers
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               _AnimatedValidationText(
                                 hasError:
-                                    createTravelProvider.validateTravelers,
-                                text: appLocalizations.users,
+                                    createTravelProvider.showTravelersError,
+                                text: l10n.users,
                               ),
                               IconButton(
                                 onPressed: () {
                                   context
                                       .read<TravelerProvider>()
-                                      .loadTravelers();
+                                      .loadTravelers(l10n);
                                   showSmoothDialog(
-                                    context,
-                                    const _SelectTravelerDialog(),
+                                    context: context,
+                                    dialog: const _SelectTravelerDialog(),
                                   );
                                 },
                                 icon: const Icon(Icons.add, color: Colors.blue),
@@ -126,12 +141,12 @@ class CreateTravelPage extends StatelessWidget {
                                 child: Wrap(
                                   spacing: 8.0,
                                   children: provider.selectedTravelers.map((
-                                    travelers,
+                                    traveler,
                                   ) {
                                     return Chip(
-                                      label: Text(travelers.name),
+                                      label: Text(traveler.name),
                                       onDeleted: () {
-                                        provider.toggleTraveler(travelers);
+                                        provider.toggleTraveler(traveler);
                                       },
                                     );
                                   }).toList(),
@@ -140,20 +155,20 @@ class CreateTravelPage extends StatelessWidget {
                             },
                           ),
 
-                          // Pontos de interesse
+                          // Points of Interest
                           const SizedBox(height: 6),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(appLocalizations.travelAddTypeInterest),
+                              Text(l10n.travelAddTypeInterest),
                               IconButton(
                                 onPressed: () {
                                   context
                                       .read<CreateTravelProvider>()
                                       .loadAvailableExperiences(context);
                                   showSmoothDialog(
-                                    context,
-                                    const _SelectExperienceDialog(),
+                                    context: context,
+                                    dialog: const _SelectExperienceDialog(),
                                   );
                                 },
                                 icon: const Icon(Icons.add, color: Colors.blue),
@@ -184,21 +199,21 @@ class CreateTravelPage extends StatelessWidget {
                             },
                           ),
 
-                          // Trajeto da viagem
+                          // Travel Route
                           const SizedBox(height: 16),
                           _AnimatedValidationText(
-                            hasError: createTravelProvider.validateRoute,
-                            text: appLocalizations.travelAddTrip,
+                            hasError: createTravelProvider.showRouteError,
+                            text: l10n.travelAddTrip,
                           ),
                           const SizedBox(height: 16),
 
-                          // Chamada ao novo widget privado para a rota
-                          _TravelRouteSection(loc: appLocalizations),
+                          // Calls the private widget for the route.
+                          _TravelRouteSection(l10n: l10n),
 
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Mostrar mapa'),
+                              Text(l10n.showMap),
                               const SizedBox(width: 80),
                               InkWell(
                                 onTap: () =>
@@ -215,21 +230,51 @@ class CreateTravelPage extends StatelessWidget {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
-                                if (!_formKey.currentState!.validate()) {
+                              onPressed: () async {
+                                if (!(_formKey.currentState?.validate() ??
+                                    false)) {
                                   return;
                                 }
 
+                                // Pega as instâncias necessárias. `read` é para chamar ações.
+                                final createTravelProvider = context
+                                    .read<CreateTravelProvider>();
                                 final travelerProvider = context
                                     .read<TravelerProvider>();
-                                createTravelProvider.saveTravel(
-                                  context,
+                                final homeProvider = context
+                                    .read<HomeProvider>();
+                                final l10n = AppLocalizations.of(context)!;
+
+                                // 1. Chama a ação no provider
+                                await createTravelProvider.saveTravel(
                                   travelerProvider,
+                                  homeProvider,
+                                  l10n,
                                 );
+
+                                // 2. APÓS a ação, a UI verifica o estado do provider e reage
+                                if (context.mounted) {
+                                  if (createTravelProvider.saveSuccess) {
+                                    // Se teve sucesso, a UI mostra o feedback!
+                                    showSuccessSnackBar(
+                                      context,
+                                      l10n.travelSavedSuccess,
+                                    );
+                                    Navigator.of(context).pop();
+                                  } else if (createTravelProvider
+                                          .errorMessage !=
+                                      null) {
+                                    // Se teve erro, a UI mostra o feedback!
+                                    showErrorSnackBar(
+                                      context,
+                                      createTravelProvider.errorMessage!,
+                                    );
+                                  }
+                                }
                               },
                               style: AppButtonStyles.primaryButtonStyle,
                               child: Text(
-                                appLocalizations.saveButton,
+                                l10n.saveButton,
                                 style: const TextStyle(color: Colors.white),
                               ),
                             ),
@@ -247,27 +292,22 @@ class CreateTravelPage extends StatelessWidget {
     );
   }
 
-  IconButton _buildButtonClean(
-    BuildContext context,
-    AppLocalizations appLocalizations,
-  ) {
+  /// Builds the clear form button for the AppBar.
+  IconButton _buildClearButton(BuildContext context, AppLocalizations l10n) {
     return IconButton(
-      icon: const Icon(Icons.refresh), // Um ícone mais apropriado que delete
+      icon: const Icon(Icons.refresh),
       onPressed: () {
         showSmoothDialog(
-          context,
-          ConfirmationDialog(
-            title: appLocalizations.clearFormTitle,
-            content: appLocalizations.clearFormContent,
-            confirmText: appLocalizations.clearFormConfirm,
-            cancel: appLocalizations.cancel,
-
+          context: context,
+          dialog: ConfirmationDialog(
+            title: l10n.clearFormTitle,
+            content: l10n.clearFormContent,
+            confirmText: l10n.clearFormConfirm,
+            cancelText: l10n.cancel,
             onConfirm: () {
-              // Sua lógica para limpar o formulário vai aqui
+              // The logic to clear the form goes here.
               final travelerProvider = context.read<TravelerProvider>();
-              context.read<CreateTravelProvider>().resetTravelForm(
-                travelerProvider,
-              );
+              context.read<CreateTravelProvider>().resetForm(travelerProvider);
             },
           ),
         );
@@ -275,36 +315,35 @@ class CreateTravelPage extends StatelessWidget {
     );
   }
 
-  // --- MÉTODOS DE LÓGICA MANTIDOS NA PÁGINA ---
-
+  /// Shows a DatePicker to select the start or end date of the travel.
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final provider = context.read<CreateTravelProvider>();
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: isStartDate ? provider.startData : provider.finalData,
-      firstDate: isStartDate ? DateTime(2020) : provider.startData,
+      initialDate: isStartDate ? provider.startDate : provider.endDate,
+      firstDate: isStartDate ? DateTime(2020) : provider.startDate,
       lastDate: DateTime(2101),
     );
 
     if (pickedDate != null) {
-      provider.updateDate(pickedDate, isStartDate);
+      provider.updateDate(pickedDate, isStartDate: isStartDate);
     }
   }
 }
 
-// =======================================================
-// WIDGETS PRIVADOS (COMPONENTES INTERNOS DA PÁGINA)
-// =======================================================
+// -- PRIVATE WIDGETS (INTERNAL COMPONENTS OF THE PAGE) --
+
+/// A private widget for the image picker with crop functionality.
 class _CropImageButton extends StatelessWidget {
   final CreateTravelProvider provider;
 
   const _CropImageButton({required this.provider});
 
   Future<void> _cropImage(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
     );
-
     if (pickedFile == null) return;
 
     final croppedFile = await ImageCropper().cropImage(
@@ -314,7 +353,7 @@ class _CropImageButton extends StatelessWidget {
       uiSettings: [
         AndroidUiSettings(
           showCropGrid: false,
-          toolbarTitle: 'Recortar imagem',
+          toolbarTitle: l10n.cropperToolbarTitle,
           toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
@@ -337,12 +376,70 @@ class _CropImageButton extends StatelessWidget {
   }
 }
 
+/// A private widget that displays the travel cover image picker.
+class _TravelImagePicker extends StatelessWidget {
+  final CreateTravelProvider providerTravel;
+  final VoidCallback onTap;
+
+  const _TravelImagePicker({required this.providerTravel, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasError = providerTravel.showImageError;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: providerTravel.coverImage != null ? 300 : 150,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: providerTravel.coverImage != null
+                  ? const BorderRadius.vertical(bottom: Radius.circular(8))
+                  : null,
+              border: Border.all(
+                color: hasError ? Colors.red : Colors.transparent,
+                width: hasError ? 2.0 : 1.0,
+              ),
+              image: providerTravel.coverImage != null
+                  ? DecorationImage(
+                      image: FileImage(providerTravel.coverImage!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: providerTravel.coverImage == null
+                ? Center(
+                    child: Lottie.asset(
+                      'assets/images/lottie/general/camera.json',
+                    ),
+                  )
+                : null,
+          ),
+        ),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+            child: Text(
+              l10n.errorSelectCoverImage,
+              style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// A private dialog for selecting experiences.
 class _SelectExperienceDialog extends StatelessWidget {
   const _SelectExperienceDialog();
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Dialog(
@@ -351,135 +448,113 @@ class _SelectExperienceDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        // A Column principal "encolhe" para se ajustar ao conteúdo.
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              appLocalizations.experienceTitle,
+              l10n.experienceTitle,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-
-            // A Column interna organiza a lista rolável e o botão.
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Flexible permite que a lista cresça e se torne rolável sem erro.
-                Flexible(
-                  child: Consumer<CreateTravelProvider>(
-                    builder: (context, provider, child) {
-                      // Se não houver experiências, o Wrap simplesmente não renderiza filhos
-                      // e o Dialog ficará pequeno, o que está correto.
-                      return SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 12.0,
-                          runSpacing: 12.0,
-                          children: provider.availableExperiences.map((
-                            experience,
-                          ) {
-                            final bool isSelected = provider
-                                .isSelectedExperience(experience);
-                            // --- CÓDIGO DO CARD IDÊNTICO AO SEU ORIGINAL ---
-                            return GestureDetector(
-                              onTap: () =>
-                                  provider.toggleExperience(experience),
-                              child: SizedBox(
-                                width: (size.width / 4),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+            Flexible(
+              child: Consumer<CreateTravelProvider>(
+                builder: (context, provider, child) {
+                  return SingleChildScrollView(
+                    child: Wrap(
+                      spacing: 12.0,
+                      runSpacing: 12.0,
+                      children: provider.availableExperiences.map((experience) {
+                        final bool isSelected = provider.isSelectedExperience(
+                          experience,
+                        );
+                        return GestureDetector(
+                          onTap: () => provider.toggleExperience(experience),
+                          child: SizedBox(
+                            width: (size.width / 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Stack(
                                   children: [
-                                    Stack(
-                                      children: [
-                                        AnimatedContainer(
-                                          duration: const Duration(
-                                            milliseconds: 200,
-                                          ),
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? Colors.black
-                                                  : Colors.transparent,
-                                              width: isSelected ? 3 : 1.0,
-                                            ),
-                                            image: DecorationImage(
-                                              image: AssetImage(
-                                                experience.image,
-                                              ),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black26,
-                                                blurRadius: 4,
-                                                offset: Offset(2, 2),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        if (isSelected)
-                                          Positioned(
-                                            top: 6,
-                                            right: 6,
-                                            child: Container(
-                                              decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              padding: const EdgeInsets.all(2),
-                                              child: const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                                size: 16,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
+                                    AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 200,
                                       ),
-                                      child: Text(
-                                        experience.label,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? Colors.black
+                                              : Colors.transparent,
+                                          width: isSelected ? 3 : 1.0,
                                         ),
+                                        image: DecorationImage(
+                                          image: AssetImage(experience.image),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 4,
+                                            offset: Offset(2, 2),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    if (isSelected)
+                                      Positioned(
+                                        top: 6,
+                                        right: 6,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: const EdgeInsets.all(2),
+                                          child: const Icon(
+                                            Icons.check,
+                                            color: Colors.black,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
-                              ),
-                            );
-                            // --- FIM DO CÓDIGO DO CARD ORIGINAL ---
-                          }).toList(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: AppButtonStyles.primaryButtonStyle,
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      appLocalizations.saveButton,
-                      style: const TextStyle(color: Colors.white),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  child: Text(
+                                    experience.label,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: AppButtonStyles.primaryButtonStyle,
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n.saveButton),
+              ),
             ),
           ],
         ),
@@ -488,12 +563,13 @@ class _SelectExperienceDialog extends StatelessWidget {
   }
 }
 
+/// A private dialog for selecting travelers.
 class _SelectTravelerDialog extends StatelessWidget {
   const _SelectTravelerDialog();
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return SafeArea(
@@ -503,205 +579,187 @@ class _SelectTravelerDialog extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  appLocalizations.travelerToTravelTitle,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.travelerToTravelTitle,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 20),
-
-                Consumer<TravelerProvider>(
-                  builder: (context, provider, child) {
-                    if (provider.isLoading) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-
-                    if (provider.errorMessage != null) {
-                      return Center(child: Text(provider.errorMessage!));
-                    }
-
-                    if (provider.travelers.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.person_off_outlined,
-                              size: 50,
+              ),
+              const SizedBox(height: 20),
+              Consumer<TravelerProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  if (provider.errorMessage != null) {
+                    return Center(child: Text(provider.errorMessage!));
+                  }
+                  if (provider.travelers.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.person_off_outlined,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.noTravelerFound,
+                            style: const TextStyle(
+                              fontSize: 16,
                               color: Colors.grey,
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Nenhum viajante encontrado.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.add),
+                            label: Text(l10n.registerTraveler),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushNamed('/travelers');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.add),
-                              label: const Text('Cadastrar Viajante'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pushNamed('/travelers');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: Wrap(
-                              spacing: 12.0,
-                              runSpacing: 12.0,
-                              children: provider.travelers.map((traveler) {
-                                final bool isSelected = provider.isSelected(
-                                  traveler,
-                                );
-                                // --- CÓDIGO DO CARD IDÊNTICO AO SEU ORIGINAL ---
-                                return GestureDetector(
-                                  onTap: () =>
-                                      provider.toggleTraveler(traveler),
-                                  child: Container(
-                                    width: (size.width / 4.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            AnimatedContainer(
-                                              duration: const Duration(
-                                                milliseconds: 200,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            spacing: 12.0,
+                            runSpacing: 12.0,
+                            children: provider.travelers.map((traveler) {
+                              final bool isSelected = provider.isSelected(
+                                traveler,
+                              );
+                              return GestureDetector(
+                                onTap: () => provider.toggleTraveler(traveler),
+                                child: SizedBox(
+                                  width: (size.width / 4.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          AnimatedContainer(
+                                            duration: const Duration(
+                                              milliseconds: 200,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? Colors.black
+                                                    : Colors.transparent,
+                                                width: isSelected ? 3 : 1.0,
                                               ),
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: isSelected
-                                                      ? Colors.black
-                                                      : Colors.transparent,
-                                                  width: isSelected ? 3 : 1.0,
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Colors.black26,
+                                                  blurRadius: 4,
+                                                  offset: Offset(2, 2),
                                                 ),
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                    color: Colors.black26,
-                                                    blurRadius: 4,
-                                                    offset: Offset(2, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: CircleAvatar(
-                                                radius: 50,
-                                                backgroundColor:
-                                                    Colors.grey[300],
-                                                backgroundImage:
-                                                    traveler.photoPath != null
-                                                    ? FileImage(
-                                                        File(
-                                                          traveler.photoPath!,
-                                                        ),
-                                                      )
-                                                    : null,
-                                                child:
-                                                    traveler.photoPath == null
-                                                    ? const Icon(
-                                                        Icons.person,
-                                                        size: 40,
-                                                        color: Colors.black,
-                                                      )
-                                                    : null,
+                                              ],
+                                            ),
+                                            child: CircleAvatar(
+                                              radius: 50,
+                                              backgroundColor: Colors.grey[300],
+                                              backgroundImage:
+                                                  traveler.photoPath != null
+                                                  ? FileImage(
+                                                      File(traveler.photoPath!),
+                                                    )
+                                                  : null,
+                                              child: traveler.photoPath == null
+                                                  ? const Icon(
+                                                      Icons.person,
+                                                      size: 40,
+                                                      color: Colors.black,
+                                                    )
+                                                  : null,
+                                            ),
+                                          ),
+                                          if (isSelected)
+                                            Positioned(
+                                              top: 6,
+                                              right: 6,
+                                              child: Container(
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                padding: const EdgeInsets.all(
+                                                  2,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.check,
+                                                  color: Colors.black,
+                                                  size: 16,
+                                                ),
                                               ),
                                             ),
-                                            if (isSelected)
-                                              Positioned(
-                                                top: 6,
-                                                right: 6,
-                                                child: Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                        color: Colors.white,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                  padding: const EdgeInsets.all(
-                                                    2,
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.check,
-                                                    color: Colors.black,
-                                                    size: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        traveler.name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          traveler.name,
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontWeight: isSelected
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                );
-                                // --- FIM DO CÓDIGO DO CARD ORIGINAL ---
-                              }).toList(),
-                            ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: AppButtonStyles.primaryButtonStyle,
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(
-                              appLocalizations.saveButton,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: AppButtonStyles.primaryButtonStyle,
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.saveButton),
                         ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -709,6 +767,7 @@ class _SelectTravelerDialog extends StatelessWidget {
   }
 }
 
+/// A private widget for displaying the list of transport options.
 class _SelectTransport extends StatelessWidget {
   const _SelectTransport();
 
@@ -716,6 +775,7 @@ class _SelectTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CreateTravelProvider>(
       builder: (context, provider, _) {
+        // Loads the vehicles if they haven't been loaded yet.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           provider.loadAvailableVehicles(context);
         });
@@ -725,10 +785,10 @@ class _SelectTransport extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: provider.availableTransport.length,
+            itemCount: provider.availableTransports.length,
             separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
-              final transport = provider.availableTransport[index];
+              final transport = provider.availableTransports[index];
               final bool isSelected = provider.isSelectedVehicle(transport);
 
               return GestureDetector(
@@ -748,7 +808,7 @@ class _SelectTransport extends StatelessWidget {
                       transport.label,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isSelected ? Colors.blue : Colors.transparent,
+                        color: isSelected ? Colors.blue : null,
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -766,68 +826,10 @@ class _SelectTransport extends StatelessWidget {
   }
 }
 
-class _TravelImagePicker extends StatelessWidget {
-  final CreateTravelProvider providerTravel;
-  final VoidCallback onTap;
-
-  const _TravelImagePicker({required this.providerTravel, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool hasError = providerTravel.validateImage;
-
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: providerTravel.coverImage != null ? 300 : 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: providerTravel.coverImage != null
-                  ? const BorderRadius.vertical(bottom: Radius.circular(8))
-                  : null,
-
-              border: Border.all(
-                color: hasError ? Colors.red : Colors.transparent,
-                width: hasError ? 3.0 : 1.0,
-              ),
-              image: providerTravel.coverImage != null
-                  ? DecorationImage(
-                      image: FileImage(providerTravel.coverImage!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: providerTravel.coverImage == null
-                ? Center(
-                    child: Lottie.asset(
-                      'assets/images/lottie/general/camera.json',
-                    ),
-                  )
-                : null,
-          ),
-        ),
-
-        if (hasError)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-            child: Text(
-              'Por favor, selecione uma imagem de capa.',
-              style: TextStyle(color: Colors.red.shade700, fontSize: 13),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Componente para exibir a lista de destinos da viagem.
+/// A private widget for displaying the travel route section.
 class _TravelRouteSection extends StatelessWidget {
-  final AppLocalizations loc;
-
-  const _TravelRouteSection({required this.loc});
+  final AppLocalizations l10n;
+  const _TravelRouteSection({required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -865,21 +867,28 @@ class _TravelRouteSection extends StatelessWidget {
                               destination: destination,
                               index: index,
                               hint: isStartPoint
-                                  ? loc.travelAddStartintPoint
-                                  : '${loc.travelAddFinalPoint} $index',
+                                  ? l10n.travelAddStartintPoint
+                                  : '${l10n.travelAddFinalPoint} $index',
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => providerTravel
-                                .removeDestinationById(destination.id),
-                            icon: const Icon(Icons.delete, color: Colors.grey),
-                            iconSize: 20,
-                            tooltip: 'Remover destino',
-                          ),
+                          if (!isStartPoint)
+                            IconButton(
+                              onPressed: () => providerTravel
+                                  .removeDestinationById(destination.id),
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.grey,
+                              ),
+                              iconSize: 20,
+                              tooltip: l10n.removeDestinationTooltip,
+                            ),
                         ],
                       ),
                       if (index < providerTravel.destinations.length - 1)
-                        const Icon(Icons.more_vert, size: 16),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 8),
+                          child: Icon(Icons.more_vert, size: 16),
+                        ),
                     ],
                   ),
                 );
@@ -894,10 +903,7 @@ class _TravelRouteSection extends StatelessWidget {
                     providerTravel.addDestination();
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text(
-                    'Adicionar destino',
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                  label: Text(l10n.addDestination),
                 ),
               ),
           ],
@@ -907,7 +913,7 @@ class _TravelRouteSection extends StatelessWidget {
   }
 }
 
-/// Componente para exibir um texto que muda de cor com base em um estado de erro.
+/// A component to display a text that changes color based on an error state.
 class _AnimatedValidationText extends StatelessWidget {
   final bool hasError;
   final String text;
@@ -916,15 +922,15 @@ class _AnimatedValidationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultColor = Theme.of(context).textTheme.bodyMedium?.color;
+
     return AnimatedDefaultTextStyle(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 300),
       style: TextStyle(
         fontSize: 16,
-        color: hasError
-            ? Colors.red
-            : Theme.of(context).textTheme.bodyMedium?.color,
+        color: hasError ? Colors.red.shade700 : defaultColor,
       ),
-      child: Text('$text: '),
+      child: Text('$text:'),
     );
   }
 }

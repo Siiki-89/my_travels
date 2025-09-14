@@ -42,12 +42,12 @@ class TravelerProvider with ChangeNotifier {
       _saveTravelerUseCase = SaveTravelerUseCase(repository),
       _deleteTravelerUseCase = DeleteTravelerUseCase(repository) {
     // Inicia o carregamento dos dados assim que o provider é criado.
-    loadTravelers();
+    loadTravelers(null);
   }
 
   // --- MÉTODOS QUE INTERAGEM COM OS USE CASES ---
 
-  Future<void> loadTravelers() async {
+  Future<void> loadTravelers(AppLocalizations? l10n) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -76,17 +76,17 @@ class TravelerProvider with ChangeNotifier {
 
     // O UseCase agora lida com a validação e o salvamento.
     // O try-catch será feito na UI para exibir o erro específico.
-    await _saveTravelerUseCase(traveler);
+    //await _saveTravelerUseCase(traveler);
 
     // Após o sucesso, limpa os campos e recarrega a lista.
     resetFields();
-    await loadTravelers();
+    await loadTravelers(null);
   }
 
   Future<void> deleteTraveler(int id, BuildContext context) async {
     try {
       await _deleteTravelerUseCase(id);
-      await loadTravelers();
+      await loadTravelers(null);
     } catch (e) {
       _errorMessage = 'Erro ao deletar viajante.';
       _showErrorSnackBar(context, _errorMessage!);
@@ -122,6 +122,11 @@ class TravelerProvider with ChangeNotifier {
   // Lógica para a seleção de viajantes para uma viagem
   bool isSelected(Traveler traveler) {
     return _selectedTravelers.any((t) => t.id == traveler.id);
+  }
+
+  void clearSelection() {
+    _selectedTravelers.clear();
+    notifyListeners();
   }
 
   void toggleTraveler(Traveler traveler) {
