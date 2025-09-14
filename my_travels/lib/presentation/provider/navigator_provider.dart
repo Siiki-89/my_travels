@@ -1,8 +1,6 @@
-// In lib/presentation/provider/navigator_provider.dart
-
 import 'package:flutter/material.dart';
 
-/// Manages the state for the main navigation, like a PageView or BottomNavigationBar. 🧭
+/// Manages the state for the main navigation, like a PageView or BottomNavigationBar.
 class NavigatorProvider with ChangeNotifier {
   int _current = 1; // Default to the home screen (index 1)
 
