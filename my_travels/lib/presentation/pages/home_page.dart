@@ -1,5 +1,3 @@
-// In lib/presentation/pages/home_page.dart
-
 import 'dart:io';
 
 import 'package:my_travels/l10n/app_localizations.dart';

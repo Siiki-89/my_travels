@@ -116,5 +116,6 @@
   "noRouteToShow": "No hay ninguna ruta que mostrar.",
   "languageNameEnglish": "Inglés",
   "languageNamePortuguese": "Portugués",
-  "languageNameSpanish": "Español"
+  "languageNameSpanish": "Español",
+  "nameMinLengthError": "El nombre debe contener 3 o más letras."
 }

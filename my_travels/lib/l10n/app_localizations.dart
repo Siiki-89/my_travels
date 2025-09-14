@@ -756,6 +756,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spanish'**
   String get languageNameSpanish;
+
+  /// No description provided for @nameMinLengthError.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must contain 3 or more letters.'**
+  String get nameMinLengthError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

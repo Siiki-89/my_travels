@@ -7,6 +7,9 @@ import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/domain/use_cases/traveler/delete_traveler_use_case.dart';
+import 'package:my_travels/domain/use_cases/traveler/get_travelers_use_case.dart';
+import 'package:my_travels/domain/use_cases/traveler/save_traveler_use_case.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/pages/home_page.dart';
@@ -43,27 +46,41 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Disponibiliza dependências para os providers que podem precisar delas
+        // Repositories
         Provider.value(value: travelerRepository),
         Provider.value(value: travelRepository),
         Provider.value(value: commentRepository),
         Provider.value(value: googleMapsService),
 
+        // UseCases
+        Provider(
+          create: (context) =>
+              GetTravelersUseCase(context.read<TravelerRepository>()),
+        ),
+        Provider(
+          create: (context) =>
+              SaveTravelerUseCase(context.read<TravelerRepository>()),
+        ),
+        Provider(
+          create: (context) =>
+              DeleteTravelerUseCase(context.read<TravelerRepository>()),
+        ),
+
         // Providers de UI globais
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
 
-        // =======================================================
-        // ### AQUI ESTÁ A CORREÇÃO ###
-        // O TravelerProvider agora recebe o repositório que ele precisa.
-        ChangeNotifierProvider(
-          create: (context) =>
-              TravelerProvider(context.read<TravelerRepository>()),
+        ChangeNotifierProvider<TravelerProvider>(
+          create: (context) => TravelerProvider(
+            getTravelersUseCase: context.read<GetTravelersUseCase>(),
+            saveTravelerUseCase: context.read<SaveTravelerUseCase>(),
+            deleteTravelerUseCase: context.read<DeleteTravelerUseCase>(),
+          ),
         ),
 
-        // =======================================================
         ChangeNotifierProvider(create: (_) => CreateTravelProvider()),
         ChangeNotifierProvider(
-          create: (_) => HomeProvider(repository: travelRepository),
+          create: (context) =>
+              HomeProvider(repository: context.read<TravelRepository>()),
         ),
 
         ChangeNotifierProvider(
@@ -78,10 +95,12 @@ void main() async {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => ThemeProvider(preferencesRepository),
+          create: (_) =>
+              ThemeProvider(preferencesRepository: preferencesRepository),
         ),
         ChangeNotifierProvider(
-          create: (_) => LocaleProvider(preferencesRepository),
+          create: (_) =>
+              LocaleProvider(preferencesRepository: preferencesRepository),
         ),
       ],
       child: const MyApp(),

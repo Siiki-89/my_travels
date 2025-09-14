@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
+import 'package:my_travels/domain/errors/failures.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/presentation/widgets/animated_floating_action_button.dart';
 import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
 import 'package:my_travels/presentation/widgets/build_empty_state.dart';
 import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
+import 'package:my_travels/utils/snackbar_helper.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
 import 'package:image_picker/image_picker.dart';
@@ -14,34 +16,40 @@ import 'package:my_travels/presentation/styles/app_button_styles.dart';
 import 'package:my_travels/presentation/widgets/custom_text_form_field.dart';
 
 class TravelersPage extends StatelessWidget {
+  /// Creates an instance of [TravelersPage].
   const TravelersPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final travelerProvider = context.watch<TravelerProvider>();
-    final appLocalizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Kicks off the initial data load.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      travelerProvider.loadTravelersIfNeeded(l10n);
+    });
 
     return Scaffold(
       appBar: travelerProvider.travelers.isEmpty
           ? null
-          : AppBar(title: Text(appLocalizations.users), centerTitle: true),
+          : AppBar(title: Text(l10n.users), centerTitle: true),
       body: SafeArea(
         child: travelerProvider.isLoading
             ? const Center(child: CircularProgressIndicator())
+            : travelerProvider.errorMessage != null
+            ? Center(child: Text(travelerProvider.errorMessage!))
             : travelerProvider.travelers.isEmpty
             ? buildEmptyState(
                 context,
                 'assets/images/lottie/general/man_with_map.json',
-                appLocalizations.noTravelersTitle,
-                appLocalizations.noTravelersSubtitle,
-                appLocalizations.travelerManagementHint,
+                l10n.noTravelersTitle,
+                l10n.noTravelersSubtitle,
+                l10n.travelerManagementHint,
               )
-            // A UI agora chama o widget privado e auto-contido.
             : const _TravelerListView(),
       ),
       floatingActionButton: AnimatedLottieButton(
         onTapAction: () async {
-          // Ação específica desta página: resetar campos e mostrar dialog.
           context.read<TravelerProvider>().resetFields();
           await showSmoothDialog(
             context: context,
@@ -53,16 +61,15 @@ class TravelersPage extends StatelessWidget {
   }
 }
 
-/// Widget privado que exibe a lista de viajantes.
+/// A private widget that displays the list of travelers.
 class _TravelerListView extends StatelessWidget {
   const _TravelerListView();
 
   @override
   Widget build(BuildContext context) {
     final travelerProvider = context.watch<TravelerProvider>();
-
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 80), // Padding para o FAB
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 80),
       itemCount: travelerProvider.travelers.length,
       separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
@@ -73,7 +80,7 @@ class _TravelerListView extends StatelessWidget {
   }
 }
 
-/// Widget privado para exibir um único item da lista de viajantes.
+/// A private widget to display a single item in the traveler list.
 class _TravelerListItem extends StatelessWidget {
   const _TravelerListItem({required this.traveler});
 
@@ -81,11 +88,12 @@ class _TravelerListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
+    final travelerProvider = context.read<TravelerProvider>();
 
     return ListTile(
       onTap: () {
-        context.read<TravelerProvider>().prepareForEdit(traveler);
+        travelerProvider.prepareForEdit(traveler);
         showSmoothDialog(context: context, dialog: CreateAddTravelerDialog());
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -104,46 +112,53 @@ class _TravelerListItem extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text('${appLocalizations.ageHint}: ${traveler.age}'),
+      subtitle: Text('${l10n.ageHint}: ${traveler.age ?? ''}'),
       trailing: IconButton(
         icon: const Icon(Icons.delete, color: Colors.redAccent),
-        onPressed: () {
-          showSmoothDialog(
+        onPressed: () async {
+          final confirmed = await showSmoothDialog<bool>(
             context: context,
             dialog: ConfirmationDialog(
-              title: appLocalizations.confirmDeletion,
-              content:
-                  '${appLocalizations.areYouSureYouWantToDelete} ${traveler.name}?',
-              confirmText: appLocalizations.delete,
-              cancelText: appLocalizations.cancel,
-              onConfirm: () async {
-                // A ação de deletar é passada aqui
-                // O `await` não é mais necessário aqui pois o pop acontece dentro da função
-                context.read<TravelerProvider>().deleteTraveler(
-                  traveler.id!,
-                  context,
-                );
-              },
+              title: l10n.confirmDeletionTitle,
+              content: l10n.confirmDeletionContent(traveler.name),
+              confirmText: l10n.deleteButton,
+              cancelText: l10n.cancel,
+              onConfirm: () => Navigator.of(context).pop(true),
             ),
           );
+
+          if (confirmed == true && context.mounted) {
+            await travelerProvider.deleteTraveler(traveler.id!, l10n);
+
+            if (context.mounted) {
+              if (travelerProvider.deleteSuccess) {
+                showSuccessSnackBar(context, l10n.travelerDeletedSuccess);
+              } else if (travelerProvider.errorMessage != null) {
+                showErrorSnackBar(context, travelerProvider.errorMessage!);
+              }
+            }
+          }
         },
       ),
     );
   }
 }
 
+/// A dialog for creating or editing a traveler.
 class CreateAddTravelerDialog extends StatelessWidget {
+  /// Creates an instance of [CreateAddTravelerDialog].
   CreateAddTravelerDialog({super.key});
-
   final _formKey = GlobalKey<FormState>();
-  final _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
-    final travelerProvider = context.watch<TravelerProvider>();
-    final travelerProviderReader = context.read<TravelerProvider>();
+    // Keys and helpers are created here in a StatelessWidget.
+
+    final picker = ImagePicker();
+
+    final travelerProvider = context.read<TravelerProvider>();
     final size = MediaQuery.of(context).size;
-    final loc = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -152,6 +167,7 @@ class CreateAddTravelerDialog extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Blurred background container
             Positioned.fill(
               top: (size.height * 0.15) / 2,
               child: BackdropFilter(
@@ -165,7 +181,7 @@ class CreateAddTravelerDialog extends StatelessWidget {
                 ),
               ),
             ),
-
+            // Form content
             Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -181,15 +197,15 @@ class CreateAddTravelerDialog extends StatelessWidget {
                     children: [
                       const SizedBox(height: 35),
                       CustomTextFormField(
-                        labelText: loc.travelerNameHint,
+                        labelText: l10n.travelerNameHint,
                         controller: travelerProvider.nameController,
                         onDarkMode: true,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return loc.enterName;
+                            return l10n.nameRequiredError;
                           }
                           if (value.trim().length < 3) {
-                            return 'Deve conter 3 letras ou mais';
+                            return l10n.nameMinLengthError;
                           }
                           return null;
                         },
@@ -197,21 +213,21 @@ class CreateAddTravelerDialog extends StatelessWidget {
                       const SizedBox(height: 16),
                       CustomTextFormField(
                         controller: travelerProvider.ageController,
-                        labelText: loc.ageHint,
-                        keyboardType: TextInputType.number,
+                        labelText: l10n.ageHint,
                         onDarkMode: true,
+                        keyboardType: TextInputType.number,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return loc.enterAge;
+                            return l10n.enterAge;
                           }
                           if (int.tryParse(value) == null) {
-                            return loc.enterValidNumber;
+                            return l10n.enterValidNumber;
                           }
                           if (int.tryParse(value)! < 0) {
-                            return loc.ageBelowZero;
+                            return l10n.ageBelowZero;
                           }
                           if (int.tryParse(value)! > 120) {
-                            return loc.ageAboveNormal;
+                            return l10n.ageAboveNormal;
                           }
                           return null;
                         },
@@ -221,14 +237,11 @@ class CreateAddTravelerDialog extends StatelessWidget {
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: () {
-                                context.read<TravelerProvider>().resetFields();
-                                Navigator.of(context).pop();
-                              },
-                              style: AppButtonStyles.savePersonButtonStyle,
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: AppButtonStyles.primaryButtonStyle,
                               child: Text(
-                                loc.cancelButton,
-                                style: const TextStyle(color: Colors.white),
+                                l10n.cancelButton,
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
@@ -238,33 +251,38 @@ class CreateAddTravelerDialog extends StatelessWidget {
                               onPressed: () async {
                                 if (_formKey.currentState?.validate() ??
                                     false) {
+                                  final provider = context
+                                      .read<TravelerProvider>();
                                   try {
-                                    await context
-                                        .read<TravelerProvider>()
-                                        .saveTraveler();
+                                    // The UI calls the provider method.
+                                    await provider.saveTraveler(l10n);
 
-                                    if (!context.mounted) return;
-                                    Navigator.of(context).pop();
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(e.toString()),
-                                        backgroundColor: Colors.redAccent,
-                                      ),
-                                    );
+                                    // After the call, the UI reacts to the result.
+                                    if (context.mounted &&
+                                        provider.saveSuccess) {
+                                      final successMessage =
+                                          provider.editingId != null
+                                          ? l10n.travelerUpdatedSuccess
+                                          : l10n.travelerAddedSuccess;
+                                      showSuccessSnackBar(
+                                        context,
+                                        successMessage,
+                                      );
+                                      Navigator.of(context).pop();
+                                    }
+                                  } on InvalidTravelerException catch (e) {
+                                    if (context.mounted) {
+                                      showErrorSnackBar(context, e.message);
+                                    }
                                   }
                                 }
                               },
-                              style: AppButtonStyles.savePersonButtonStyle,
-                              child: Consumer<TravelerProvider>(
-                                builder: (context, provider, child) {
-                                  return Text(
-                                    provider.editingId != null
-                                        ? loc.updateHint
-                                        : loc.saveButton,
-                                    style: const TextStyle(color: Colors.white),
-                                  );
-                                },
+                              style: AppButtonStyles.primaryButtonStyle,
+                              child: Text(
+                                travelerProvider.editingId != null
+                                    ? l10n.editButton
+                                    : l10n.saveButton,
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
@@ -275,12 +293,20 @@ class CreateAddTravelerDialog extends StatelessWidget {
                 ),
               ),
             ),
-
+            // Circular avatar for photo
             Align(
               alignment: Alignment.topCenter,
               child: InkWell(
-                onTap: () async =>
-                    await _pickImageFromGallery(travelerProviderReader),
+                onTap: () async {
+                  final pickedFile = await picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (pickedFile != null && context.mounted) {
+                    context.read<TravelerProvider>().setImage(
+                      File(pickedFile.path),
+                    );
+                  }
+                },
                 customBorder: const CircleBorder(),
                 child: CircleAvatar(
                   radius: size.height * 0.075,
@@ -319,15 +345,5 @@ class CreateAddTravelerDialog extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _pickImageFromGallery(TravelerProvider provider) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      provider.setImage(File(pickedFile.path));
-    } else {
-      provider.setImage(null);
-    }
   }
 }

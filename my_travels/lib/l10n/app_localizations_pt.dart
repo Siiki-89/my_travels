@@ -339,4 +339,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get languageNameSpanish => 'Espanhol';
+
+  @override
+  String get nameMinLengthError => 'O nome deve conter 3 ou mais letras.';
 }

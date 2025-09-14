@@ -116,5 +116,6 @@
   "noRouteToShow": "Não há trajeto para mostrar.",
   "languageNameEnglish": "Inglês",
   "languageNamePortuguese": "Português",
-  "languageNameSpanish": "Espanhol"
+  "languageNameSpanish": "Espanhol",
+  "nameMinLengthError": "O nome deve conter 3 ou mais letras."
 }
