@@ -112,5 +112,6 @@
   "addDestination": "Añadir destino",
   "removeDestinationTooltip": "Eliminar destino",
   "titleMaxLengthError": "El título no puede exceder los 50 caracteres.",
-  "travelSavedSuccess": "¡Viaje guardado con éxito!"
+  "travelSavedSuccess": "¡Viaje guardado con éxito!",
+  "noRouteToShow": "No hay ninguna ruta que mostrar."
 }

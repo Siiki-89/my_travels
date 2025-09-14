@@ -327,4 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get travelSavedSuccess => 'Travel saved successfully!';
+
+  @override
+  String get noRouteToShow => 'There is no route to display.';
 }

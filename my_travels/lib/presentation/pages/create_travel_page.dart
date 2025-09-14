@@ -65,16 +65,13 @@ class CreateTravelPage extends StatelessWidget {
                           CustomTextFormField(
                             labelText: l10n.travelAddTitle,
                             controller: createTravelProvider.titleController,
-                            maxLength:
-                                50, // <-- 1. Limite visual e de digitação na UI
+                            maxLength: 50,
                             validator: (title) {
-                              // A validação agora cobre os dois casos
                               if (title == null || title.trim().length < 3) {
                                 return l10n.titleMinLengthError;
                               }
                               if (title.trim().length > 50) {
-                                return l10n
-                                    .titleMaxLengthError; // <-- 2. Validação da regra de negócio
+                                return l10n.titleMaxLengthError;
                               }
                               return null;
                             },
@@ -161,7 +158,6 @@ class CreateTravelPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(l10n.travelAddTypeInterest),
-                              // IconButton para Pontos de Interesse (Versão Nova)
                               IconButton(
                                 onPressed: () {
                                   showSmoothDialog(
@@ -234,26 +230,24 @@ class CreateTravelPage extends StatelessWidget {
                                   return;
                                 }
 
-                                // Pega as instâncias necessárias. `read` é para chamar ações.
                                 final createTravelProvider = context
                                     .read<CreateTravelProvider>();
                                 final travelerProvider = context
                                     .read<TravelerProvider>();
                                 final homeProvider = context
                                     .read<HomeProvider>();
+                                final mapProvider = context.read<MapProvider>();
                                 final l10n = AppLocalizations.of(context)!;
 
-                                // 1. Chama a ação no provider
                                 await createTravelProvider.saveTravel(
                                   travelerProvider,
                                   homeProvider,
+                                  mapProvider,
                                   l10n,
                                 );
 
-                                // 2. APÓS a ação, a UI verifica o estado do provider e reage
                                 if (context.mounted) {
                                   if (createTravelProvider.saveSuccess) {
-                                    // Se teve sucesso, a UI mostra o feedback!
                                     showSuccessSnackBar(
                                       context,
                                       l10n.travelSavedSuccess,
@@ -262,7 +256,6 @@ class CreateTravelPage extends StatelessWidget {
                                   } else if (createTravelProvider
                                           .errorMessage !=
                                       null) {
-                                    // Se teve erro, a UI mostra o feedback!
                                     showErrorSnackBar(
                                       context,
                                       createTravelProvider.errorMessage!,
@@ -305,7 +298,11 @@ class CreateTravelPage extends StatelessWidget {
             onConfirm: () {
               // The logic to clear the form goes here.
               final travelerProvider = context.read<TravelerProvider>();
-              context.read<CreateTravelProvider>().resetForm(travelerProvider);
+              final mapProvider = context.read<MapProvider>();
+              context.read<CreateTravelProvider>().resetForm(
+                travelerProvider,
+                mapProvider,
+              );
             },
           ),
         );
@@ -876,8 +873,11 @@ class _TravelRouteSection extends StatelessWidget {
                           ),
                           if (!isStartPoint)
                             IconButton(
-                              onPressed: () => providerTravel
-                                  .removeDestinationById(destination.id),
+                              onPressed: () =>
+                                  providerTravel.removeDestinationById(
+                                    destination.id,
+                                    mapProvider,
+                                  ),
                               icon: const Icon(
                                 Icons.delete,
                                 color: Colors.grey,

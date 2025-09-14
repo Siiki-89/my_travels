@@ -732,6 +732,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Travel saved successfully!'**
   String get travelSavedSuccess;
+
+  /// No description provided for @noRouteToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no route to display.'**
+  String get noRouteToShow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

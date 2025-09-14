@@ -15,6 +15,7 @@ import 'package:my_travels/model/experience_model.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/utils/experience_model.dart';
 import 'package:my_travels/utils/transport_data.dart';
@@ -220,7 +221,7 @@ class CreateTravelProvider with ChangeNotifier {
   }
 
   /// Removes a destination from the list by its ID.
-  void removeDestinationById(int id) {
+  void removeDestinationById(int id, MapProvider mapProvider) {
     final indexToRemove = _destinations.indexWhere((d) => d.id == id);
     if (indexToRemove == -1) return;
 
@@ -228,6 +229,14 @@ class CreateTravelProvider with ChangeNotifier {
     if (indexToRemove == _editingIndex) {
       _editingIndex = null;
     }
+
+    // Atualiza o mapa
+    final stops = _destinations
+        .where((d) => d.location != null)
+        .map((d) => d.location!)
+        .toList();
+    mapProvider.createRouteFromStops(stops);
+
     notifyListeners();
   }
 
@@ -260,6 +269,7 @@ class CreateTravelProvider with ChangeNotifier {
   Future<void> saveTravel(
     TravelerProvider travelerProvider,
     HomeProvider homeProvider,
+    MapProvider mapProvider,
     AppLocalizations l10n,
   ) async {
     _isLoading = true;
@@ -278,7 +288,7 @@ class CreateTravelProvider with ChangeNotifier {
       // On SUCCESS: update the success flag and trigger side effects.
       _saveSuccess = true;
       await homeProvider.fetchTravels(l10n);
-      resetForm(travelerProvider);
+      resetForm(travelerProvider, mapProvider);
     } on TravelValidationException catch (e) {
       _errorMessage = e.message;
       _handleValidationException(e);
@@ -292,7 +302,7 @@ class CreateTravelProvider with ChangeNotifier {
   }
 
   /// Resets the form state completely after a successful save or cancellation.
-  void resetForm(TravelerProvider travelerProvider) {
+  void resetForm(TravelerProvider travelerProvider, MapProvider mapProvider) {
     travelerProvider.clearSelection();
     titleController.clear();
     descriptionController.clear();
@@ -301,13 +311,17 @@ class CreateTravelProvider with ChangeNotifier {
     _endDate = DateTime.now();
     _selectedExperiences.clear();
     _selectedTransport = TransportModel(label: '', lottieAsset: '');
-    _destinations = [DestinationModel(id: 0)];
+    _destinations = [
+      DestinationModel(id: 0, location: null, description: null),
+    ];
     _nextId = 1;
     _editingIndex = null;
     _resetValidationFlags();
+    resetAllTaps(); // já existe no seu código
     _vehiclesLoaded = false;
     _experiencesLoaded = false;
     notifyListeners();
+    mapProvider.clearStops();
   }
 
   // -- Private Helper Methods --
