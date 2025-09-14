@@ -342,4 +342,97 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nameMinLengthError => 'El nombre debe contener 3 o más letras.';
+
+  @override
+  String get noTravelToShow => 'No hay ningún viaje que mostrar.';
+
+  @override
+  String get deleteTravelTitle => 'Eliminar Viaje';
+
+  @override
+  String deleteTravelContent(String travelTitle) {
+    return '¿Está seguro de que desea eliminar permanentemente el viaje \"$travelTitle\"?';
+  }
+
+  @override
+  String get participants => 'Participantes';
+
+  @override
+  String get travelRoute => 'Ruta del viaje';
+
+  @override
+  String comments(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count comentarios',
+      one: '1 comentario',
+      zero: 'Ningún comentario',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noCommentsYet => 'Aún no hay comentarios.';
+
+  @override
+  String get anonymous => 'Anónimo';
+
+  @override
+  String yearsOld(Object age) {
+    return '$age años';
+  }
+
+  @override
+  String get addComment => 'Añadir comentario';
+
+  @override
+  String get noImagesToShow => 'No hay imágenes para mostrar.';
+
+  @override
+  String get addImageCommentTitle => 'Añadir Nuevas Fotos';
+
+  @override
+  String get addImageCommentContent => 'Selecciona fotos de tu galería para añadir al viaje.';
+
+  @override
+  String get generalTrip => 'Viaje general';
+
+  @override
+  String get linkToLocation => 'Vincular a un lugar';
+
+  @override
+  String get generalTripOptional => 'General del viaje (opcional)';
+
+  @override
+  String travelNotFound(int travelId) {
+    return 'Viaje con ID $travelId no encontrada.';
+  }
+
+  @override
+  String get errorLoadingTravelDetails => 'Error al cargar los detalles del viaje.';
+
+  @override
+  String get errorSavingImages => 'Error al guardar las imágenes.';
+
+  @override
+  String get errorDeletingTravel => 'Error al eliminar el viaje.';
+
+  @override
+  String get errorUpdatingStatus => 'Error al actualizar el estado del viaje.';
+
+  @override
+  String get errorGeneratingPdf => 'Error al generar el PDF.';
+
+  @override
+  String get saveImagesNoTravelers => 'No se puede guardar: el viaje no tiene participantes.';
+
+  @override
+  String get saveImagesNoStartPoint => 'No se puede guardar: el viaje no tiene punto de partida.';
+
+  @override
+  String get travelMarkedAsCompleted => '¡Viaje marcado como completado!';
+
+  @override
+  String get travelReopened => 'Viaje reabierto.';
 }

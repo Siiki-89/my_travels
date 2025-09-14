@@ -578,189 +578,201 @@ class _SelectTravelerDialog extends StatelessWidget {
         shadowColor: Colors.black87,
         insetPadding: const EdgeInsets.all(12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.travelerToTravelTitle,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.travelerToTravelTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Consumer<TravelerProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-                  if (provider.errorMessage != null) {
-                    return Center(child: Text(provider.errorMessage!));
-                  }
-                  if (provider.travelers.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.person_off_outlined,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.noTravelerFound,
-                            style: const TextStyle(
-                              fontSize: 16,
+                const SizedBox(height: 20),
+                Consumer<TravelerProvider>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    if (provider.errorMessage != null) {
+                      return Center(child: Text(provider.errorMessage!));
+                    }
+                    if (provider.travelers.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.person_off_outlined,
+                              size: 50,
                               color: Colors.grey,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.add),
-                            label: Text(l10n.registerTraveler),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pushNamed('/travelers');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.noTravelerFound,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.add),
+                              label: Text(l10n.registerTraveler),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pushNamed('/travelers');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: SingleChildScrollView(
-                          child: Wrap(
-                            spacing: 12.0,
-                            runSpacing: 12.0,
-                            children: provider.travelers.map((traveler) {
-                              final bool isSelected = provider.isSelected(
-                                traveler,
-                              );
-                              return GestureDetector(
-                                onTap: () => provider.toggleTraveler(traveler),
-                                child: SizedBox(
-                                  width: (size.width / 4.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Stack(
-                                        children: [
-                                          AnimatedContainer(
-                                            duration: const Duration(
-                                              milliseconds: 200,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: isSelected
-                                                    ? Colors.black
-                                                    : Colors.transparent,
-                                                width: isSelected ? 3 : 1.0,
+                          ],
+                        ),
+                      );
+                    }
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: Wrap(
+                              spacing: 12.0,
+                              runSpacing: 12.0,
+                              children: provider.travelers.map((traveler) {
+                                final bool isSelected = provider.isSelected(
+                                  traveler,
+                                );
+                                return GestureDetector(
+                                  onTap: () =>
+                                      provider.toggleTraveler(traveler),
+                                  child: SizedBox(
+                                    width: (size.width / 4.0),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            AnimatedContainer(
+                                              duration: const Duration(
+                                                milliseconds: 200,
                                               ),
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                  color: Colors.black26,
-                                                  blurRadius: 4,
-                                                  offset: Offset(2, 2),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? Colors.black
+                                                      : Colors.transparent,
+                                                  width: isSelected ? 3 : 1.0,
                                                 ),
-                                              ],
-                                            ),
-                                            child: CircleAvatar(
-                                              radius: 50,
-                                              backgroundColor: Colors.grey[300],
-                                              backgroundImage:
-                                                  traveler.photoPath != null
-                                                  ? FileImage(
-                                                      File(traveler.photoPath!),
-                                                    )
-                                                  : null,
-                                              child: traveler.photoPath == null
-                                                  ? const Icon(
-                                                      Icons.person,
-                                                      size: 40,
-                                                      color: Colors.black,
-                                                    )
-                                                  : null,
-                                            ),
-                                          ),
-                                          if (isSelected)
-                                            Positioned(
-                                              top: 6,
-                                              right: 6,
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                  color: Colors.white,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                padding: const EdgeInsets.all(
-                                                  2,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.check,
-                                                  color: Colors.black,
-                                                  size: 16,
-                                                ),
+                                                boxShadow: const [
+                                                  BoxShadow(
+                                                    color: Colors.black26,
+                                                    blurRadius: 4,
+                                                    offset: Offset(2, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: CircleAvatar(
+                                                radius: 50,
+                                                backgroundColor:
+                                                    Colors.grey[300],
+                                                backgroundImage:
+                                                    traveler.photoPath != null
+                                                    ? FileImage(
+                                                        File(
+                                                          traveler.photoPath!,
+                                                        ),
+                                                      )
+                                                    : null,
+                                                child:
+                                                    traveler.photoPath == null
+                                                    ? const Icon(
+                                                        Icons.person,
+                                                        size: 40,
+                                                        color: Colors.black,
+                                                      )
+                                                    : null,
                                               ),
                                             ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        traveler.name,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontWeight: isSelected
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
+                                            if (isSelected)
+                                              Positioned(
+                                                top: 6,
+                                                right: 6,
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.white,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                  padding: const EdgeInsets.all(
+                                                    2,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.check,
+                                                    color: Colors.black,
+                                                    size: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          traveler.name,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
+                                );
+                              }).toList(),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: AppButtonStyles.primaryButtonStyle,
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.saveButton),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: AppButtonStyles.primaryButtonStyle,
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text(
+                              l10n.saveButton,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

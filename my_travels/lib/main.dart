@@ -7,6 +7,8 @@ import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/domain/use_cases/travel/delete_travel_use_case.dart';
+import 'package:my_travels/domain/use_cases/travel/update_travel_status_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/delete_traveler_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/get_travelers_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/save_traveler_use_case.dart';
@@ -53,6 +55,18 @@ void main() async {
         Provider.value(value: googleMapsService),
 
         // UseCases
+        Provider<TravelRepository>(create: (_) => TravelRepository()),
+        Provider<CommentRepository>(create: (_) => CommentRepository()),
+
+        // 2. DOMAIN LAYER: Use cases are created, consuming the repositories.
+        Provider<DeleteTravelUseCase>(
+          create: (context) =>
+              DeleteTravelUseCase(context.read<TravelRepository>()),
+        ),
+        Provider<UpdateTravelStatusUseCase>(
+          create: (context) =>
+              UpdateTravelStatusUseCase(context.read<TravelRepository>()),
+        ),
         Provider(
           create: (context) =>
               GetTravelersUseCase(context.read<TravelerRepository>()),
@@ -92,6 +106,9 @@ void main() async {
           create: (context) => InfoTravelProvider(
             travelRepository: context.read<TravelRepository>(),
             commentRepository: context.read<CommentRepository>(),
+            deleteTravelUseCase: context.read<DeleteTravelUseCase>(),
+            updateTravelStatusUseCase: context
+                .read<UpdateTravelStatusUseCase>(),
           ),
         ),
         ChangeNotifierProvider(

@@ -1,34 +1,40 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:intl/intl.dart';
 import 'package:my_travels/data/entities/stop_point_entity.dart';
-import 'package:my_travels/data/entities/travel_entity.dart';
-import 'package:my_travels/data/entities/traveler_entity.dart';
-import 'package:my_travels/model/location_map_model.dart';
-import 'package:my_travels/presentation/provider/create_travel_provider.dart';
-import 'package:my_travels/presentation/provider/info_travel_provider.dart';
-import 'package:my_travels/presentation/provider/map_provider.dart';
-import 'package:my_travels/presentation/provider/traveler_provider.dart';
-import 'package:my_travels/presentation/styles/app_button_styles.dart';
-import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
+import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/widgets/custom_dropdown.dart';
-import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
-import 'package:my_travels/utils/map_utils.dart';
+import 'package:my_travels/utils/snackbar_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
+import 'package:my_travels/data/entities/travel_entity.dart';
+import 'package:my_travels/data/entities/traveler_entity.dart';
+import 'package:my_travels/model/location_map_model.dart';
+import 'package:my_travels/presentation/provider/info_travel_provider.dart';
+import 'package:my_travels/presentation/provider/map_provider.dart';
+import 'package:my_travels/presentation/styles/app_button_styles.dart';
+import 'package:my_travels/presentation/widgets/confirmation_dialog.dart';
+import 'package:my_travels/presentation/widgets/show_smooth_dialog.dart';
+import 'package:my_travels/utils/map_utils.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
+
+/// Main page displaying detailed information about a travel.
+/// Fully stateless. Providers handle all state management.
 class InfoTravelPage extends StatelessWidget {
   const InfoTravelPage({super.key});
   static final GlobalKey _mapKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final travelId = ModalRoute.of(context)!.settings.arguments as int?;
 
-    // Dispara a verificação em cada build. O provider vai decidir se busca os dados ou não.
+    // Trigger data fetching after the first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<InfoTravelProvider>().fetchTravelDetailsIfNeeded(
         context,
@@ -43,9 +49,12 @@ class InfoTravelPage extends StatelessWidget {
       body: SafeArea(
         child: Builder(
           builder: (context) {
+            // Loading state
             if (provider.isLoading && travel == null) {
               return const Center(child: CircularProgressIndicator());
             }
+
+            // Error state
             if (provider.errorMessage != null) {
               return Center(
                 child: Padding(
@@ -57,100 +66,36 @@ class InfoTravelPage extends StatelessWidget {
                 ),
               );
             }
+
+            // No travel available
             if (travel == null) {
-              return const Center(child: Text('Nenhuma viagem para exibir.'));
+              return Center(child: Text(l10n.noTravelToShow));
             }
+
+            // Main content
             return Stack(
               children: [
                 _InfoTravelView(travel: travel, mapKey: _mapKey),
-                Positioned(
+
+                /// Back button
+                const Positioned(
                   top: 0.0,
                   left: 0.0,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black.withValues(alpha: 0.5),
-                        child: const BackButton(
-                          color:
-                              Colors.white, // Define a cor do ícone de voltar
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: _BackButtonWidget(),
                 ),
+
+                /// Delete button
                 Positioned(
                   top: 0.0,
                   right: 0.0,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black.withValues(alpha: 0.5),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            showSmoothDialog(
-                              context: context,
-                              dialog: ConfirmationDialog(
-                                title: 'Deletar Viagem',
-                                content:
-                                    'Tem certeza que deseja deletar permanentemente a viagem "${travel.title}"?',
-                                cancelText: 'Cancelar',
-                                confirmText: 'Deletar',
-
-                                onConfirm: () {
-                                  // Agora ele chama a ação correta do provider correto.
-                                  context
-                                      .read<InfoTravelProvider>()
-                                      .deleteTravel(context);
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+                  child: _DeleteButton(travel: travel),
                 ),
+
+                /// Edit or Export PDF button
                 Positioned(
                   top: 0.0,
-                  right: 50.0, // afasta um pouco do botão de deletar
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.black.withValues(alpha: 0.5),
-                        child: IconButton(
-                          icon: Icon(
-                            travel.isFinished
-                                ? Icons.picture_as_pdf
-                                : Icons.edit,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            if (travel.isFinished) {
-                              // Gera PDF
-                              context.read<InfoTravelProvider>().generatePdf(
-                                _mapKey,
-                                context,
-                              );
-                            } else {
-                              // Abre tela de edição
-                              /*Navigator.pushNamed(
-                                context,
-                                '/editTravel',
-                                arguments: travel,
-                              );*/
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+                  right: 50.0,
+                  child: _EditOrExportButton(travel: travel, mapKey: _mapKey),
                 ),
               ],
             );
@@ -161,7 +106,109 @@ class InfoTravelPage extends StatelessWidget {
   }
 }
 
-/// A View principal que exibe os detalhes da viagem.
+/// Back button styled inside a CircleAvatar.
+class _BackButtonWidget extends StatelessWidget {
+  const _BackButtonWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CircleAvatar(
+          backgroundColor: Colors.black.withValues(alpha: 0.5),
+          child: const BackButton(color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+/// Delete button with confirmation dialog.
+class _DeleteButton extends StatelessWidget {
+  const _DeleteButton({required this.travel});
+  final Travel travel;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CircleAvatar(
+          backgroundColor: Colors.black.withValues(alpha: 0.5),
+          child: IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.white),
+            onPressed: () async {
+              final l10n = AppLocalizations.of(context)!;
+              final infoProvider = context.read<InfoTravelProvider>();
+              final homeProvider = context.read<HomeProvider>();
+
+              final confirmed = await showSmoothDialog<bool>(
+                context: context,
+                dialog: ConfirmationDialog(
+                  title: l10n.deleteTravelTitle,
+                  content: l10n.deleteTravelContent(travel.title),
+                  confirmText: l10n.deleteButton,
+                  cancelText: l10n.cancel,
+                  onConfirm: () => Navigator.of(context).pop(true),
+                ),
+              );
+
+              if (confirmed == true && context.mounted) {
+                await infoProvider.deleteTravel(l10n);
+
+                if (context.mounted) {
+                  if (infoProvider.deleteSuccess) {
+                    homeProvider.fetchTravels(l10n);
+                    Navigator.of(context).pop();
+                  } else if (infoProvider.errorMessage != null) {
+                    showErrorSnackBar(context, infoProvider.errorMessage!);
+                  }
+                }
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Edit (if not finished) or Export PDF (if finished) button.
+class _EditOrExportButton extends StatelessWidget {
+  const _EditOrExportButton({required this.travel, required this.mapKey});
+  final Travel travel;
+  final GlobalKey mapKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CircleAvatar(
+          backgroundColor: Colors.black.withValues(alpha: 0.5),
+          child: IconButton(
+            icon: Icon(
+              travel.isFinished ? Icons.picture_as_pdf : Icons.edit,
+              color: Colors.white,
+            ),
+            onPressed: () async {
+              final provider = context.read<InfoTravelProvider>();
+
+              await provider.generatePdf(mapKey, context);
+
+              if (context.mounted && provider.errorMessage != null) {
+                showErrorSnackBar(context, provider.errorMessage!);
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Main content of the InfoTravelPage displaying travel details.
 class _InfoTravelView extends StatelessWidget {
   const _InfoTravelView({required this.travel, required this.mapKey});
   final Travel travel;
@@ -169,52 +216,65 @@ class _InfoTravelView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final infoProvider = context.watch<InfoTravelProvider>();
 
     return SingleChildScrollView(
       child: Column(
         children: [
-          const _CarouselView(),
+          const _CarouselView(), // Travel images carousel
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// Title and completion toggle
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Título da viagem (ocupa o espaço disponível)
                     Expanded(
                       child: Text(
                         travel.title,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.headlineSmall?.copyWith(),
+                        style: Theme.of(context).textTheme.headlineSmall,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    // Switch para marcar como concluída
                     Transform.scale(
-                      // Use valores menores que 1.0 para diminuir.
-                      // 0.8 é um bom ponto de partida.
                       scale: 0.8,
                       child: Switch(
                         value: travel.isFinished,
-                        onChanged: (newValue) {
-                          // Chama o método do provider para alterar o status
-                          context.read<InfoTravelProvider>().toggleTravelStatus(
-                            context,
-                            newValue,
-                          );
+                        onChanged: (newValue) async {
+                          final infoProvider = context
+                              .read<InfoTravelProvider>();
+                          final homeProvider = context.read<HomeProvider>();
+                          final l10n = AppLocalizations.of(context)!;
+
+                          await infoProvider.toggleTravelStatus(l10n);
+
+                          if (context.mounted) {
+                            if (infoProvider.statusUpdateSuccess) {
+                              final message = newValue
+                                  ? l10n.travelMarkedAsCompleted
+                                  : l10n.travelReopened;
+                              showSuccessSnackBar(context, message);
+                              homeProvider.fetchTravels(l10n);
+                            } else if (infoProvider.errorMessage != null) {
+                              showErrorSnackBar(
+                                context,
+                                infoProvider.errorMessage!,
+                              );
+                            }
+                          }
                         },
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 8),
+
+                /// Dates and optional vehicle animation
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -233,26 +293,30 @@ class _InfoTravelView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+
+                /// Stop points
                 _buildStopPoints(travel),
                 const Divider(),
                 const SizedBox(height: 16),
+
+                /// Travelers list
                 Text(
-                  'Participantes',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(),
+                  l10n.participants,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 _ParticipantsList(travelers: travel.travelers),
                 const SizedBox(height: 6),
                 const Divider(),
                 const SizedBox(height: 8),
+
+                /// Map preview
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Trajeto da viagem',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineSmall?.copyWith(),
+                      l10n.travelRoute,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     InkWell(
                       onTap: () => Navigator.pushNamed(context, '/mappage'),
@@ -269,23 +333,22 @@ class _InfoTravelView extends StatelessWidget {
                 const SizedBox(height: 12),
                 const Divider(),
                 const SizedBox(height: 12),
+
+                /// Comments section
                 const _CommentsView(),
                 const SizedBox(height: 12),
+
+                /// Add comment button
                 SizedBox(
                   height: 50,
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      // ### AQUI ESTÁ A MUDANÇA ###
-                      // 1. A navegação agora é 'await' para esperar por um resultado.
                       final result = await Navigator.pushNamed(
                         context,
                         '/newcomment',
                         arguments: travel,
                       );
-
-                      // 2. Se o resultado for 'true' (indicando sucesso),
-                      //    pedimos ao provider para recarregar os dados.
                       if (result == true) {
                         context
                             .read<InfoTravelProvider>()
@@ -297,9 +360,9 @@ class _InfoTravelView extends StatelessWidget {
                       }
                     },
                     style: AppButtonStyles.primaryButtonStyle,
-                    child: const Text(
-                      'Adicionar comentario',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      l10n.addComment,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -311,6 +374,7 @@ class _InfoTravelView extends StatelessWidget {
     );
   }
 
+  /// Builds a date container
   Widget _buildDateContainer(DateTime date) {
     return ElevatedButton(
       onPressed: () {},
@@ -326,11 +390,13 @@ class _InfoTravelView extends StatelessWidget {
     );
   }
 
+  /// Builds the list of stop points
   Widget _buildStopPoints(Travel travel) {
     return Column(
       children: List.generate(travel.stopPoints.length, (index) {
         final stop = travel.stopPoints[index];
         final isLast = index == travel.stopPoints.length - 1;
+
         return Row(
           children: [
             Column(
@@ -372,9 +438,7 @@ class _InfoTravelView extends StatelessWidget {
   }
 }
 
-// Os sub-widgets (_CarouselView, etc.) usam o `context.watch` para se reconstruir
-// sempre que o provider notificar uma mudança.
-
+/// Participants list widget (Stateless)
 class _ParticipantsList extends StatelessWidget {
   final List<Traveler> travelers;
 
@@ -382,13 +446,14 @@ class _ParticipantsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ListView.separated(
       itemCount: travelers.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       separatorBuilder: (context, index) => const SizedBox(height: 12),
-
       itemBuilder: (context, index) {
         final traveler = travelers[index];
 
@@ -411,7 +476,7 @@ class _ParticipantsList extends StatelessWidget {
                 Text(traveler.name, style: const TextStyle(fontSize: 16)),
                 if (traveler.age != null)
                   Text(
-                    '${traveler.age} anos',
+                    l10n.yearsOld(traveler.age ?? 0),
                     style: const TextStyle(fontSize: 14, color: Colors.black54),
                   ),
               ],
@@ -421,20 +486,132 @@ class _ParticipantsList extends StatelessWidget {
               onPressed: () {
                 showSmoothDialog(
                   context: context,
-                  dialog: const _ConfirmationDialogImage(
-                    title: 'Adicionar Novas Fotos',
-                    content:
-                        'Selecione as fotos da sua galeria para adicionar à viagem.',
-                    confirmText: 'Salvar',
-                    cancelText: 'Cancelar',
-                  ),
+                  dialog: _ConfirmationDialogImage(),
                 );
               },
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
             ),
           ],
         );
       },
+    );
+  }
+}
+// This widget can be placed at the end of `info_travel_page.dart`
+
+/// A dialog for adding new photos as a comment, allowing the user
+/// to link them to a specific stop point.
+class _ConfirmationDialogImage extends StatelessWidget {
+  /// Creates an instance of [_ConfirmationDialogImage].
+  const _ConfirmationDialogImage();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<InfoTravelProvider>();
+    final travel = provider.travel;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (travel == null) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    final List<DropdownMenuItem<StopPoint?>> dropdownItems = [
+      // An initial item representing the "None" or "General" option.
+      DropdownMenuItem<StopPoint?>(value: null, child: Text(l10n.generalTrip)),
+      ...travel.stopPoints.map((sp) {
+        return DropdownMenuItem<StopPoint?>(
+          value: sp,
+          child: Text(sp.locationName, overflow: TextOverflow.ellipsis),
+        );
+      }),
+    ];
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Main title is centered.
+            Center(
+              child: Text(
+                l10n.addImageCommentTitle, // Using l10n
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.addImageCommentContent, // Using l10n
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+
+            // Dropdown title
+            Text(
+              l10n.linkToLocation, // Using l10n
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+
+            CustomDropdown<StopPoint?>(
+              hintText: l10n.generalTripOptional, // Using l10n
+              value: provider.selectedStopPointForComment,
+              items: dropdownItems,
+              onChanged: (value) => provider.selectStopPoint(value),
+            ),
+
+            const SizedBox(height: 24),
+            // Image selection area
+            _ImagePickerArea(provider: provider),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.primaryButtonStyle,
+                    onPressed: () {
+                      context
+                          .read<InfoTravelProvider>()
+                          .clearNewCommentFields();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      l10n.cancelButton,
+                      style: TextStyle(color: Colors.white),
+                    ), // Using l10n
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    style: AppButtonStyles.primaryButtonStyle,
+                    onPressed: () {
+                      provider.saveImagesAsComment(l10n);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      l10n.saveButton,
+                      style: TextStyle(color: Colors.white),
+                    ), // Using l10n
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -447,7 +624,6 @@ class _ImagePickerArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (provider.selectedImagesForComment.isEmpty) {
-      // Botão para adicionar imagens quando a lista está vazia
       return InkWell(
         onTap: () => provider.pickImages(),
         child: Container(
@@ -459,17 +635,13 @@ class _ImagePickerArea extends StatelessWidget {
         ),
       );
     } else {
-      // Lista horizontal de imagens selecionadas
       return SizedBox(
         height: 100,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount:
-              provider.selectedImagesForComment.length +
-              1, // +1 para o botão de adicionar
+          itemCount: provider.selectedImagesForComment.length + 1,
           itemBuilder: (context, index) {
             if (index == provider.selectedImagesForComment.length) {
-              // Botão para adicionar mais imagens
               return InkWell(
                 onTap: () => provider.pickImages(),
                 child: Container(
@@ -526,18 +698,21 @@ class _ImagePickerArea extends StatelessWidget {
   }
 }
 
+/// Carousel for travel images
 class _CarouselView extends StatelessWidget {
   const _CarouselView();
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final provider = context.watch<InfoTravelProvider>();
     if (provider.allImagePaths.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 300,
-        child: Center(child: Text('Nenhuma imagem para exibir')),
+        child: Center(child: Text(loc.noImagesToShow)),
       );
     }
+
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
@@ -578,12 +753,14 @@ class _CarouselView extends StatelessWidget {
   }
 }
 
+/// Map preview of travel route
 class _PreviewMap extends StatelessWidget {
   const _PreviewMap();
 
   @override
   Widget build(BuildContext context) {
     final mapController = Completer<gmaps.GoogleMapController>();
+    final loc = AppLocalizations.of(context)!;
 
     return SizedBox(
       height: 200,
@@ -593,7 +770,7 @@ class _PreviewMap extends StatelessWidget {
               .whereType<LocationMapModel>()
               .toList();
           if (stops.isEmpty) {
-            return const Center(child: Text('Não há trajeto para mostrar'));
+            return Center(child: Text(loc.noRouteToShow));
           }
 
           final bounds = calculateBounds(stops);
@@ -639,166 +816,34 @@ class _PreviewMap extends StatelessWidget {
   }
 }
 
-class _ConfirmationDialogImage extends StatelessWidget {
-  final String title;
-  final String content;
-  final String confirmText;
-  final String cancelText;
-
-  const _ConfirmationDialogImage({
-    required this.title,
-    required this.content,
-    required this.confirmText,
-    required this.cancelText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<InfoTravelProvider>();
-    final travel = provider.travel;
-    if (travel == null) {
-      return const Dialog(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-    final List<DropdownMenuItem<StopPoint?>> dropdownItems = [
-      // 2. Adicione um item inicial que representa a opção "Nenhum"
-      // O valor dele é 'null', e ele exibe o texto do hint.
-      const DropdownMenuItem<StopPoint?>(
-        value: null,
-        child: Text('Viagem geral'),
-      ),
-      ...travel.stopPoints.map((sp) {
-        return DropdownMenuItem<StopPoint?>(
-          value: sp,
-          child: Text(sp.locationName, overflow: TextOverflow.ellipsis),
-        );
-      }),
-    ];
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment:
-              CrossAxisAlignment.start, // Alinha os títulos à esquerda
-          children: [
-            Center(
-              // Centraliza apenas o título principal
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              content,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-
-            // Título para o Dropdown
-            Text(
-              'Vincular a um local',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-
-            // --- AQUI ESTÁ A MUDANÇA ---
-            // Substituído o DropdownButton pelo seu widget estilizado e reutilizável
-            CustomDropdown<StopPoint?>(
-              hintText: 'Geral da viagem (opcional)',
-              value: provider.selectedStopPointForComment,
-              items: dropdownItems, // <--- Usa a nova lista
-              onChanged: (value) => provider.selectStopPoint(value),
-            ),
-
-            // --- FIM DA MUDANÇA ---
-            const SizedBox(height: 24),
-            // Área de seleção de imagens
-            _ImagePickerArea(provider: provider),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: AppButtonStyles.primaryButtonStyle,
-                    onPressed: () {
-                      context
-                          .read<InfoTravelProvider>()
-                          .clearNewCommentFields();
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(cancelText),
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    style: AppButtonStyles.primaryButtonStyle,
-                    onPressed: () {
-                      provider.saveImagesAsComment(context);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      confirmText,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+/// Comments view
 class _CommentsView extends StatelessWidget {
   const _CommentsView();
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final provider = context.watch<InfoTravelProvider>();
 
-    // --- AQUI ESTÁ A MUDANÇA ---
-    // Filtramos a lista para pegar apenas comentários que têm texto.
-    // Usamos trim() para remover espaços em branco e garantir que o conteúdo é real.
     final commentsWithContent = provider.comments
         .where((comment) => comment.content.trim().isNotEmpty)
         .toList();
-    // --- FIM DA MUDANÇA ---
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          // Usamos a contagem da nova lista filtrada
-          '${commentsWithContent.length} Comentários',
+          loc.comments(commentsWithContent.length),
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         const SizedBox(height: 12),
-        // Verificamos se a nova lista está vazia
         if (commentsWithContent.isEmpty)
-          const Text('Nenhum comentário ainda.')
+          Text(loc.noCommentsYet)
         else
           SizedBox(
             height: 140,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              // Usamos os dados da nova lista filtrada
               itemCount: commentsWithContent.length,
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
@@ -835,7 +880,7 @@ class _CommentsView extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              comment.traveler?.name ?? 'Anônimo',
+                              comment.traveler?.name ?? loc.anonymous,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),

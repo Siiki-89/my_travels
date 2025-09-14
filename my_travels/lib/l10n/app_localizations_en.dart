@@ -342,4 +342,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nameMinLengthError => 'Name must contain 3 or more letters.';
+
+  @override
+  String get noTravelToShow => 'No travel to display.';
+
+  @override
+  String get deleteTravelTitle => 'Delete Travel';
+
+  @override
+  String deleteTravelContent(String travelTitle) {
+    return 'Are you sure you want to permanently delete the trip \"$travelTitle\"?';
+  }
+
+  @override
+  String get participants => 'Participants';
+
+  @override
+  String get travelRoute => 'Travel Route';
+
+  @override
+  String comments(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Comments',
+      one: '1 Comment',
+      zero: 'No comments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noCommentsYet => 'No comments yet.';
+
+  @override
+  String get anonymous => 'Anonymous';
+
+  @override
+  String yearsOld(Object age) {
+    return '$age years old';
+  }
+
+  @override
+  String get addComment => 'Add Comment';
+
+  @override
+  String get noImagesToShow => 'No images to display.';
+
+  @override
+  String get addImageCommentTitle => 'Add New Photos';
+
+  @override
+  String get addImageCommentContent => 'Select photos from your gallery to add to the trip.';
+
+  @override
+  String get generalTrip => 'General Trip';
+
+  @override
+  String get linkToLocation => 'Link to a location';
+
+  @override
+  String get generalTripOptional => 'General trip (optional)';
+
+  @override
+  String travelNotFound(int travelId) {
+    return 'Travel with ID $travelId not found.';
+  }
+
+  @override
+  String get errorLoadingTravelDetails => 'Error loading travel details.';
+
+  @override
+  String get errorSavingImages => 'Error saving images.';
+
+  @override
+  String get errorDeletingTravel => 'Error deleting travel.';
+
+  @override
+  String get errorUpdatingStatus => 'Error updating travel status.';
+
+  @override
+  String get errorGeneratingPdf => 'Error generating PDF.';
+
+  @override
+  String get saveImagesNoTravelers => 'Cannot save: the trip has no travelers.';
+
+  @override
+  String get saveImagesNoStartPoint => 'Cannot save: the trip has no starting point.';
+
+  @override
+  String get travelMarkedAsCompleted => 'Travel marked as completed!';
+
+  @override
+  String get travelReopened => 'Travel reopened.';
 }

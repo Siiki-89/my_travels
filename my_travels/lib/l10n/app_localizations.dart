@@ -762,6 +762,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Name must contain 3 or more letters.'**
   String get nameMinLengthError;
+
+  /// No description provided for @noTravelToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'No travel to display.'**
+  String get noTravelToShow;
+
+  /// No description provided for @deleteTravelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Travel'**
+  String get deleteTravelTitle;
+
+  /// No description provided for @deleteTravelContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete the trip \"{travelTitle}\"?'**
+  String deleteTravelContent(String travelTitle);
+
+  /// No description provided for @participants.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get participants;
+
+  /// No description provided for @travelRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Route'**
+  String get travelRoute;
+
+  /// No description provided for @comments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =0{No comments} =1{1 Comment} other{{count} Comments}}'**
+  String comments(num count);
+
+  /// No description provided for @noCommentsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet.'**
+  String get noCommentsYet;
+
+  /// No description provided for @anonymous.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get anonymous;
+
+  /// No description provided for @yearsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'{age} years old'**
+  String yearsOld(Object age);
+
+  /// No description provided for @addComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Comment'**
+  String get addComment;
+
+  /// No description provided for @noImagesToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'No images to display.'**
+  String get noImagesToShow;
+
+  /// No description provided for @addImageCommentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Photos'**
+  String get addImageCommentTitle;
+
+  /// No description provided for @addImageCommentContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select photos from your gallery to add to the trip.'**
+  String get addImageCommentContent;
+
+  /// No description provided for @generalTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'General Trip'**
+  String get generalTrip;
+
+  /// No description provided for @linkToLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to a location'**
+  String get linkToLocation;
+
+  /// No description provided for @generalTripOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'General trip (optional)'**
+  String get generalTripOptional;
+
+  /// No description provided for @travelNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel with ID {travelId} not found.'**
+  String travelNotFound(int travelId);
+
+  /// No description provided for @errorLoadingTravelDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading travel details.'**
+  String get errorLoadingTravelDetails;
+
+  /// No description provided for @errorSavingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving images.'**
+  String get errorSavingImages;
+
+  /// No description provided for @errorDeletingTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting travel.'**
+  String get errorDeletingTravel;
+
+  /// No description provided for @errorUpdatingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating travel status.'**
+  String get errorUpdatingStatus;
+
+  /// No description provided for @errorGeneratingPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Error generating PDF.'**
+  String get errorGeneratingPdf;
+
+  /// No description provided for @saveImagesNoTravelers.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot save: the trip has no travelers.'**
+  String get saveImagesNoTravelers;
+
+  /// No description provided for @saveImagesNoStartPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot save: the trip has no starting point.'**
+  String get saveImagesNoStartPoint;
+
+  /// No description provided for @travelMarkedAsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel marked as completed!'**
+  String get travelMarkedAsCompleted;
+
+  /// No description provided for @travelReopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel reopened.'**
+  String get travelReopened;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
