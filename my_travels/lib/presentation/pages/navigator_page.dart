@@ -1,20 +1,27 @@
+// In lib/presentation/pages/navigator_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
-import 'package:my_travels/presentation/pages/travelers_page.dart';
-import 'package:my_travels/presentation/pages/home_page.dart';
-import 'package:my_travels/presentation/pages/settings_page.dart';
-import 'package:my_travels/presentation/provider/navigator_provider.dart';
 import 'package:provider/provider.dart';
 
+import 'package:my_travels/presentation/pages/home_page.dart';
+import 'package:my_travels/presentation/pages/settings_page.dart';
+import 'package:my_travels/presentation/pages/travelers_page.dart';
+import 'package:my_travels/presentation/provider/navigator_provider.dart';
+
+/// A widget that handles the main navigation of the app using a PageView
+/// and a BottomNavigationBar.
 class NavigatorPage extends StatelessWidget {
-  const NavigatorPage({Key? key}) : super(key: key);
+  /// Creates an instance of [NavigatorPage].
+  const NavigatorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final navigatorProvider = context.watch<NavigatorProvider>();
-    final loc = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
 
+    // A list of the pages to be displayed in the PageView.
     final pages = [
       const TravelersPage(),
       const HomePage(),
@@ -38,9 +45,8 @@ class NavigatorPage extends StatelessWidget {
             curve: Curves.easeInOut,
           );
         },
+        // Hides the labels for a cleaner look with Lottie animations.
         showUnselectedLabels: false,
-
-        // Define se o texto do item SELECIONADO deve aparecer.
         showSelectedLabels: false,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey.shade400,
@@ -58,7 +64,7 @@ class NavigatorPage extends StatelessWidget {
               key: ValueKey('person_${navigatorProvider.current}'),
               animate: navigatorProvider.current == 0,
             ),
-            label: loc.users,
+            label: l10n.users,
           ),
           BottomNavigationBarItem(
             icon: Lottie.asset(
@@ -71,7 +77,7 @@ class NavigatorPage extends StatelessWidget {
               key: ValueKey('home_${navigatorProvider.current}'),
               animate: navigatorProvider.current == 1,
             ),
-            label: loc.home,
+            label: l10n.home,
           ),
           BottomNavigationBarItem(
             icon: Lottie.asset(
@@ -84,7 +90,7 @@ class NavigatorPage extends StatelessWidget {
               key: ValueKey('settings_${navigatorProvider.current}'),
               animate: navigatorProvider.current == 2,
             ),
-            label: loc.settings,
+            label: l10n.settings,
           ),
         ],
       ),
