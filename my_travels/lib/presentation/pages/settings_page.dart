@@ -1,5 +1,3 @@
-// In lib/presentation/pages/settings_page.dart
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';

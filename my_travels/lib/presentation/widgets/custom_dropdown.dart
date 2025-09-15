@@ -1,5 +1,3 @@
-// In lib/presentation/widgets/custom_dropdown.dart
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 

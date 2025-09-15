@@ -1,5 +1,3 @@
-// In lib/presentation/widgets/show_smooth_dialog.dart
-
 import 'package:flutter/material.dart';
 
 /// Displays a dialog with a smooth scale and fade transition.

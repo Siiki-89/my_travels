@@ -242,7 +242,6 @@ class CreateAddTravelerDialog extends StatelessWidget {
                                     await travelerProviderReader.saveTraveler(
                                       l10n,
                                     );
-                                    // Fechando o diálogo e mostrando snackbar de sucesso
                                     if (context.mounted) {
                                       Navigator.of(context).pop();
                                       showSuccessSnackBar(
@@ -278,7 +277,7 @@ class CreateAddTravelerDialog extends StatelessWidget {
             Align(
               alignment: Alignment.topCenter,
               child: Transform.translate(
-                offset: const Offset(0, -20), // ajusta para ficar mais pra cima
+                offset: const Offset(0, -20),
                 child: InkWell(
                   onTap: () async =>
                       await _pickImageFromGallery(travelerProviderReader),

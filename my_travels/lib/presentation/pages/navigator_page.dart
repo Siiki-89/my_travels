@@ -1,5 +1,3 @@
-// In lib/presentation/pages/navigator_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:my_travels/l10n/app_localizations.dart';

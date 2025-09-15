@@ -1,5 +1,3 @@
-// In lib/presentation/widgets/custom_text_form_field.dart
-
 import 'package:flutter/material.dart';
 
 /// A customized, reusable text form field with a consistent style.
