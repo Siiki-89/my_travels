@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_travels/data/local/database_service.dart';
 import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/domain/use_cases/travel/save_travel_use_case.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+
 import 'package:my_travels/domain/use_cases/travel/delete_travel_use_case.dart';
 import 'package:my_travels/domain/use_cases/travel/update_travel_status_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/delete_traveler_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/get_travelers_use_case.dart';
 import 'package:my_travels/domain/use_cases/traveler/save_traveler_use_case.dart';
-import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/presentation/pages/create_travel_page.dart';
 import 'package:my_travels/presentation/pages/home_page.dart';
 import 'package:my_travels/presentation/pages/info_travel_page.dart';
@@ -21,94 +24,69 @@ import 'package:my_travels/presentation/pages/navigator_page.dart';
 import 'package:my_travels/presentation/pages/new_comment_page.dart';
 import 'package:my_travels/presentation/pages/settings_page.dart';
 import 'package:my_travels/presentation/pages/travelers_page.dart';
+import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/info_travel_provider.dart';
 import 'package:my_travels/presentation/provider/locale_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/presentation/provider/navigator_provider.dart';
 import 'package:my_travels/presentation/provider/theme_provider.dart';
-import 'package:my_travels/presentation/provider/create_travel_provider.dart';
 import 'package:my_travels/presentation/provider/traveler_provider.dart';
 import 'package:my_travels/services/google_maps_service.dart';
-import 'package:provider/provider.dart';
 
+/// The main entry point of the application.
 void main() async {
+  // Ensures that Flutter bindings are initialized before using plugins.
   WidgetsFlutterBinding.ensureInitialized();
+  // Loads environment variables from the .env file.
   await dotenv.load();
 
-  // 1. Construir Dependências (Singletons)
-  // final dbService = DatabaseService.instance; // Não precisa ser uma variável local
+  // 1. Build Dependencies (Singletons) that will be provided to the app.
   final preferencesRepository = PreferencesRepository();
   final googleMapsService = GoogleMapsService();
-
   final travelerRepository = TravelerRepository();
   final travelRepository = TravelRepository();
   final commentRepository = CommentRepository();
 
   runApp(
+    // MultiProvider injects all app-level providers into the widget tree.
     MultiProvider(
       providers: [
-        // Repositories
+        // Providing existing instances of repositories and services.
         Provider.value(value: travelerRepository),
         Provider.value(value: travelRepository),
         Provider.value(value: commentRepository),
         Provider.value(value: googleMapsService),
 
-        // UseCases
-        Provider<TravelRepository>(create: (_) => TravelRepository()),
-        Provider<CommentRepository>(create: (_) => CommentRepository()),
-
-        // 2. DOMAIN LAYER: Use cases are created, consuming the repositories.
-        Provider<DeleteTravelUseCase>(
-          create: (context) =>
-              DeleteTravelUseCase(context.read<TravelRepository>()),
-        ),
-        Provider<UpdateTravelStatusUseCase>(
-          create: (context) =>
-              UpdateTravelStatusUseCase(context.read<TravelRepository>()),
-        ),
-        Provider(
-          create: (context) =>
-              GetTravelersUseCase(context.read<TravelerRepository>()),
-        ),
-        Provider(
-          create: (context) =>
-              SaveTravelerUseCase(context.read<TravelerRepository>()),
-        ),
-        Provider(
-          create: (context) =>
-              DeleteTravelerUseCase(context.read<TravelerRepository>()),
-        ),
-
-        // Providers de UI globais
+        // Global UI Providers
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
-
-        ChangeNotifierProvider<TravelerProvider>(
+        ChangeNotifierProvider(
           create: (context) => TravelerProvider(
-            getTravelersUseCase: context.read<GetTravelersUseCase>(),
-            saveTravelerUseCase: context.read<SaveTravelerUseCase>(),
-            deleteTravelerUseCase: context.read<DeleteTravelerUseCase>(),
+            getTravelersUseCase: GetTravelersUseCase(travelerRepository),
+            saveTravelerUseCase: SaveTravelerUseCase(travelerRepository),
+            deleteTravelerUseCase: DeleteTravelerUseCase(travelerRepository),
           ),
         ),
-
-        ChangeNotifierProvider(create: (_) => CreateTravelProvider()),
+        ChangeNotifierProvider(
+          create: (context) => CreateTravelProvider(
+            saveTravelUseCase: SaveTravelUseCase(travelRepository),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => HomeProvider(repository: travelRepository),
+        ),
         ChangeNotifierProvider(
           create: (context) =>
-              HomeProvider(repository: context.read<TravelRepository>()),
+              MapProvider(googleMapsService: googleMapsService),
         ),
-
-        ChangeNotifierProvider(
-          create: (context) =>
-              MapProvider(googleMapsService: context.read<GoogleMapsService>()),
-        ),
-
         ChangeNotifierProvider(
           create: (context) => InfoTravelProvider(
-            travelRepository: context.read<TravelRepository>(),
-            commentRepository: context.read<CommentRepository>(),
-            deleteTravelUseCase: context.read<DeleteTravelUseCase>(),
-            updateTravelStatusUseCase: context
-                .read<UpdateTravelStatusUseCase>(),
+            travelRepository: travelRepository,
+            commentRepository: commentRepository,
+            deleteTravelUseCase: DeleteTravelUseCase(travelRepository),
+            updateTravelStatusUseCase: UpdateTravelStatusUseCase(
+              travelRepository,
+            ),
           ),
         ),
         ChangeNotifierProvider(
@@ -125,27 +103,25 @@ void main() async {
   );
 }
 
+/// The root widget of the application.
 class MyApp extends StatelessWidget {
+  /// Creates an instance of [MyApp].
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Consumer2 listens to two providers and rebuilds when either of them changes.
     return Consumer2<ThemeProvider, LocaleProvider>(
       builder: (context, themeProvider, localeProvider, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'My Travels',
-          theme: lightMode(),
-          darkTheme: darkMode(),
+          theme: _lightMode(),
+          darkTheme: _darkMode(),
           themeMode: themeProvider.themeMode,
           locale: localeProvider.locale,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en'), Locale('es'), Locale('pt')],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales, // More robust
           initialRoute: '/navigator',
           routes: {
             '/navigator': (_) => const NavigatorPage(),
@@ -162,30 +138,26 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  // MODO CLARO
-  ThemeData lightMode() {
+  /// Defines the light theme for the application.
+  ThemeData _lightMode() {
     return ThemeData(
       useMaterial3: true,
       fontFamily: GoogleFonts.notoSans().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,
         brightness: Brightness.light,
-        onSurface: Colors.black,
-        onSurfaceVariant: Colors.grey.shade800,
       ),
     );
   }
 
-  // MODO ESCURO
-  ThemeData darkMode() {
+  /// Defines the dark theme for the application.
+  ThemeData _darkMode() {
     return ThemeData(
       useMaterial3: true,
       fontFamily: GoogleFonts.notoSans().fontFamily,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.blue,
         brightness: Brightness.dark,
-        onSurface: Colors.white,
-        onSurfaceVariant: Colors.grey.shade300,
       ),
     );
   }

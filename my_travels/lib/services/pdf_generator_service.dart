@@ -1,5 +1,3 @@
-// Em lib/services/pdf_generator_service.dart
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
@@ -12,12 +10,21 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+/// A service to generate and share a PDF travel booklet.
 class PdfGeneratorService {
+  /// The travel data to be included in the booklet.
   final Travel travel;
+
+  /// A map snapshot of the travel route.
   final Uint8List mapSnapshot;
+
+  /// The localization object for translated strings.
   final AppLocalizations l10n;
+
+  /// A list of comments associated with the travel's stop points.
   final List<Comment> comments;
 
+  /// Creates a [PdfGeneratorService] with the required data.
   PdfGeneratorService({
     required this.travel,
     required this.mapSnapshot,
@@ -25,6 +32,7 @@ class PdfGeneratorService {
     required this.comments,
   });
 
+  /// Generates the PDF booklet and shares it with the user.
   Future<void> generateAndShareBooklet() async {
     final pdf = pw.Document();
 
@@ -34,33 +42,35 @@ class PdfGeneratorService {
       italic: await PdfGoogleFonts.robotoItalic(),
     );
 
-    // Carrega a logo da empresa
+    // Load the company logo
     final logoSvg = await rootBundle.loadString(
       'assets/images/general/logo.svg',
     );
     final logoImage = pw.SvgImage(svg: logoSvg);
 
-    // Adiciona as páginas ao PDF
+    // Add pages to the PDF
     pdf.addPage(_buildCoverPage(theme));
     pdf.addPage(_buildParticipantsPage(theme));
     pdf.addPage(_buildMapPage(theme));
 
-    // Adiciona uma página para cada parada da viagem
+    // Pages for each stop point
     for (final stopPoint in travel.stopPoints) {
       pdf.addPage(_buildStopPointPage(theme, stopPoint));
     }
 
+    // Final page
     pdf.addPage(_buildFinalPage(theme, logoImage));
 
-    // Usa o pacote 'printing' para salvar e compartilhar o PDF
+    // Save and share the PDF
     await Printing.sharePdf(
       bytes: await pdf.save(),
       filename: '${travel.title}_booklet.pdf',
     );
   }
 
-  // --- MÉTODOS DE CONSTRUÇÃO DAS PÁGINAS ---
+  // --- PAGE BUILDING METHODS ---
 
+  /// Builds the cover page of the booklet.
   pw.Page _buildCoverPage(pw.ThemeData theme) {
     final coverImage = pw.MemoryImage(
       File(travel.coverImagePath!).readAsBytesSync(),
@@ -70,19 +80,12 @@ class PdfGeneratorService {
 
     return pw.Page(
       theme: theme,
-      // Define a orientação da página, se necessário (A5 é mais alto que largo)
       pageFormat: PdfPageFormat.a5,
       build: (context) => pw.Stack(
         alignment: pw.Alignment.center,
         children: [
-          // --- AQUI ESTÁ A CORREÇÃO ---
-          // Usamos Positioned.fill para que a imagem preencha todo o espaço da Stack.
           pw.Positioned.fill(child: pw.Image(coverImage, fit: pw.BoxFit.cover)),
-
-          // --- FIM DA CORREÇÃO ---
-          pw.Container(
-            color: PdfColor.fromInt(0x80000000),
-          ), // Sobreposição escura
+          pw.Container(color: PdfColor.fromInt(0x80000000)), // dark overlay
           pw.Padding(
             padding: const pw.EdgeInsets.all(20),
             child: pw.Column(
@@ -108,7 +111,7 @@ class PdfGeneratorService {
                 pw.SizedBox(height: 10),
                 if (travel.vehicle != null)
                   pw.Text(
-                    'Transporte: ${travel.vehicle}',
+                    '${l10n.transportation}: ${travel.vehicle}',
                     style: const pw.TextStyle(
                       fontSize: 16,
                       color: PdfColors.white,
@@ -122,15 +125,17 @@ class PdfGeneratorService {
     );
   }
 
+  /// Builds the participants' page.
   pw.MultiPage _buildParticipantsPage(pw.ThemeData theme) {
     return pw.MultiPage(
       theme: theme,
       pageFormat: PdfPageFormat.a5,
-      header: (context) => pw.Header(level: 0, text: 'Participantes da Viagem'),
+      header: (context) =>
+          pw.Header(level: 0, text: l10n.travelParticipantsTitle),
       build: (context) => [
-        pw.GridView(
-          crossAxisCount: 2,
-          childAspectRatio: 0.8,
+        pw.Wrap(
+          spacing: 20,
+          runSpacing: 20,
           children: travel.travelers.map((traveler) {
             final imageProvider = traveler.photoPath != null
                 ? pw.MemoryImage(File(traveler.photoPath!).readAsBytesSync())
@@ -154,6 +159,7 @@ class PdfGeneratorService {
     );
   }
 
+  /// Builds the map page with the travel route.
   pw.Page _buildMapPage(pw.ThemeData theme) {
     final mapImage = pw.MemoryImage(mapSnapshot);
     return pw.Page(
@@ -162,7 +168,7 @@ class PdfGeneratorService {
       build: (context) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Header(level: 0, text: 'Mapa da Viagem'),
+          pw.Header(level: 0, text: l10n.travelMapTitle),
           pw.SizedBox(height: 20),
           pw.Image(mapImage, fit: pw.BoxFit.contain),
         ],
@@ -170,18 +176,25 @@ class PdfGeneratorService {
     );
   }
 
+  /// Builds a page for a specific stop point, including photos and comments.
   pw.MultiPage _buildStopPointPage(pw.ThemeData theme, StopPoint stopPoint) {
-    // Encontra os comentários e fotos para esta parada específica
     final relevantComments = comments.where(
       (c) => c.stopPointId == stopPoint.id,
     );
     final photos = relevantComments.expand((c) => c.photos).toList();
 
+    final period =
+        (stopPoint.arrivalDate != null && stopPoint.departureDate != null)
+        ? '${DateFormat('dd/MM/yyyy').format(stopPoint.arrivalDate!)} - ${DateFormat('dd/MM/yyyy').format(stopPoint.departureDate!)}'
+        : '';
+
     return pw.MultiPage(
       theme: theme,
       pageFormat: PdfPageFormat.a5,
-      header: (context) =>
-          pw.Header(level: 0, text: 'Parada: ${stopPoint.locationName}'),
+      header: (context) => pw.Header(
+        level: 0,
+        text: '${l10n.stopPointTitle}: ${stopPoint.locationName}\n$period',
+      ),
       build: (context) => [
         if (photos.isNotEmpty)
           pw.Wrap(
@@ -214,7 +227,7 @@ class PdfGeneratorService {
                 pw.Text('"${comment.content}"'),
                 pw.SizedBox(height: 8),
                 pw.Text(
-                  '- ${comment.traveler?.name ?? 'Anônimo'}',
+                  '- ${comment.traveler?.name ?? l10n.anonymousTraveler}',
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
               ],
@@ -225,6 +238,7 @@ class PdfGeneratorService {
     );
   }
 
+  /// Builds the final page of the booklet.
   pw.Page _buildFinalPage(pw.ThemeData theme, pw.SvgImage logo) {
     return pw.Page(
       theme: theme,
@@ -235,13 +249,13 @@ class PdfGeneratorService {
             pw.SizedBox(height: 100, width: 100, child: logo),
             pw.SizedBox(height: 50),
             pw.Text(
-              'l10n.pdfFinalMessagePart1', // "UMA VIAGEM NÃO SE MEDE EM MILHAS, MAS EM MOMENTOS."
+              l10n.finalPageQuote1,
               textAlign: pw.TextAlign.center,
               style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 20),
             pw.Text(
-              'l10n.pdfFinalMessagePart2', // "CADA PÁGINA DESTE LIVRETO..."
+              l10n.finalPageQuote2,
               textAlign: pw.TextAlign.center,
               style: pw.TextStyle(fontSize: 14, fontStyle: pw.FontStyle.italic),
             ),

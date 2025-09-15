@@ -435,4 +435,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get travelReopened => 'Travel reopened.';
+
+  @override
+  String get errorSavingComment => 'An unexpected error occurred while saving the comment.';
+
+  @override
+  String get newCommentAppBarTitle => 'Make a comment';
+
+  @override
+  String travelFor(String title) {
+    return 'Trip to $title';
+  }
+
+  @override
+  String get participant => 'Participant';
+
+  @override
+  String get selectAuthorHint => 'Select the author of the comment';
+
+  @override
+  String get travelLocation => 'Trip location';
+
+  @override
+  String get linkToLocationHint => 'Link to a location';
+
+  @override
+  String get comment => 'Comment';
+
+  @override
+  String get selectPhotos => 'Select Photos';
+
+  @override
+  String get destinationNotDefined => 'Destination not defined';
+
+  @override
+  String get travelParticipantsTitle => 'Travel Participants';
+
+  @override
+  String get travelMapTitle => 'Travel Map';
+
+  @override
+  String get stopPointTitle => 'Stop Point';
+
+  @override
+  String get anonymousTraveler => 'Anonymous';
+
+  @override
+  String get transportation => 'Transportation';
+
+  @override
+  String get finalPageQuote1 => 'A journey is not measured in miles, but in moments.';
+
+  @override
+  String get finalPageQuote2 => 'Each page of this booklet holds more than just landscapes: they are spontaneous smiles, unexpected discoveries, conversations that touched the soul, and silences that spoke more than words.';
 }

@@ -1,118 +1,120 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:my_travels/data/entities/comment_entity.dart';
+import 'package:my_travels/l10n/app_localizations.dart';
+
 import 'package:my_travels/data/entities/comment_photo_entity.dart';
 import 'package:my_travels/data/entities/stop_point_entity.dart';
 import 'package:my_travels/data/entities/travel_entity.dart';
 import 'package:my_travels/data/entities/traveler_entity.dart';
-import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/domain/errors/failures.dart';
 import 'package:my_travels/domain/use_cases/comment/save_comment_use_case.dart';
 
-class NewCommentProvider extends ChangeNotifier {
-  // Use Case para a lógica de negócio
+/// Manages the state for the new comment creation form.
+class NewCommentProvider with ChangeNotifier {
+  // -- Dependencies --
   final SaveCommentUseCase _saveCommentUseCase;
-
   final Travel travel;
 
-  // Estado da UI
+  /// Creates an instance of [NewCommentProvider].
+  ///
+  /// Requires the [travel] the comment belongs to and the [saveCommentUseCase]
+  /// for business logic, which are injected for testability.
+  NewCommentProvider({
+    required this.travel,
+    required SaveCommentUseCase saveCommentUseCase,
+  }) : _saveCommentUseCase = saveCommentUseCase;
+
+  // -- State --
   final TextEditingController contentController = TextEditingController();
   final _picker = ImagePicker();
-  Traveler? selectedTraveler;
-  StopPoint? selectedStopPoint;
-  List<String> selectedImagePaths = [];
-  bool isLoading = false;
+  Traveler? _selectedTraveler;
+  StopPoint? _selectedStopPoint;
+  List<String> _selectedImagePaths = [];
+  bool _isLoading = false;
+  bool _saveSuccess = false;
+  String? _errorMessage;
 
-  // O provider agora recebe o repositório para criar o UseCase
-  NewCommentProvider({required this.travel})
-    : _saveCommentUseCase = SaveCommentUseCase(CommentRepository());
+  // -- Getters --
+  Traveler? get selectedTraveler => _selectedTraveler;
+  StopPoint? get selectedStopPoint => _selectedStopPoint;
+  List<String> get selectedImagePaths => _selectedImagePaths;
+  bool get isLoading => _isLoading;
+  bool get saveSuccess => _saveSuccess;
+  String? get errorMessage => _errorMessage;
 
+  // -- Methods --
+
+  /// Selects the author of the comment.
   void selectTraveler(Traveler? traveler) {
-    selectedTraveler = traveler;
+    _selectedTraveler = traveler;
     notifyListeners();
   }
 
+  /// Selects the stop point to associate the comment with.
   void selectStopPoint(StopPoint? stopPoint) {
-    selectedStopPoint = stopPoint;
+    _selectedStopPoint = stopPoint;
     notifyListeners();
   }
 
+  /// Opens the gallery to pick multiple images.
   Future<void> pickImages() async {
     final images = await _picker.pickMultiImage();
     if (images.isNotEmpty) {
-      selectedImagePaths.addAll(images.map((img) => img.path));
+      _selectedImagePaths.addAll(images.map((img) => img.path));
       notifyListeners();
     }
   }
 
+  /// Removes a previously selected image.
   void removeImage(String path) {
-    selectedImagePaths.remove(path);
+    _selectedImagePaths.remove(path);
     notifyListeners();
   }
 
-  /// Salva o comentário. Retorna `true` se for bem-sucedido.
-  /// Lida com a exibição de erros para o usuário.
-  /* Future<bool> saveComment(BuildContext context) async {
-    // --- VALIDAÇÃO DOS CAMPOS OBRIGATÓRIOS ---
-    // A validação agora acontece ANTES de qualquer outra coisa.
-    if (selectedTraveler == null) {
-      _showErrorSnackBar(
-        context,
-        'Por favor, selecione o autor do comentário.',
-      );
-      return false;
+  /// Validates and saves the new comment, updating the provider's state.
+  Future<void> saveComment(AppLocalizations l10n) async {
+    // UI-level validation for immediate feedback.
+    if (_selectedTraveler == null) {
+      _errorMessage = l10n.errorSelectAuthor;
+      notifyListeners();
+      return;
+    }
+    if (_selectedStopPoint == null) {
+      _errorMessage = l10n.errorLinkCommentToLocation;
+      notifyListeners();
+      return;
     }
 
-    if (selectedStopPoint == null) {
-      _showErrorSnackBar(
-        context,
-        'Por favor, vincule o comentário a um local da viagem.',
-      );
-      return false;
-    }
-    // --- FIM DA VALIDAÇÃO ---
-
-    isLoading = true;
+    _isLoading = true;
+    _saveSuccess = false;
+    _errorMessage = null;
     notifyListeners();
 
-    // Agora que já validamos, podemos usar '!' com segurança para
-    // garantir ao Dart que os valores não são nulos.
     final comment = Comment(
-      travelerId: selectedTraveler!.id!,
-      stopPointId: selectedStopPoint!.id!,
+      travelerId: _selectedTraveler!.id!,
+      stopPointId: _selectedStopPoint!.id!,
       content: contentController.text.trim(),
-      photos: selectedImagePaths
+      photos: _selectedImagePaths
           .map((path) => CommentPhoto(commentId: 0, imagePath: path))
           .toList(),
     );
 
     try {
-      // Delega a validação de CONTEÚDO para o UseCase
-      await _saveCommentUseCase(comment);
-      return true;
-    } on InvalidCommentDataException catch (e) {
-      _showErrorSnackBar(context, e.message);
-      return false;
+      // The Use Case handles the core business rule validations.
+      await _saveCommentUseCase(comment, l10n);
+      _saveSuccess = true;
+    } on InvalidCommentException catch (e) {
+      _errorMessage = e.message;
+      // Re-throw for the UI to catch and show the specific validation message.
+      throw e;
     } catch (e) {
-      debugPrint('Erro ao salvar comentário: $e');
-      _showErrorSnackBar(context, 'Ocorreu um erro inesperado.');
-      return false;
+      _errorMessage = l10n.errorSavingComment;
+      // debugPrint('Error saving comment: $e');
     } finally {
-      isLoading = false;
+      _isLoading = false;
       notifyListeners();
     }
-  } */
-
-  // Não se esqueça de ter um método para mostrar a SnackBar no seu provider
-  void _showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   @override

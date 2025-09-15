@@ -435,4 +435,57 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get travelReopened => 'Viagem reaberta.';
+
+  @override
+  String get errorSavingComment => 'Ocorreu um erro inesperado ao salvar o comentário.';
+
+  @override
+  String get newCommentAppBarTitle => 'Faça um comentário';
+
+  @override
+  String travelFor(String title) {
+    return 'Viagem para $title';
+  }
+
+  @override
+  String get participant => 'Participante';
+
+  @override
+  String get selectAuthorHint => 'Selecione o autor do comentário';
+
+  @override
+  String get travelLocation => 'Local da viagem';
+
+  @override
+  String get linkToLocationHint => 'Vincular a um local';
+
+  @override
+  String get comment => 'Comentário';
+
+  @override
+  String get selectPhotos => 'Selecione Fotos';
+
+  @override
+  String get destinationNotDefined => 'Destino não definido';
+
+  @override
+  String get travelParticipantsTitle => 'Participantes da Viagem';
+
+  @override
+  String get travelMapTitle => 'Mapa da Viagem';
+
+  @override
+  String get stopPointTitle => 'Parada';
+
+  @override
+  String get anonymousTraveler => 'Anônimo';
+
+  @override
+  String get transportation => 'Transporte';
+
+  @override
+  String get finalPageQuote1 => 'Uma viagem não se mede em milhas, mas em momentos.';
+
+  @override
+  String get finalPageQuote2 => 'Cada página deste livreto guarda mais do que paisagens: são sorrisos espontâneos, descobertas inesperadas, conversas que ficaram na alma e silêncios que falaram mais que palavras.';
 }

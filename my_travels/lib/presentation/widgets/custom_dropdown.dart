@@ -1,13 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
+// In lib/presentation/widgets/custom_dropdown.dart
 
+import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/material.dart';
+
+/// A customized, reusable dropdown widget based on the `dropdown_button2` package.
 class CustomDropdown<T> extends StatelessWidget {
+  /// The text displayed as a hint when no value is selected.
   final String hintText;
+
+  /// The currently selected value of the dropdown.
   final T? value;
+
+  /// The list of items to display in the dropdown.
   final List<DropdownMenuItem<T>> items;
+
+  /// The callback that is executed when a new item is selected.
   final void Function(T?)? onChanged;
 
+  /// Creates an instance of [CustomDropdown].
   const CustomDropdown({
+    super.key,
     required this.hintText,
     required this.value,
     required this.items,

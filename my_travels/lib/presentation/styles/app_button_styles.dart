@@ -11,17 +11,4 @@ abstract class AppButtonStyles {
     padding: const EdgeInsets.symmetric(vertical: 14),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
   );
-  static final ButtonStyle deleteButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: Color(0xFF9C3133),
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-  );
-  static final ButtonStyle savePersonButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: Colors.black,
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-      side: BorderSide(color: Colors.white24),
-    ),
-  );
 }

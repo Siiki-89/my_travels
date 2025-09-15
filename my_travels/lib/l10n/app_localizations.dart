@@ -918,6 +918,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Travel reopened.'**
   String get travelReopened;
+
+  /// No description provided for @errorSavingComment.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while saving the comment.'**
+  String get errorSavingComment;
+
+  /// No description provided for @newCommentAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a comment'**
+  String get newCommentAppBarTitle;
+
+  /// No description provided for @travelFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip to {title}'**
+  String travelFor(String title);
+
+  /// No description provided for @participant.
+  ///
+  /// In en, this message translates to:
+  /// **'Participant'**
+  String get participant;
+
+  /// No description provided for @selectAuthorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the author of the comment'**
+  String get selectAuthorHint;
+
+  /// No description provided for @travelLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip location'**
+  String get travelLocation;
+
+  /// No description provided for @linkToLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to a location'**
+  String get linkToLocationHint;
+
+  /// No description provided for @comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get comment;
+
+  /// No description provided for @selectPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Photos'**
+  String get selectPhotos;
+
+  /// No description provided for @destinationNotDefined.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination not defined'**
+  String get destinationNotDefined;
+
+  /// No description provided for @travelParticipantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Participants'**
+  String get travelParticipantsTitle;
+
+  /// No description provided for @travelMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel Map'**
+  String get travelMapTitle;
+
+  /// No description provided for @stopPointTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Point'**
+  String get stopPointTitle;
+
+  /// No description provided for @anonymousTraveler.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get anonymousTraveler;
+
+  /// No description provided for @transportation.
+  ///
+  /// In en, this message translates to:
+  /// **'Transportation'**
+  String get transportation;
+
+  /// No description provided for @finalPageQuote1.
+  ///
+  /// In en, this message translates to:
+  /// **'A journey is not measured in miles, but in moments.'**
+  String get finalPageQuote1;
+
+  /// No description provided for @finalPageQuote2.
+  ///
+  /// In en, this message translates to:
+  /// **'Each page of this booklet holds more than just landscapes: they are spontaneous smiles, unexpected discoveries, conversations that touched the soul, and silences that spoke more than words.'**
+  String get finalPageQuote2;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

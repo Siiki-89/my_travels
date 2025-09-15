@@ -152,6 +152,26 @@
   "saveImagesNoTravelers": "Cannot save: the trip has no travelers.",
   "saveImagesNoStartPoint": "Cannot save: the trip has no starting point.",
   "travelMarkedAsCompleted": "Travel marked as completed!",
-  "travelReopened": "Travel reopened."
+  "travelReopened": "Travel reopened.",
+  "errorSelectAuthor": "Please, select the author of the comment.",
+  "errorLinkCommentToLocation": "Please, link the comment to a location on the trip.",
+  "errorSavingComment": "An unexpected error occurred while saving the comment.",
+  "newCommentAppBarTitle": "Make a comment",
+  "travelFor": "Trip to {title}",
+  "@travelFor": { "placeholders": { "title": { "type": "String" } } },
+  "participant": "Participant",
+  "selectAuthorHint": "Select the author of the comment",
+  "travelLocation": "Trip location",
+  "linkToLocationHint": "Link to a location",
+  "comment": "Comment",
+  "selectPhotos": "Select Photos",
+  "destinationNotDefined": "Destination not defined",
+  "travelParticipantsTitle": "Travel Participants",
+  "travelMapTitle": "Travel Map",
+  "stopPointTitle": "Stop Point",
+  "anonymousTraveler": "Anonymous",
+  "transportation": "Transportation",
+  "finalPageQuote1": "A journey is not measured in miles, but in moments.",
+  "finalPageQuote2": "Each page of this booklet holds more than just landscapes: they are spontaneous smiles, unexpected discoveries, conversations that touched the soul, and silences that spoke more than words."
 
 }

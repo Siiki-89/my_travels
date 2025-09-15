@@ -1,13 +1,23 @@
+// In lib/presentation/widgets/build_empty_state.dart
+
 import 'package:flutter/material.dart';
-import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 
+/// Builds a generic empty state widget for use across the application.
+///
+/// Displays a Lottie animation, a title, a subtitle, and an optional hint text.
+///
+/// - [context]: The build context.
+/// - [lottiePath]: The asset path for the Lottie JSON file.
+/// - [title]: The main title text for the empty state.
+/// - [subtitle]: The subtitle text displayed below the title.
+/// - [hint]: An additional hint or instructional text at the bottom.
 Widget buildEmptyState(
   BuildContext context,
-  String imagePath,
+  String lottiePath,
   String title,
   String subtitle,
-  String text,
+  String hint,
 ) {
   return Center(
     child: SingleChildScrollView(
@@ -16,7 +26,7 @@ Widget buildEmptyState(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset(imagePath, width: 200, height: 200),
+            Lottie.asset(lottiePath, width: 200, height: 200),
             const SizedBox(height: 24),
             Text(
               title,
@@ -31,9 +41,11 @@ Widget buildEmptyState(
             ),
             const SizedBox(height: 56),
             Text(
-              text,
+              hint,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
             ),
           ],
         ),

@@ -15,6 +15,7 @@ import 'package:my_travels/domain/use_cases/travel/update_travel_status_use_case
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:my_travels/model/location_map_model.dart';
 import 'package:my_travels/model/transport_model.dart';
+import 'package:my_travels/presentation/provider/home_provider.dart';
 import 'package:my_travels/presentation/provider/map_provider.dart';
 import 'package:my_travels/services/pdf_generator_service.dart';
 import 'package:my_travels/utils/transport_data.dart';
@@ -86,6 +87,11 @@ class InfoTravelProvider extends ChangeNotifier {
     _fetchTravelDetails(context, travelId);
   }
 
+  Travel? getTravelById(int id) {
+    if (_travel?.id == id) return _travel;
+    return null; // ou fetchTravelDetails se quiser buscar do repositório
+  }
+
   /// Fetches all details for a given [travelId].
   Future<void> _fetchTravelDetails(BuildContext context, int travelId) async {
     _isFetching = true;
@@ -151,29 +157,34 @@ class InfoTravelProvider extends ChangeNotifier {
     try {
       await _commentRepository.insertComment(newComment);
       _commentSaveSuccess = true;
-      clearNewCommentFields();
-      // The calling UI will be responsible for triggering a reload.
+
+      // 🚀 Atualiza a lista de imagens para o carrossel imediatamente
+      _allImagePaths.addAll(_selectedImagesForComment.map((f) => f.path));
+
+      clearNewCommentFields(); // limpa o picker
+      notifyListeners(); // notifica a UI
     } catch (e) {
       _errorMessage = l10n.errorSavingImages;
-      // debugPrint('Error saving images as comment: $e');
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   /// Deletes the current travel.
-  Future<void> deleteTravel(AppLocalizations l10n) async {
+  Future<void> deleteTravel(BuildContext context, AppLocalizations l10n) async {
     if (_travel?.id == null) return;
-    _deleteSuccess = false;
-    _errorMessage = null;
+    AppLocalizations l10n = AppLocalizations.of(context)!;
 
     try {
       await _deleteTravelUseCase(_travel!.id!);
-      _deleteSuccess = true;
+      if (context.mounted) {
+        Provider.of<HomeProvider>(context, listen: false).fetchTravels(l10n);
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       _errorMessage = l10n.errorDeletingTravel;
-      // debugPrint("Error in deleteTravel: $e");
+      notifyListeners();
+      //debugPrint("Erro em deleteTravel: $e");
     }
-    notifyListeners();
   }
 
   /// Toggles the finished status of the current travel.

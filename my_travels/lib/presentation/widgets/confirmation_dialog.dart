@@ -1,13 +1,26 @@
+// In lib/presentation/widgets/confirmation_dialog.dart
+
 import 'package:flutter/material.dart';
 import 'package:my_travels/presentation/styles/app_button_styles.dart';
 
+/// A generic dialog for confirming an action.
 class ConfirmationDialog extends StatelessWidget {
+  /// The title displayed at the top of the dialog.
   final String title;
+
+  /// The main content or question of the dialog.
   final String content;
+
+  /// The text for the confirmation button (e.g., "Delete", "Confirm").
   final String confirmText;
+
+  /// The text for the cancellation button (e.g., "Cancel").
   final String cancelText;
+
+  /// The callback function to execute when the confirmation button is pressed.
   final VoidCallback onConfirm;
 
+  /// Creates an instance of [ConfirmationDialog].
   const ConfirmationDialog({
     super.key,
     required this.title,
@@ -46,7 +59,7 @@ class ConfirmationDialog extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text(
                       cancelText,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -54,14 +67,13 @@ class ConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     style: AppButtonStyles.primaryButtonStyle,
-
                     onPressed: () {
-                      Navigator.of(context).pop(); // Fecha o dialog
-                      onConfirm(); // Executa a ação
+                      Navigator.of(context).pop(); // Close the dialog
+                      onConfirm(); // Execute the action
                     },
                     child: Text(
                       confirmText,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),

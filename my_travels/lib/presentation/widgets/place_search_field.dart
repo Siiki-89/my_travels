@@ -1,5 +1,3 @@
-// In lib/presentation/pages/create_travel_page.dart (or its own file)
-
 import 'package:flutter/material.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';

@@ -257,10 +257,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorCommentTooLong => 'El comentario no puede tener más de 280 caracteres.';
 
   @override
-  String get errorSelectAuthor => 'Por favor, selecciona el autor del comentario.';
+  String get errorSelectAuthor => 'Por favor, seleccione el autor del comentario.';
 
   @override
-  String get errorLinkCommentToLocation => 'Por favor, vincula el comentario a un lugar del viaje.';
+  String get errorLinkCommentToLocation => 'Por favor, vincule el comentario a un lugar del viaje.';
 
   @override
   String get errorSelectCoverImage => 'Por favor, selecciona una imagen de portada.';
@@ -435,4 +435,57 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get travelReopened => 'Viaje reabierto.';
+
+  @override
+  String get errorSavingComment => 'Ocurrió un error inesperado al guardar el comentario.';
+
+  @override
+  String get newCommentAppBarTitle => 'Hacer un comentario';
+
+  @override
+  String travelFor(String title) {
+    return 'Viaje a $title';
+  }
+
+  @override
+  String get participant => 'Participante';
+
+  @override
+  String get selectAuthorHint => 'Selecciona el autor del comentario';
+
+  @override
+  String get travelLocation => 'Lugar del viaje';
+
+  @override
+  String get linkToLocationHint => 'Vincular a un lugar';
+
+  @override
+  String get comment => 'Comentario';
+
+  @override
+  String get selectPhotos => 'Seleccionar Fotos';
+
+  @override
+  String get destinationNotDefined => 'Destino no definido';
+
+  @override
+  String get travelParticipantsTitle => 'Participantes del Viaje';
+
+  @override
+  String get travelMapTitle => 'Mapa del Viaje';
+
+  @override
+  String get stopPointTitle => 'Punto de Parada';
+
+  @override
+  String get anonymousTraveler => 'Anónimo';
+
+  @override
+  String get transportation => 'Transporte';
+
+  @override
+  String get finalPageQuote1 => 'Un viaje no se mide en millas, sino en momentos.';
+
+  @override
+  String get finalPageQuote2 => 'Cada página de este folleto guarda más que paisajes: son sonrisas espontáneas, descubrimientos inesperados, conversaciones que llegaron al alma y silencios que hablaron más que las palabras.';
 }

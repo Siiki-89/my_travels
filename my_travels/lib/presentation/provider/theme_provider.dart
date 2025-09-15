@@ -1,5 +1,3 @@
-// In lib/presentation/provider/theme_provider.dart
-
 import 'package:flutter/material.dart';
 
 import 'package:my_travels/data/repository/preferences_repository.dart';

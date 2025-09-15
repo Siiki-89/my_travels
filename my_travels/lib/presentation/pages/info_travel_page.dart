@@ -125,12 +125,15 @@ class _BackButtonWidget extends StatelessWidget {
 }
 
 /// Delete button with confirmation dialog.
+
 class _DeleteButton extends StatelessWidget {
   const _DeleteButton({required this.travel});
   final Travel travel;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -139,33 +142,19 @@ class _DeleteButton extends StatelessWidget {
           child: IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.white),
             onPressed: () async {
-              final l10n = AppLocalizations.of(context)!;
-              final infoProvider = context.read<InfoTravelProvider>();
-              final homeProvider = context.read<HomeProvider>();
-
-              final confirmed = await showSmoothDialog<bool>(
+              await showSmoothDialog<bool>(
                 context: context,
+                isDismissible: true, //
                 dialog: ConfirmationDialog(
                   title: l10n.deleteTravelTitle,
                   content: l10n.deleteTravelContent(travel.title),
                   confirmText: l10n.deleteButton,
-                  cancelText: l10n.cancel,
-                  onConfirm: () => Navigator.of(context).pop(true),
+                  cancelText: l10n.cancelButton,
+                  onConfirm: () => context
+                      .read<InfoTravelProvider>()
+                      .deleteTravel(context, l10n),
                 ),
               );
-
-              if (confirmed == true && context.mounted) {
-                await infoProvider.deleteTravel(l10n);
-
-                if (context.mounted) {
-                  if (infoProvider.deleteSuccess) {
-                    homeProvider.fetchTravels(l10n);
-                    Navigator.of(context).pop();
-                  } else if (infoProvider.errorMessage != null) {
-                    showErrorSnackBar(context, infoProvider.errorMessage!);
-                  }
-                }
-              }
             },
           ),
         ),
@@ -193,12 +182,14 @@ class _EditOrExportButton extends StatelessWidget {
               color: Colors.white,
             ),
             onPressed: () async {
-              final provider = context.read<InfoTravelProvider>();
+              if (travel.isFinished) {
+                final provider = context.read<InfoTravelProvider>();
 
-              await provider.generatePdf(mapKey, context);
+                await provider.generatePdf(mapKey, context);
 
-              if (context.mounted && provider.errorMessage != null) {
-                showErrorSnackBar(context, provider.errorMessage!);
+                if (context.mounted && provider.errorMessage != null) {
+                  showErrorSnackBar(context, provider.errorMessage!);
+                }
               }
             },
           ),
@@ -347,7 +338,7 @@ class _InfoTravelView extends StatelessWidget {
                       final result = await Navigator.pushNamed(
                         context,
                         '/newcomment',
-                        arguments: travel,
+                        arguments: travel.id,
                       );
                       if (result == true) {
                         context
@@ -648,7 +639,6 @@ class _ImagePickerArea extends StatelessWidget {
                   width: 100,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.add, size: 40, color: Colors.grey),
@@ -865,7 +855,7 @@ class _CommentsView extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           CircleAvatar(
@@ -889,6 +879,7 @@ class _CommentsView extends StatelessWidget {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 );
