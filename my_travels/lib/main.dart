@@ -7,6 +7,7 @@ import 'package:my_travels/data/repository/comment_repository.dart';
 import 'package:my_travels/data/repository/preferences_repository.dart';
 import 'package:my_travels/data/repository/travel_repository.dart';
 import 'package:my_travels/data/repository/traveler_repository.dart';
+import 'package:my_travels/domain/use_cases/comment/save_comment_use_case.dart';
 import 'package:my_travels/domain/use_cases/travel/save_travel_use_case.dart';
 import 'package:my_travels/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -57,6 +58,8 @@ void main() async {
         Provider.value(value: travelRepository),
         Provider.value(value: commentRepository),
         Provider.value(value: googleMapsService),
+
+        Provider(create: (_) => SaveCommentUseCase(commentRepository)),
 
         // Global UI Providers
         ChangeNotifierProvider(create: (_) => NavigatorProvider()),
